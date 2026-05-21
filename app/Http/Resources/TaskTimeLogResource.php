@@ -7,13 +7,15 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class TaskTimeLogResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'id'          => $this->id,
+            'minutes'     => $this->minutes,
+            'hours'       => round($this->minutes / 60, 1),
+            'description' => $this->description,
+            'user'        => UserResource::make($this->whenLoaded('user')),
+            'created_at'  => $this->created_at->toDateString(),
+        ];
     }
 }

@@ -2,65 +2,77 @@
 
 namespace App\Policies;
 
+use App\Enums\TaskStatus;
 use App\Models\Task;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class TaskPolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
+    public function before(User $user): ?bool
+    {
+        return $user->hasRole('super-admin') ? true : null;
+    }
+
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->can('task.view');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
     public function view(User $user, Task $task): bool
     {
-        return false;
+        return $user->can('task.view')
+            && ($task->project->owner_id === $user->id
+                || $task->project->members()->where('user_id', $user->id)->exists());
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
     public function create(User $user): bool
     {
-        return false;
+        return $user->can('task.create');
     }
 
     /**
-     * Determine whether the user can update the model.
+     * PM edita cualquier tarea del proyecto.
+     * Developer/QA solo edita sus propias tareas y solo si no está Done.
      */
     public function update(User $user, Task $task): bool
     {
-        return false;
+        if ($task->status === TaskStatus::Done) {
+            return false;
+        }
+
+        if ($user->hasRole('project-manager')) {
+            return $user->can('task.edit');
+        }
+
+        return $user->can('task.edit')
+            && $task->assigned_to === $user->id;
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
+    public function updateStatus(User $user, Task $task): bool
+    {
+        if ($task->status === TaskStatus::Done) {
+            return false;
+        }
+
+        return $user->can('task.update-status')
+            && ($user->hasRole('project-manager')
+                || $task->assigned_to === $user->id);
+    }
+
+    public function assign(User $user): bool
+    {
+        return $user->can('task.assign');
+    }
+
     public function delete(User $user, Task $task): bool
     {
-        return false;
+        return $user->can('task.delete')
+            && $user->hasRole('project-manager');
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Task $task): bool
+    public function logTime(User $user, Task $task): bool
     {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Task $task): bool
-    {
-        return false;
+        return $user->can('task.log-time')
+            && $task->assigned_to === $user->id;
     }
 }

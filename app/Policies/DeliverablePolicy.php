@@ -4,63 +4,43 @@ namespace App\Policies;
 
 use App\Models\Deliverable;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class DeliverablePolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
+    public function before(User $user): ?bool
+    {
+        return $user->hasRole('super-admin') ? true : null;
+    }
+
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->can('deliverable.view');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
-    public function view(User $user, Deliverable $deliverable): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can create models.
-     */
     public function create(User $user): bool
     {
-        return false;
+        return $user->can('deliverable.create');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
     public function update(User $user, Deliverable $deliverable): bool
     {
-        return false;
+        if ($deliverable->approved) {
+            return false;
+        }
+
+        return $user->can('deliverable.edit')
+            && $user->hasRole('project-manager');
     }
 
     /**
-     * Determine whether the user can delete the model.
+     * Un entregable aprobado no puede ser aprobado de nuevo.
      */
-    public function delete(User $user, Deliverable $deliverable): bool
+    public function approve(User $user, Deliverable $deliverable): bool
     {
-        return false;
-    }
+        if ($deliverable->approved) {
+            return false;
+        }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Deliverable $deliverable): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Deliverable $deliverable): bool
-    {
-        return false;
+        return $user->can('deliverable.approve');
     }
 }

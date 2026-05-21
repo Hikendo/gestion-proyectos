@@ -4,63 +4,37 @@ namespace App\Policies;
 
 use App\Models\Milestone;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class MilestonePolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
+    public function before(User $user): ?bool
+    {
+        return $user->hasRole('super-admin') ? true : null;
+    }
+
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->can('milestone.view');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
-    public function view(User $user, Milestone $milestone): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can create models.
-     */
     public function create(User $user): bool
     {
-        return false;
+        return $user->can('milestone.create');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
     public function update(User $user, Milestone $milestone): bool
     {
-        return false;
+        return $user->can('milestone.edit')
+            && $user->hasRole('project-manager');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
     public function delete(User $user, Milestone $milestone): bool
     {
-        return false;
-    }
+        if ($milestone->completed) {
+            return false;
+        }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Milestone $milestone): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Milestone $milestone): bool
-    {
-        return false;
+        return $user->can('milestone.delete')
+            && $user->hasRole('project-manager');
     }
 }

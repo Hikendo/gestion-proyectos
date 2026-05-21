@@ -4,6 +4,8 @@
 
 namespace App\Models;
 
+use App\Enums\RiskImpact;
+use App\Enums\RiskProbability;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -19,6 +21,15 @@ class Risk extends Model
         'probability',
         'mitigation_plan',
     ];
+    protected $casts = [
+        'impact'      => RiskImpact::class,
+        'probability' => RiskProbability::class,
+    ];
+
+    public function criticality(): int
+    {
+        return $this->probability->criticality($this->impact);
+    }
 
     public function project()
     {

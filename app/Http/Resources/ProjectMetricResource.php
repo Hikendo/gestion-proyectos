@@ -7,13 +7,14 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class ProjectMetricResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'total_tasks'      => $this->total_tasks,
+            'completed_tasks'  => $this->completed_tasks,
+            'open_tickets'     => $this->open_tickets,
+            'total_blockers'   => $this->total_blockers,
+            'completion_rate'  => $this->completion_rate,
+        ];
     }
 }

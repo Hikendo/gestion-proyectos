@@ -4,6 +4,7 @@
 
 namespace App\Models;
 
+use App\Enums\TaskStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -27,6 +28,8 @@ class Task extends Model
     ];
 
     protected $casts = [
+        'status'     => TaskStatus::class,
+
         'due_date' => 'datetime',
     ];
 

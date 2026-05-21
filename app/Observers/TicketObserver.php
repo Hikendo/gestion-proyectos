@@ -2,47 +2,41 @@
 
 namespace App\Observers;
 
+use App\Events\TicketAssigned;
+use App\Events\TicketCreated;
 use App\Models\Ticket;
+use Illuminate\Support\Facades\Auth;
 
 class TicketObserver
 {
-    /**
-     * Handle the Ticket "created" event.
-     */
     public function created(Ticket $ticket): void
     {
-        //
+        $actor = Auth::user();
+
+        if (! $actor) {
+            return;
+        }
+
+        TicketCreated::dispatch($ticket, $actor);
+
+        if ($ticket->assigned_to && $ticket->assignee) {
+            TicketAssigned::dispatch($ticket, $ticket->assignee, $actor);
+        }
     }
 
-    /**
-     * Handle the Ticket "updated" event.
-     */
     public function updated(Ticket $ticket): void
     {
-        //
-    }
+        $actor = Auth::user();
 
-    /**
-     * Handle the Ticket "deleted" event.
-     */
-    public function deleted(Ticket $ticket): void
-    {
-        //
-    }
+        if (! $actor) {
+            return;
+        }
 
-    /**
-     * Handle the Ticket "restored" event.
-     */
-    public function restored(Ticket $ticket): void
-    {
-        //
-    }
-
-    /**
-     * Handle the Ticket "force deleted" event.
-     */
-    public function forceDeleted(Ticket $ticket): void
-    {
-        //
+        if ($ticket->wasChanged('assigned_to') && $ticket->assigned_to) {
+            $assignee = $ticket->assignee;
+            if ($assignee) {
+                TicketAssigned::dispatch($ticket, $assignee, $actor);
+            }
+        }
     }
 }

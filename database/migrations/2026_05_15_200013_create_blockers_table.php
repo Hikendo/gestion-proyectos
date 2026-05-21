@@ -13,33 +13,33 @@ return new class extends Migration
     {
         Schema::create('blockers', function (Blueprint $table) {
 
-    $table->id();
+            $table->id();
 
-    $table->foreignId('project_id')
-        ->constrained()
-        ->cascadeOnDelete();
+            $table->foreignId('project_id')
+                ->constrained()
+                ->cascadeOnDelete();
 
-    $table->foreignId('task_id')
-        ->nullable()
-        ->constrained()
-        ->nullOnDelete();
+            $table->foreignId('task_id')
+                ->nullable()
+                ->constrained()
+                ->nullOnDelete();
 
-    $table->string('title');
+            $table->string('title');
 
-    $table->text('description');
+            $table->text('description')->nullable();
 
-    $table->enum('severity', [
-        'low',
-        'medium',
-        'high',
-        'critical'
-    ]);
+            $table->enum('severity', [
+                'low',
+                'medium',
+                'high',
+                'critical'
+            ]);
 
-    $table->boolean('resolved')
-        ->default(false);
+            $table->boolean('resolved')
+                ->default(false);
 
-    $table->timestamps();
-});
+            $table->timestamps();
+        });
     }
 
     /**

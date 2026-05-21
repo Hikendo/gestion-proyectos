@@ -7,13 +7,15 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class ProjectPhaseResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'id'          => $this->id,
+            'name'        => $this->name,
+            'start_date'  => $this->start_date?->toDateString(),
+            'end_date'    => $this->end_date?->toDateString(),
+            'progress'    => $this->progress,
+            'tasks_count' => $this->whenCounted('tasks'),
+        ];
     }
 }

@@ -2,28 +2,22 @@
 
 namespace App\Http\Requests\Ticket;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreTicketRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        return $this->user()->can('ticket.create');
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            //
+            'subject'     => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'priority'    => ['nullable', 'in:low,medium,high,critical'],
+            'assigned_to' => ['nullable', 'exists:users,id'],
         ];
     }
 }

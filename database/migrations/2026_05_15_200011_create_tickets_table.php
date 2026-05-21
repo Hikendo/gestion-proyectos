@@ -13,41 +13,41 @@ return new class extends Migration
     {
         Schema::create('tickets', function (Blueprint $table) {
 
-    $table->id();
+            $table->id();
 
-    $table->foreignId('project_id')
-        ->nullable()
-        ->constrained()
-        ->nullOnDelete();
+            $table->foreignId('project_id')
+                ->nullable()
+                ->constrained()
+                ->nullOnDelete();
 
-    $table->foreignId('created_by')
-        ->constrained('users');
+            $table->foreignId('created_by')
+                ->constrained('users');
 
-    $table->foreignId('assigned_to')
-        ->nullable()
-        ->constrained('users')
-        ->nullOnDelete();
+            $table->foreignId('assigned_to')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
 
-    $table->string('subject');
+            $table->string('subject');
 
-    $table->text('description');
+            $table->text('description')->nullable();
 
-    $table->enum('status', [
-        'open',
-        'in_progress',
-        'resolved',
-        'closed'
-    ])->default('open');
+            $table->enum('status', [
+                'open',
+                'in_progress',
+                'resolved',
+                'closed'
+            ])->default('open');
 
-    $table->enum('priority', [
-        'low',
-        'medium',
-        'high',
-        'urgent'
-    ])->default('medium');
+            $table->enum('priority', [
+                'low',
+                'medium',
+                'high',
+                'urgent'
+            ])->default('medium');
 
-    $table->timestamps();
-});
+            $table->timestamps();
+        });
     }
 
     /**

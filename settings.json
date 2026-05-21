@@ -1,0 +1,11 @@
+{
+    "editor.inlineSuggest.enabled": true,
+    "github.copilot.enable": {
+        "*": true,
+        "plaintext": false,
+        "markdown": true,
+        "scminput": false
+    },
+    "php.validate.executablePath": "/usr/bin/php",
+    "intelephense.environment.phpVersion": "8.4"
+}

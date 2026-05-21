@@ -2,28 +2,23 @@
 
 namespace App\Http\Requests\Risk;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateRiskRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        return $this->user()->can('risk.edit');
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            //
+            'title'           => ['sometimes', 'string', 'max:255'],
+            'description'     => ['nullable', 'string'],
+            'impact'          => ['nullable', 'in:low,medium,high,critical'],
+            'probability'     => ['nullable', 'in:low,medium,high'],
+            'mitigation_plan' => ['nullable', 'string'],
         ];
     }
 }

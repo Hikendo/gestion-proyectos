@@ -4,6 +4,7 @@
 
 namespace App\Models;
 
+use App\Enums\BlockerSeverity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -22,6 +23,7 @@ class Blocker extends Model
 
     protected $casts = [
         'resolved' => 'boolean',
+        'severity' => BlockerSeverity::class,
     ];
 
     public function project()

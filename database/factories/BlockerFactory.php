@@ -2,23 +2,21 @@
 
 namespace Database\Factories;
 
-use App\Models\Blocker;
+use App\Enums\BlockerSeverity;
+use App\Models\Project;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<Blocker>
- */
 class BlockerFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
-            //
+            'project_id'  => Project::factory(),
+            'task_id'     => null,
+            'title'       => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
+            'severity'    => BlockerSeverity::Medium->value,
+            'resolved'    => false,
         ];
     }
 }

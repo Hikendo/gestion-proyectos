@@ -13,54 +13,54 @@ return new class extends Migration
     {
         Schema::create('tasks', function (Blueprint $table) {
 
-    $table->id();
+            $table->id();
 
-    $table->foreignId('project_id')
-        ->constrained()
-        ->cascadeOnDelete();
+            $table->foreignId('project_id')
+                ->constrained()
+                ->cascadeOnDelete();
 
-    $table->foreignId('phase_id')
-        ->nullable()
-        ->constrained('project_phases')
-        ->nullOnDelete();
+            $table->foreignId('phase_id')
+                ->nullable()
+                ->constrained('project_phases')
+                ->nullOnDelete();
 
-    $table->foreignId('assigned_to')
-        ->nullable()
-        ->constrained('users')
-        ->nullOnDelete();
+            $table->foreignId('assigned_to')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
 
-    $table->foreignId('created_by')
-        ->constrained('users');
+            $table->foreignId('created_by')
+                ->constrained('users');
 
-    $table->string('title');
+            $table->string('title');
 
-    $table->text('description')->nullable();
+            $table->text('description')->nullable();
 
-    $table->enum('priority', [
-        'low',
-        'medium',
-        'high',
-        'critical'
-    ])->default('medium');
+            $table->enum('priority', [
+                'low',
+                'medium',
+                'high',
+                'critical'
+            ])->default('medium');
 
-    $table->enum('status', [
-        'pending',
-        'in_progress',
-        'testing',
-        'completed',
-        'blocked'
-    ])->default('pending');
+            $table->enum('status', [
+                'pending',
+                'in_progress',
+                'review',    // ← era 'testing'
+                'done',      // ← era 'completed'
+                'blocked',
+            ])->default('pending');
 
-    $table->timestamp('due_date')->nullable();
+            $table->timestamp('due_date')->nullable();
 
-    $table->integer('estimated_hours')->nullable();
-    $table->integer('worked_hours')->default(0);
+            $table->integer('estimated_hours')->nullable();
+            $table->integer('worked_hours')->default(0);
 
-    $table->unsignedTinyInteger('progress')
-        ->default(0);
+            $table->unsignedTinyInteger('progress')
+                ->default(0);
 
-    $table->timestamps();
-});
+            $table->timestamps();
+        });
     }
 
     /**

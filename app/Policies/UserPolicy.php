@@ -3,63 +3,44 @@
 namespace App\Policies;
 
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class UserPolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
+    public function before(User $user): ?bool
+    {
+        return $user->hasRole('super-admin') ? true : null;
+    }
+
+    // Listar usuarios
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->hasRole(['super-admin', 'project-manager']);
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
+    // Ver un usuario
     public function view(User $user, User $model): bool
     {
-        return false;
+        return $user->id === $model->id
+            || $user->hasRole(['super-admin', 'project-manager']);
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
+    // Crear usuario — solo super-admin y project-manager
     public function create(User $user): bool
     {
-        return false;
+        return $user->can('user.create');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
+    // Editar — el propio usuario o super-admin
     public function update(User $user, User $model): bool
     {
-        return false;
+        return $user->id === $model->id
+            || $user->hasRole('super-admin');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
+    // Eliminar — solo super-admin, no a sí mismo
     public function delete(User $user, User $model): bool
     {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, User $model): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, User $model): bool
-    {
-        return false;
+        return $user->id !== $model->id
+            && $user->hasRole('super-admin');
     }
 }

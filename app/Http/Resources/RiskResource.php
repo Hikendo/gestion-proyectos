@@ -7,13 +7,16 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class RiskResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'id'              => $this->id,
+            'title'           => $this->title,
+            'description'     => $this->description,
+            'impact'          => $this->impact,
+            'probability'     => $this->probability,
+            'mitigation_plan' => $this->mitigation_plan,
+            'created_at'      => $this->created_at->toDateString(),
+        ];
     }
 }

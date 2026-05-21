@@ -9,23 +9,30 @@ services:
     container_name: gestion_proyectos_backend_app
     restart: unless-stopped
     ports:
-      # CAMBIO: Ahora accederás desde tu navegador usando el puerto 8085
-      # Sintaxis: "PUERTO_LOCAL:PUERTO_CONTENEDOR"
       - "8085:8000"
     volumes:
       - .:/var/www
     networks:
       - gestion_network
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: gestion_db
+      DB_USERNAME: gestion_user
+      DB_PASSWORD: gestion_password_local
+      # ── Credenciales del primer admin ──────────────────
+      ADMIN_NAME: "Administrador"
+      ADMIN_EMAIL: "admin@admin.com"
+      ADMIN_PASSWORD: "Admin1234!"
 
   db:
     image: mysql:8.4
     container_name: gestion_proyectos_mysql
     restart: unless-stopped
-    tty: true
     ports:
-      # CAMBIO: Si usas un gestor como DBeaver o TablePlus, te conectarás al puerto 3309
       - "3319:3306"
     environment:
       MYSQL_DATABASE: gestion_db
@@ -36,6 +43,12 @@ services:
       - dbdata:/var/lib/mysql
     networks:
       - gestion_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-ugestion_user", "-pgestion_password_local"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
 
 networks:
   gestion_network:

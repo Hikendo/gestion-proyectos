@@ -7,13 +7,16 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class BlockerResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'id'          => $this->id,
+            'title'       => $this->title,
+            'description' => $this->description,
+            'severity'    => $this->severity,
+            'resolved'    => $this->resolved,
+            'task'        => TaskResource::make($this->whenLoaded('task')),
+            'created_at'  => $this->created_at->toDateString(),
+        ];
     }
 }

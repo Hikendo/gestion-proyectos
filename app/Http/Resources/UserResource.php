@@ -7,13 +7,15 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class UserResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
-        return parent::toArray($request);
+        return [
+            'id'         => $this->id,
+            'name'       => $this->name,
+            'email'      => $this->email,
+            'roles'      => $this->whenLoaded('roles', fn() => $this->getRoleNames()),
+            'metrics'    => UserMetricResource::make($this->whenLoaded('metrics')),
+            'created_at' => $this->created_at?->toDateString(), // ← nullsafe
+        ];
     }
 }

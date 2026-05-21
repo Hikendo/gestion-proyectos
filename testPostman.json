@@ -1,0 +1,980 @@
+{
+  "info": {
+    "name": "Gestión de Proyectos API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8085/api/v1" },
+    { "key": "token", "value": "" },
+    { "key": "project_id", "value": "1" },
+    { "key": "ticket_id", "value": "1" },
+    { "key": "task_id", "value": "1" },
+    { "key": "deliverable_id", "value": "1" },
+    { "key": "milestone_id", "value": "1" },
+    { "key": "blocker_id", "value": "1" },
+    { "key": "user_id", "value": "1" },
+    { "key": "risk_id", "value": "1" },
+    { "key": "phase_id", "value": "1" },
+    { "key": "objective_id", "value": "1" },
+    { "key": "comment_id", "value": "1" },
+    { "key": "timelog_id", "value": "1" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.token) {",
+                  "    pm.collectionVariables.set('token', res.token);",
+                  "    console.log('Token guardado:', res.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"superadmin@test.com\",\n  \"password\": \"password\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password\",\n  \"password_confirmation\": \"password\",\n  \"role\": \"project-manager\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/auth/logout", "host": ["{{base_url}}"], "path": ["auth", "logout"] }
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/auth/me", "host": ["{{base_url}}"], "path": ["auth", "me"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/dashboard", "host": ["{{base_url}}"], "path": ["dashboard"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Roles",
+      "item": [
+        {
+          "name": "List Roles",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/roles", "host": ["{{base_url}}"], "path": ["roles"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "Create User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) pm.collectionVariables.set('user_id', res.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nuevo Usuario\",\n  \"email\": \"nuevo@example.com\",\n  \"password\": \"password\",\n  \"password_confirmation\": \"password\",\n  \"role\": \"developer\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] }
+          }
+        },
+        {
+          "name": "Get User",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["users", "{{user_id}}"] }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Usuario Actualizado\",\n  \"email\": \"actualizado@example.com\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["users", "{{user_id}}"] }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/users/{{user_id}}", "host": ["{{base_url}}"], "path": ["users", "{{user_id}}"] }
+          }
+        },
+        {
+          "name": "User Metrics",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/users/{{user_id}}/metrics", "host": ["{{base_url}}"], "path": ["users", "{{user_id}}", "metrics"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Projects",
+      "item": [
+        {
+          "name": "List Projects",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects", "host": ["{{base_url}}"], "path": ["projects"] }
+          }
+        },
+        {
+          "name": "Create Project",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) pm.collectionVariables.set('project_id', res.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Proyecto Demo\",\n  \"description\": \"Descripción del proyecto\",\n  \"start_date\": \"2026-01-01\",\n  \"end_date\": \"2026-12-31\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/projects", "host": ["{{base_url}}"], "path": ["projects"] }
+          }
+        },
+        {
+          "name": "Get Project",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}"] }
+          }
+        },
+        {
+          "name": "Update Project",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Proyecto Actualizado\",\n  \"description\": \"Nueva descripción\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}"] }
+          }
+        },
+        {
+          "name": "Delete Project",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Project Members",
+      "item": [
+        {
+          "name": "List Members",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/members", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "members"] }
+          }
+        },
+        {
+          "name": "Add Member",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": 2,\n  \"role\": \"developer\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/members", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "members"] }
+          }
+        },
+        {
+          "name": "Remove Member",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/members/{{user_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "members", "{{user_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Project Plan",
+      "item": [
+        {
+          "name": "Get Plan",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/plan", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "plan"] }
+          }
+        },
+        {
+          "name": "Create / Update Plan",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Plan detallado del proyecto\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/plan", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "plan"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Phases",
+      "item": [
+        {
+          "name": "List Phases",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/phases", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "phases"] }
+          }
+        },
+        {
+          "name": "Create Phase",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) pm.collectionVariables.set('phase_id', res.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Fase 1 - Análisis\",\n  \"start_date\": \"2026-01-01\",\n  \"end_date\": \"2026-03-31\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/phases", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "phases"] }
+          }
+        },
+        {
+          "name": "Update Phase",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Fase 1 - Análisis Actualizada\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/phases/{{phase_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "phases", "{{phase_id}}"] }
+          }
+        },
+        {
+          "name": "Delete Phase",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/phases/{{phase_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "phases", "{{phase_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Objectives",
+      "item": [
+        {
+          "name": "List Objectives",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/objectives", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "objectives"] }
+          }
+        },
+        {
+          "name": "Create Objective",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) pm.collectionVariables.set('objective_id', res.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Lanzar la versión 1.0 antes de julio\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/objectives", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "objectives"] }
+          }
+        },
+        {
+          "name": "Update Objective",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Objetivo actualizado\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/objectives/{{objective_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "objectives", "{{objective_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Risks",
+      "item": [
+        {
+          "name": "List Risks",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/risks", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "risks"] }
+          }
+        },
+        {
+          "name": "Create Risk",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) pm.collectionVariables.set('risk_id', res.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Riesgo de retraso por falta de recursos\",\n  \"impact\": \"high\",\n  \"probability\": \"medium\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/risks", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "risks"] }
+          }
+        },
+        {
+          "name": "Update Risk",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Riesgo actualizado\",\n  \"impact\": \"low\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/risks/{{risk_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "risks", "{{risk_id}}"] }
+          }
+        },
+        {
+          "name": "Delete Risk",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/risks/{{risk_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "risks", "{{risk_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Milestones",
+      "item": [
+        {
+          "name": "List Milestones",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/milestones", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "milestones"] }
+          }
+        },
+        {
+          "name": "Create Milestone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) pm.collectionVariables.set('milestone_id', res.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"MVP lanzado\",\n  \"due_date\": \"2026-09-01\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/milestones", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "milestones"] }
+          }
+        },
+        {
+          "name": "Update Milestone",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"MVP actualizado\",\n  \"due_date\": \"2026-10-01\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/milestones/{{milestone_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "milestones", "{{milestone_id}}"] }
+          }
+        },
+        {
+          "name": "Complete Milestone",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/milestones/{{milestone_id}}/complete", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "milestones", "{{milestone_id}}", "complete"] }
+          }
+        },
+        {
+          "name": "Delete Milestone",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/milestones/{{milestone_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "milestones", "{{milestone_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Blockers",
+      "item": [
+        {
+          "name": "List Blockers",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/blockers", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "blockers"] }
+          }
+        },
+        {
+          "name": "Create Blocker",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) pm.collectionVariables.set('blocker_id', res.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Falta acceso al servidor de producción\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/blockers", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "blockers"] }
+          }
+        },
+        {
+          "name": "Update Blocker",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Blocker actualizado\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/blockers/{{blocker_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "blockers", "{{blocker_id}}"] }
+          }
+        },
+        {
+          "name": "Resolve Blocker",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/blockers/{{blocker_id}}/resolve", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "blockers", "{{blocker_id}}", "resolve"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Deliverables",
+      "item": [
+        {
+          "name": "List Deliverables",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/deliverables", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "deliverables"] }
+          }
+        },
+        {
+          "name": "Create Deliverable",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) pm.collectionVariables.set('deliverable_id', res.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Módulo de autenticación\",\n  \"delivery_date\": \"2026-07-01\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/deliverables", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "deliverables"] }
+          }
+        },
+        {
+          "name": "Update Deliverable",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Módulo actualizado\",\n  \"delivery_date\": \"2026-08-01\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/deliverables/{{deliverable_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "deliverables", "{{deliverable_id}}"] }
+          }
+        },
+        {
+          "name": "Approve Deliverable",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/deliverables/{{deliverable_id}}/approve", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "deliverables", "{{deliverable_id}}", "approve"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        {
+          "name": "List Tasks",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/tasks", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "tasks"] }
+          }
+        },
+        {
+          "name": "Create Task",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) pm.collectionVariables.set('task_id', res.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Tarea de prueba\",\n  \"description\": \"Descripción de la tarea\",\n  \"priority\": \"high\",\n  \"due_date\": \"2026-06-30\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/tasks", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "tasks"] }
+          }
+        },
+        {
+          "name": "Get Task",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/tasks/{{task_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "tasks", "{{task_id}}"] }
+          }
+        },
+        {
+          "name": "Update Task",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Tarea actualizada\",\n  \"description\": \"Nueva descripción\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/tasks/{{task_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "tasks", "{{task_id}}"] }
+          }
+        },
+        {
+          "name": "Delete Task",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/tasks/{{task_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "tasks", "{{task_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Task Comments",
+      "item": [
+        {
+          "name": "List Comments",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/tasks/{{task_id}}/comments", "host": ["{{base_url}}"], "path": ["tasks", "{{task_id}}", "comments"] }
+          }
+        },
+        {
+          "name": "Create Comment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) pm.collectionVariables.set('comment_id', res.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Este es un comentario de prueba\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/tasks/{{task_id}}/comments", "host": ["{{base_url}}"], "path": ["tasks", "{{task_id}}", "comments"] }
+          }
+        },
+        {
+          "name": "Delete Comment",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/tasks/{{task_id}}/comments/{{comment_id}}", "host": ["{{base_url}}"], "path": ["tasks", "{{task_id}}", "comments", "{{comment_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Task Time Logs",
+      "item": [
+        {
+          "name": "List Time Logs",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/tasks/{{task_id}}/time-logs", "host": ["{{base_url}}"], "path": ["tasks", "{{task_id}}", "time-logs"] }
+          }
+        },
+        {
+          "name": "Log Time",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) pm.collectionVariables.set('timelog_id', res.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"minutes\": 90,\n  \"note\": \"Trabajé en la feature X\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/tasks/{{task_id}}/time-logs", "host": ["{{base_url}}"], "path": ["tasks", "{{task_id}}", "time-logs"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tickets",
+      "item": [
+        {
+          "name": "List Tickets",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/tickets?status=open&priority=high",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", "tickets"],
+              "query": [
+                { "key": "status", "value": "open" },
+                { "key": "priority", "value": "high" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Ticket",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.id) pm.collectionVariables.set('ticket_id', res.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"Bug en login\",\n  \"description\": \"El botón de login no responde en móvil\",\n  \"priority\": \"high\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/tickets", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "tickets"] }
+          }
+        },
+        {
+          "name": "Get Ticket",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/tickets/{{ticket_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "tickets", "{{ticket_id}}"] }
+          }
+        },
+        {
+          "name": "Update Ticket",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"Bug en login - actualizado\",\n  \"priority\": \"urgent\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/tickets/{{ticket_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "tickets", "{{ticket_id}}"] }
+          }
+        },
+        {
+          "name": "Assign Ticket",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assigned_to\": 2\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/tickets/{{ticket_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "tickets", "{{ticket_id}}"] }
+          }
+        },
+        {
+          "name": "Delete Ticket",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/{{project_id}}/tickets/{{ticket_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "tickets", "{{ticket_id}}"] }
+          }
+        }
+      ]
+    }
+  ]
+}

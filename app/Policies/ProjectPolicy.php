@@ -2,65 +2,73 @@
 
 namespace App\Policies;
 
+use App\Enums\ProjectStatus;
 use App\Models\Project;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class ProjectPolicy
 {
     /**
-     * Determine whether the user can view any models.
+     * Super-admin bypasses todo.
+     */
+    public function before(User $user): ?bool
+    {
+        return $user->hasRole('super-admin') ? true : null;
+    }
+
+    /**
+     * Cualquier usuario autenticado puede ver proyectos donde es owner o miembro.
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
     public function view(User $user, Project $project): bool
     {
-        return false;
+        return $project->owner_id === $user->id
+            || $project->members()->where('user_id', $user->id)->exists();
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
     public function create(User $user): bool
     {
-        return false;
+        return $user->can('project.create');
     }
 
     /**
-     * Determine whether the user can update the model.
+     * Solo el owner o un PM miembro del proyecto puede editar.
+     * No se puede editar un proyecto cerrado.
      */
     public function update(User $user, Project $project): bool
     {
-        return false;
+        if ($project->status->isClosed()) {
+            return false;
+        }
+
+        return $user->can('project.edit')
+            && ($project->owner_id === $user->id
+                || $project->members()->where('user_id', $user->id)
+                ->where('role', 'manager')
+                ->exists());
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
     public function delete(User $user, Project $project): bool
     {
-        return false;
+        // El owner siempre puede eliminar su propio proyecto
+        if ($project->owner_id === $user->id) {
+            return true;
+        }
+
+        // Otros necesitan permiso explícito
+        return $user->can('project.delete');
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Project $project): bool
+    public function assignMembers(User $user, Project $project): bool
     {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Project $project): bool
-    {
-        return false;
+        return $user->can('project.assign-members')
+            && ($project->owner_id === $user->id
+                || $project->members()->where('user_id', $user->id)
+                ->where('role', 'manager')
+                ->exists());
     }
 }

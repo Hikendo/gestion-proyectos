@@ -2,28 +2,23 @@
 
 namespace App\Http\Requests\Risk;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreRiskRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        return $this->user()->can('risk.create');
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            //
+            'title'           => ['required', 'string', 'max:255'],
+            'description'     => ['nullable', 'string'],
+            'impact'          => ['required', 'in:low,medium,high,critical'],
+            'probability'     => ['required', 'in:low,medium,high'],
+            'mitigation_plan' => ['nullable', 'string'],
         ];
     }
 }

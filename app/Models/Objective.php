@@ -4,6 +4,7 @@
 
 namespace App\Models;
 
+use App\Enums\ObjectiveType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -21,6 +22,7 @@ class Objective extends Model
 
     protected $casts = [
         'completed' => 'boolean',
+        'type'      => ObjectiveType::class,
     ];
 
     public function project()

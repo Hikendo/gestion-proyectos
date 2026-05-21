@@ -2,65 +2,53 @@
 
 namespace App\Policies;
 
+use App\Enums\TicketStatus;
 use App\Models\Ticket;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class TicketPolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
+    public function before(User $user): ?bool
+    {
+        return $user->hasRole('super-admin') ? true : null;
+    }
+
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->can('ticket.view');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
     public function view(User $user, Ticket $ticket): bool
     {
-        return false;
+        return $user->can('ticket.view')
+            && ($ticket->project->owner_id === $user->id
+                || $ticket->project->members()->where('user_id', $user->id)->exists());
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
     public function create(User $user): bool
     {
-        return false;
+        return $user->can('ticket.create');
     }
 
     /**
-     * Determine whether the user can update the model.
+     * No se puede editar un ticket cerrado.
      */
     public function update(User $user, Ticket $ticket): bool
     {
-        return false;
+        if ($ticket->status->isClosed()) {
+            return false;
+        }
+
+        return $user->can('ticket.edit');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
+    public function assign(User $user): bool
+    {
+        return $user->can('ticket.assign');
+    }
+
     public function delete(User $user, Ticket $ticket): bool
     {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Ticket $ticket): bool
-    {
-        return false;
-    }
-
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
-    public function forceDelete(User $user, Ticket $ticket): bool
-    {
-        return false;
+        return $user->can('ticket.delete');
     }
 }

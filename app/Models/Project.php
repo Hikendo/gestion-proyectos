@@ -4,6 +4,7 @@
 
 namespace App\Models;
 
+use App\Enums\ProjectStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -26,8 +27,9 @@ class Project extends Model
 
     protected $casts = [
         'start_date' => 'date',
-        'end_date' => 'date',
-        'budget' => 'decimal:2',
+        'end_date'   => 'date',
+        'budget'     => 'decimal:2',
+        'status'     => ProjectStatus::class,
     ];
 
     public function owner()
