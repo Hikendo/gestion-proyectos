@@ -2,13 +2,20 @@
 
 namespace App\Http\Requests\Task;
 
+use App\Models\Project;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreTaskRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('task.create');
+        $project = $this->route('project');
+
+        if (! $project instanceof Project) {
+            return false;
+        }
+
+        return $this->user()->canForProject($project, 'task.create');
     }
 
     public function rules(): array

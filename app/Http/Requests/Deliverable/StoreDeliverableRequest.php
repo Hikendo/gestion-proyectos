@@ -2,13 +2,20 @@
 
 namespace App\Http\Requests\Deliverable;
 
+use App\Models\Project;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreDeliverableRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('deliverable.create');
+        $project = $this->route('project');
+
+        if (! $project instanceof Project) {
+            return false;
+        }
+
+        return $this->user()->canForProject($project, 'deliverable.create');
     }
 
     public function rules(): array

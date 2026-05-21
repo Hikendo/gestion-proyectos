@@ -2,13 +2,20 @@
 
 namespace App\Http\Requests\Objective;
 
+use App\Models\Project;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreObjectiveRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('objective.create');
+        $project = $this->route('project');
+
+        if (! $project instanceof Project) {
+            return false;
+        }
+
+        return $this->user()->canForProject($project, 'objective.create');
     }
 
     public function rules(): array

@@ -2,13 +2,20 @@
 
 namespace App\Http\Requests\Deliverable;
 
+use App\Models\Project;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateDeliverableRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('deliverable.edit');
+        $project = $this->route('project');
+
+        if (! $project instanceof Project) {
+            return false;
+        }
+
+        return $this->user()->canForProject($project, 'deliverable.edit');
     }
 
     public function rules(): array

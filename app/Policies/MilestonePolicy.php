@@ -24,8 +24,9 @@ class MilestonePolicy
 
     public function update(User $user, Milestone $milestone): bool
     {
-        return $user->can('milestone.edit')
-            && $user->hasRole('project-manager');
+        return $user->canForProject($milestone->project, 'milestone.edit')
+            && ($milestone->project->owner_id === $user->id
+                || $user->hasProjectRole($milestone->project, 'manager'));
     }
 
     public function delete(User $user, Milestone $milestone): bool
@@ -34,7 +35,8 @@ class MilestonePolicy
             return false;
         }
 
-        return $user->can('milestone.delete')
-            && $user->hasRole('project-manager');
+        return $user->canForProject($milestone->project, 'milestone.delete')
+            && ($milestone->project->owner_id === $user->id
+                || $user->hasProjectRole($milestone->project, 'manager'));
     }
 }

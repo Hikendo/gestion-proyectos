@@ -14,20 +14,20 @@ class UserPolicy
     // Listar usuarios
     public function viewAny(User $user): bool
     {
-        return $user->hasRole(['super-admin', 'project-manager']);
+        return $user->hasRole('super-admin');
     }
 
     // Ver un usuario
     public function view(User $user, User $model): bool
     {
         return $user->id === $model->id
-            || $user->hasRole(['super-admin', 'project-manager']);
+            || $user->hasRole('super-admin');
     }
 
-    // Crear usuario — solo super-admin y project-manager
+    // Crear usuario — solo super-admin
     public function create(User $user): bool
     {
-        return $user->can('user.create');
+        return $user->hasRole('super-admin');
     }
 
     // Editar — el propio usuario o super-admin

@@ -2,13 +2,20 @@
 
 namespace App\Http\Requests\Milestone;
 
+use App\Models\Project;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreMilestoneRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('milestone.create');
+        $project = $this->route('project');
+
+        if (! $project instanceof Project) {
+            return false;
+        }
+
+        return $this->user()->canForProject($project, 'milestone.create');
     }
 
     public function rules(): array

@@ -28,8 +28,9 @@ class DeliverablePolicy
             return false;
         }
 
-        return $user->can('deliverable.edit')
-            && $user->hasRole('project-manager');
+        return $user->canForProject($deliverable->project, 'deliverable.edit')
+            && ($deliverable->project->owner_id === $user->id
+                || $user->hasProjectRole($deliverable->project, 'manager'));
     }
 
     /**
@@ -41,6 +42,8 @@ class DeliverablePolicy
             return false;
         }
 
-        return $user->can('deliverable.approve');
+        return $user->canForProject($deliverable->project, 'deliverable.approve')
+            && ($deliverable->project->owner_id === $user->id
+                || $user->hasProjectRole($deliverable->project, 'manager'));
     }
 }

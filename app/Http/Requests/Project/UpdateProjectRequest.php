@@ -2,13 +2,22 @@
 
 namespace App\Http\Requests\Project;
 
+use App\Models\Project;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateProjectRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('project.edit');
+        $project = $this->route('project');
+
+        if (! $project instanceof Project) {
+            return false;
+        }
+
+        return $this->user()->canForProject($project, 'project.edit')
+            && ($project->owner_id === $this->user()->id
+                || $this->user()->hasProjectRole($project, 'manager'));
     }
 
     public function rules(): array

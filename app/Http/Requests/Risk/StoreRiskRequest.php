@@ -2,13 +2,20 @@
 
 namespace App\Http\Requests\Risk;
 
+use App\Models\Project;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreRiskRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('risk.create');
+        $project = $this->route('project');
+
+        if (! $project instanceof Project) {
+            return false;
+        }
+
+        return $this->user()->canForProject($project, 'risk.create');
     }
 
     public function rules(): array

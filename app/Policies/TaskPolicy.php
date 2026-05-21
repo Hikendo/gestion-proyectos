@@ -40,11 +40,11 @@ class TaskPolicy
             return false;
         }
 
-        if ($user->hasRole('project-manager')) {
-            return $user->can('task.edit');
+        if ($task->project->owner_id === $user->id || $user->hasProjectRole($task->project, 'manager')) {
+            return $user->canForProject($task->project, 'task.edit');
         }
 
-        return $user->can('task.edit')
+        return $user->canForProject($task->project, 'task.edit')
             && $task->assigned_to === $user->id;
     }
 
@@ -54,8 +54,9 @@ class TaskPolicy
             return false;
         }
 
-        return $user->can('task.update-status')
-            && ($user->hasRole('project-manager')
+        return $user->canForProject($task->project, 'task.update-status')
+            && ($task->project->owner_id === $user->id
+                || $user->hasProjectRole($task->project, 'manager')
                 || $task->assigned_to === $user->id);
     }
 
@@ -66,13 +67,14 @@ class TaskPolicy
 
     public function delete(User $user, Task $task): bool
     {
-        return $user->can('task.delete')
-            && $user->hasRole('project-manager');
+        return $user->canForProject($task->project, 'task.delete')
+            && ($task->project->owner_id === $user->id
+                || $user->hasProjectRole($task->project, 'manager'));
     }
 
     public function logTime(User $user, Task $task): bool
     {
-        return $user->can('task.log-time')
+        return $user->canForProject($task->project, 'task.log-time')
             && $task->assigned_to === $user->id;
     }
 }

@@ -19,7 +19,7 @@ class BlockerPolicy
 
     public function create(User $user): bool
     {
-        return $user->can('blocker.create');
+        return true;
     }
 
     public function update(User $user, Blocker $blocker): bool
@@ -28,7 +28,9 @@ class BlockerPolicy
             return false;
         }
 
-        return $user->can('blocker.edit');
+        return $user->canForProject($blocker->project, 'blocker.edit')
+            && ($blocker->project->owner_id === $user->id
+                || $user->hasProjectRole($blocker->project, 'manager'));
     }
 
     public function resolve(User $user, Blocker $blocker): bool
@@ -37,6 +39,8 @@ class BlockerPolicy
             return false;
         }
 
-        return $user->can('blocker.resolve');
+        return $user->canForProject($blocker->project, 'blocker.resolve')
+            && ($blocker->project->owner_id === $user->id
+                || $user->hasProjectRole($blocker->project, 'manager'));
     }
 }

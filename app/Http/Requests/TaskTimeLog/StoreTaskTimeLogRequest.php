@@ -2,13 +2,20 @@
 
 namespace App\Http\Requests\TaskTimeLog;
 
+use App\Models\Task;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreTaskTimeLogRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('task.log-time');
+        $task = $this->route('task');
+
+        if (! $task instanceof Task) {
+            return false;
+        }
+
+        return $this->user()->canForProject($task->project, 'task.log-time');
     }
 
     public function rules(): array

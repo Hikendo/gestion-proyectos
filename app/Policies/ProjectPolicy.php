@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use App\Enums\ProjectStatus;
 use App\Models\Project;
 use App\Models\User;
 
@@ -45,11 +44,9 @@ class ProjectPolicy
             return false;
         }
 
-        return $user->can('project.edit')
+        return $user->canForProject($project, 'project.edit')
             && ($project->owner_id === $user->id
-                || $project->members()->where('user_id', $user->id)
-                ->where('role', 'manager')
-                ->exists());
+                || $user->hasProjectRole($project, 'manager'));
     }
 
     public function delete(User $user, Project $project): bool
@@ -65,10 +62,8 @@ class ProjectPolicy
 
     public function assignMembers(User $user, Project $project): bool
     {
-        return $user->can('project.assign-members')
+        return $user->canForProject($project, 'project.assign-members')
             && ($project->owner_id === $user->id
-                || $project->members()->where('user_id', $user->id)
-                ->where('role', 'manager')
-                ->exists());
+                || $user->hasProjectRole($project, 'manager'));
     }
 }

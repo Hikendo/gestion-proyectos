@@ -17,7 +17,7 @@ Route::prefix('auth')->group(function () {
             ->name('auth.logout');
 
         Route::post('register', [AuthController::class, 'register'])
-            ->middleware('role:super-admin|project-manager')
+            ->middleware('role:super-admin')
             ->name('auth.register');
     });
 });

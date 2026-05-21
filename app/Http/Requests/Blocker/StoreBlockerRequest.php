@@ -2,13 +2,20 @@
 
 namespace App\Http\Requests\Blocker;
 
+use App\Models\Project;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreBlockerRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('blocker.create');
+        $project = $this->route('project');
+
+        if (! $project instanceof Project) {
+            return false;
+        }
+
+        return $this->user()->canForProject($project, 'blocker.create');
     }
 
     public function rules(): array

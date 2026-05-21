@@ -24,13 +24,15 @@ class RiskPolicy
 
     public function update(User $user, Risk $risk): bool
     {
-        return $user->can('risk.edit')
-            && $user->hasRole('project-manager');
+        return $user->canForProject($risk->project, 'risk.edit')
+            && ($risk->project->owner_id === $user->id
+                || $user->hasProjectRole($risk->project, 'manager'));
     }
 
     public function delete(User $user, Risk $risk): bool
     {
-        return $user->can('risk.delete')
-            && $user->hasRole('project-manager');
+        return $user->canForProject($risk->project, 'risk.delete')
+            && ($risk->project->owner_id === $user->id
+                || $user->hasProjectRole($risk->project, 'manager'));
     }
 }

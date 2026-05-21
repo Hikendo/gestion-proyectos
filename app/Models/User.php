@@ -4,11 +4,13 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Enums\ProjectMemberRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Arr;
 
 use Laravel\Sanctum\HasApiTokens;
 
@@ -216,6 +218,40 @@ class User extends Authenticatable
     public function isClient(): bool
     {
         return $this->hasRole('client');
+    }
+
+    public function projectMembershipRole(Project $project): ?string
+    {
+        return $this->projectMemberships()
+            ->where('project_id', $project->id)
+            ->value('role');
+    }
+
+    public function hasProjectRole(Project $project, string|array $roles): bool
+    {
+        $membershipRole = $this->projectMembershipRole($project);
+
+        return $membershipRole !== null
+            && in_array($membershipRole, Arr::wrap($roles), true);
+    }
+
+    public function canForProject(Project $project, string $permission): bool
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        if ($project->owner_id === $this->id) {
+            return true;
+        }
+
+        $membershipRole = $this->projectMembershipRole($project);
+
+        if ($membershipRole === null) {
+            return false;
+        }
+
+        return in_array($permission, ProjectMemberRole::permissionsFor($membershipRole), true);
     }
 
     /**

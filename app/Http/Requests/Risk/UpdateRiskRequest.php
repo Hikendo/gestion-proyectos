@@ -2,13 +2,20 @@
 
 namespace App\Http\Requests\Risk;
 
+use App\Models\Project;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateRiskRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('risk.edit');
+        $project = $this->route('project');
+
+        if (! $project instanceof Project) {
+            return false;
+        }
+
+        return $this->user()->canForProject($project, 'risk.edit');
     }
 
     public function rules(): array

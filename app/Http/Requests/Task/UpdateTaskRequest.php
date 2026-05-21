@@ -2,15 +2,22 @@
 
 namespace App\Http\Requests\Task;
 
+use App\Models\Project;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateTaskRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Permiso mínimo: task.edit o task.update-status
-        // La lógica fina (solo su tarea) se resuelve en TaskService::canEdit()
-        return $this->user()->canAny(['task.edit', 'task.update-status', 'task.assign']);
+        $project = $this->route('project');
+
+        if (! $project instanceof Project) {
+            return false;
+        }
+
+        return $this->user()->canForProject($project, 'task.edit')
+            || $this->user()->canForProject($project, 'task.update-status')
+            || $this->user()->canForProject($project, 'task.assign');
     }
 
     public function rules(): array

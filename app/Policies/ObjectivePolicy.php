@@ -24,7 +24,8 @@ class ObjectivePolicy
 
     public function update(User $user, Objective $objective): bool
     {
-        return $user->can('objective.edit')
-            && $user->hasRole('project-manager');
+        return $user->canForProject($objective->project, 'objective.edit')
+            && ($objective->project->owner_id === $user->id
+                || $user->hasProjectRole($objective->project, 'manager'));
     }
 }

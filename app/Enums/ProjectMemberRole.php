@@ -21,6 +21,116 @@ enum ProjectMemberRole: string
         };
     }
 
+    public function permissions(): array
+    {
+        return match ($this) {
+            self::Manager => [
+                'project.view',
+                'project.create',
+                'project.edit',
+                'project.assign-members',
+                'phase.view',
+                'phase.create',
+                'phase.edit',
+                'phase.delete',
+                'task.view',
+                'task.create',
+                'task.edit',
+                'task.delete',
+                'task.assign',
+                'task.update-status',
+                'task.log-time',
+                'ticket.view',
+                'ticket.create',
+                'ticket.edit',
+                'ticket.delete',
+                'ticket.assign',
+                'risk.view',
+                'risk.create',
+                'risk.edit',
+                'risk.delete',
+                'blocker.view',
+                'blocker.create',
+                'blocker.edit',
+                'blocker.resolve',
+                'milestone.view',
+                'milestone.create',
+                'milestone.edit',
+                'milestone.delete',
+                'deliverable.view',
+                'deliverable.create',
+                'deliverable.edit',
+                'deliverable.approve',
+                'objective.view',
+                'objective.create',
+                'objective.edit',
+                'metrics.view',
+                'reports.view',
+            ],
+            self::Developer => [
+                'project.view',
+                'phase.view',
+                'task.view',
+                'task.create',
+                'task.edit',
+                'task.update-status',
+                'task.log-time',
+                'ticket.view',
+                'ticket.create',
+                'risk.view',
+                'blocker.view',
+                'blocker.create',
+                'milestone.view',
+                'deliverable.view',
+                'objective.view',
+                'metrics.view',
+            ],
+            self::Qa => [
+                'project.view',
+                'phase.view',
+                'task.view',
+                'task.create',
+                'task.edit',
+                'task.update-status',
+                'ticket.view',
+                'ticket.create',
+                'ticket.edit',
+                'risk.view',
+                'blocker.view',
+                'blocker.create',
+                'milestone.view',
+                'deliverable.view',
+                'objective.view',
+                'metrics.view',
+            ],
+            self::Support => [
+                'project.view',
+                'task.view',
+                'ticket.view',
+                'ticket.create',
+                'ticket.edit',
+                'ticket.assign',
+                'blocker.view',
+                'user.view',
+            ],
+            self::Client => [
+                'project.view',
+                'ticket.view',
+                'ticket.create',
+                'milestone.view',
+                'deliverable.view',
+                'objective.view',
+                'metrics.view',
+                'reports.view',
+            ],
+        };
+    }
+
+    public static function permissionsFor(string|self $role): array
+    {
+        return ($role instanceof self ? $role : self::from($role))->permissions();
+    }
+
     public static function values(): array
     {
         return array_column(self::cases(), 'value');

@@ -2,7 +2,6 @@
 
 namespace App\Policies;
 
-use App\Enums\TicketStatus;
 use App\Models\Ticket;
 use App\Models\User;
 
@@ -20,7 +19,7 @@ class TicketPolicy
 
     public function view(User $user, Ticket $ticket): bool
     {
-        return $user->can('ticket.view')
+        return $user->canForProject($ticket->project, 'ticket.view')
             && ($ticket->project->owner_id === $user->id
                 || $ticket->project->members()->where('user_id', $user->id)->exists());
     }
@@ -39,16 +38,16 @@ class TicketPolicy
             return false;
         }
 
-        return $user->can('ticket.edit');
+        return $user->canForProject($ticket->project, 'ticket.edit');
     }
 
-    public function assign(User $user): bool
+    public function assign(User $user, Ticket $ticket): bool
     {
-        return $user->can('ticket.assign');
+        return $user->canForProject($ticket->project, 'ticket.assign');
     }
 
     public function delete(User $user, Ticket $ticket): bool
     {
-        return $user->can('ticket.delete');
+        return $user->canForProject($ticket->project, 'ticket.delete');
     }
 }
