@@ -10,6 +10,16 @@ echo "================================================"
 composer install --no-interaction --optimize-autoloader
 
 echo "================================================"
+echo " Generando APP_KEY si no existe..."
+echo "================================================"
+if [ -z "${APP_KEY}" ] || [ "${APP_KEY}" = "" ]; then
+    php artisan key:generate --force
+    echo " ✓ APP_KEY generado."
+else
+    echo " → APP_KEY ya existe, omitido."
+fi
+
+echo "================================================"
 echo " Esperando que la base de datos esté lista..."
 echo "================================================"
 
