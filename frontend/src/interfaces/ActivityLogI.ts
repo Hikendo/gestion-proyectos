@@ -1,4 +1,5 @@
-
+import { ModelBaseI } from "@/interfaces/ModelBaseI";
+import { UserI } from "@/interfaces/UserI";
 
 export interface ActivityLogI extends ModelBaseI {
   user_id: number; // Required en Laravel

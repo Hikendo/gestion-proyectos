@@ -1,6 +1,5 @@
-import { ModelBaseI, DateString } from "@/interfaces/ModelBaseI";
+import { DateString, ModelBaseI } from "@/interfaces/ModelBaseI";
 import { ProjectI } from "@/interfaces/ProjectI";
-
 export interface DeliverableI extends ModelBaseI {
   project_id: number; // Required en Laravel
 

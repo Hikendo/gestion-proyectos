@@ -1,7 +1,8 @@
+import { BlockerSeverity } from "@/interfaces/enums";
 import { ModelBaseI } from "@/interfaces/ModelBaseI";
 import { ProjectI } from "@/interfaces/ProjectI";
 import { TaskI } from "@/interfaces/TaskI";
-import { BlockerSeverity } from "@/interfaces/enums";
+
 
 export interface BlockerI extends ModelBaseI {
   project_id: number; // Required en Laravel

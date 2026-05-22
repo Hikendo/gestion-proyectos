@@ -1,5 +1,5 @@
 import { reactive, ref } from 'vue';
-import type { User, UserValidationErrors } from '../interfaces/user';
+import type { User, UserValidationErrors } from '../interfaces/UserI';
 
 export interface UserFormState {
     name: string;

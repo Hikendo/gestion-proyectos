@@ -1,6 +1,6 @@
 import { ref, reactive } from 'vue';
 import { useUsersService } from './index';
-import type { User } from '../interfaces/user';
+import type { User } from '../interfaces/UserI';
 
 export interface UserListState {
     page: number;
