@@ -1,0 +1,10 @@
+export type ProjectStatus = 'planning' | 'active' | 'on_hold' | 'completed' | 'cancelled';
+export type ObjectiveType = 'general' | 'specific';
+export type TaskStatus = 'pending' | 'in_progress' | 'review' | 'done' | 'blocked';
+export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed';
+export type TicketPriority = 'low' | 'medium' | 'high' | 'critical';
+export type TaskPriority = 'low' | 'medium' | 'high' | 'critical';
+export type BlockerSeverity = 'low' | 'medium' | 'high' | 'critical';
+export type RiskImpact = 'low' | 'medium' | 'high' | 'critical';
+export type RiskProbability = 'low' | 'medium' | 'high';
+export type ProjectMemberRole = 'manager' | 'developer' | 'qa' | 'support' | 'client';

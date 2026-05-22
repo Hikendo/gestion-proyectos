@@ -1,0 +1,42 @@
+import type { BaseModel, DateString, SoftDeletesModel } from './ModelBaseI';
+import type { ProjectStatus } from './enums';
+import type { Blocker } from './BlockerI';
+import type { Deliverable } from './DeliverableI';
+import type { Milestone } from './MilestoneI';
+import type { Objective } from './ObjectiveI';
+import type { ProjectMember } from './ProjectMemberI';
+import type { ProjectMetric } from './project-metric';
+import type { ProjectPhase } from './project-phase';
+import type { ProjectPlan } from './project-plan';
+import type { Risk } from './risk';
+import type { Task } from './task';
+import type { Ticket } from './ticket';
+import type { User } from './user';
+
+export interface Project extends SoftDeletesModel {
+    name: string;
+    code?: string | null;
+    description?: string | null;
+    status: ProjectStatus;
+    start_date?: DateString | null;
+    end_date?: DateString | null;
+    budget?: string | null;
+    progress?: number | null;
+    owner_id: number;
+    owner?: User;
+    members?: ProjectMember[];
+    phases?: ProjectPhase[];
+    objectives?: Objective[];
+    tasks?: Task[];
+    tickets?: Ticket[];
+    risks?: Risk[];
+    blockers?: Blocker[];
+    deliverables?: Deliverable[];
+    plans?: ProjectPlan[];
+    milestones?: Milestone[];
+    metrics?: ProjectMetric | null;
+    tasks_count?: number;
+    tickets_count?: number;
+    risks_count?: number;
+    blockers_count?: number;
+}

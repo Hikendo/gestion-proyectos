@@ -1,6 +1,6 @@
-# 🗂️ Gestión de Proyectos — Backend API
+# 🗂️ Gestión de Proyectos — Backend API + Frontend Vue
 
-API REST para la gestión de proyectos, tareas, tickets, equipos y más. Construida con **Laravel 12** + **Sanctum** + **Spatie Permissions**.
+API REST para la gestión de proyectos, tareas, tickets, equipos y más. Construida con **Laravel 12** + **Sanctum** + **Spatie Permissions**. El frontend vive desacoplado en una app **Vue 3** dentro de `/frontend`.
 
 ---
 
@@ -14,6 +14,7 @@ API REST para la gestión de proyectos, tareas, tickets, equipos y más. Constru
 - Dashboard con métricas por usuario
 - Tests de Feature con **PHPUnit**
 - Base de datos SQLite para testing / MySQL para producción
+- Frontend Vue 3 separado, servido en contenedor propio
 
 ---
 
@@ -67,6 +68,24 @@ ADMIN_PASSWORD=Admin1234!
 docker compose up -d --build
 ```
 
+Servicios expuestos por defecto:
+
+- Backend API: `http://localhost:8085`
+- Frontend Vue: `http://localhost:5173`
+- MySQL: `localhost:3319`
+
+### 5. Instalar y arrancar el frontend de Vue
+
+Si quieres trabajarlo fuera de Docker también puedes entrar a la carpeta del frontend y ejecutar:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+El frontend usa por defecto `VITE_API_BASE_URL=/api/v1` y en Docker se apoya en un proxy hacia el contenedor `backend`, así evitas CORS en desarrollo.
+
 > ✅ El entrypoint ejecuta automáticamente al iniciar el contenedor:
 >
 > - Instalación de dependencias (`composer install`)
@@ -79,12 +98,12 @@ docker compose up -d --build
 
 ## 👤 Usuarios por defecto (Seeders)
 
-| Rol | Email | Contraseña |
-|---|---|---|
-| Super Admin | <superadmin@test.com> | password |
-| Project Manager | <pm@test.com> | password |
-| Developer | <developer@test.com> | password |
-| Client | <client@test.com> | password |
+| Rol             | Email                 | Contraseña |
+| --------------- | --------------------- | ---------- |
+| Super Admin     | <superadmin@test.com> | password   |
+| Project Manager | <pm@test.com>         | password   |
+| Developer       | <developer@test.com>  | password   |
+| Client          | <client@test.com>     | password   |
 
 > El super-admin configurado via `.env` (`ADMIN_EMAIL`) se crea adicionalmente si no existe ningún usuario con ese rol.
 
@@ -102,8 +121,8 @@ Obtén tu token haciendo **POST** a `/api/v1/auth/login`:
 
 ```json
 {
-  "email": "superadmin@test.com",
-  "password": "password"
+    "email": "superadmin@test.com",
+    "password": "password"
 }
 ```
 
@@ -111,25 +130,25 @@ Obtén tu token haciendo **POST** a `/api/v1/auth/login`:
 
 ## 📡 Endpoints principales
 
-| Recurso | Base URL |
-|---|---|
-| Auth | `/api/v1/auth` |
-| Users | `/api/v1/users` |
-| Projects | `/api/v1/projects` |
-| Members | `/api/v1/projects/{id}/members` |
-| Phases | `/api/v1/projects/{id}/phases` |
-| Tasks | `/api/v1/projects/{id}/tasks` |
-| Task Comments | `/api/v1/tasks/{id}/comments` |
-| Task Time Logs | `/api/v1/tasks/{id}/time-logs` |
-| Tickets | `/api/v1/projects/{id}/tickets` |
-| Milestones | `/api/v1/projects/{id}/milestones` |
-| Deliverables | `/api/v1/projects/{id}/deliverables` |
-| Blockers | `/api/v1/projects/{id}/blockers` |
-| Risks | `/api/v1/projects/{id}/risks` |
-| Objectives | `/api/v1/projects/{id}/objectives` |
-| Plan | `/api/v1/projects/{id}/plan` |
-| Dashboard | `/api/v1/dashboard` |
-| Roles | `/api/v1/roles` |
+| Recurso        | Base URL                             |
+| -------------- | ------------------------------------ |
+| Auth           | `/api/v1/auth`                       |
+| Users          | `/api/v1/users`                      |
+| Projects       | `/api/v1/projects`                   |
+| Members        | `/api/v1/projects/{id}/members`      |
+| Phases         | `/api/v1/projects/{id}/phases`       |
+| Tasks          | `/api/v1/projects/{id}/tasks`        |
+| Task Comments  | `/api/v1/tasks/{id}/comments`        |
+| Task Time Logs | `/api/v1/tasks/{id}/time-logs`       |
+| Tickets        | `/api/v1/projects/{id}/tickets`      |
+| Milestones     | `/api/v1/projects/{id}/milestones`   |
+| Deliverables   | `/api/v1/projects/{id}/deliverables` |
+| Blockers       | `/api/v1/projects/{id}/blockers`     |
+| Risks          | `/api/v1/projects/{id}/risks`        |
+| Objectives     | `/api/v1/projects/{id}/objectives`   |
+| Plan           | `/api/v1/projects/{id}/plan`         |
+| Dashboard      | `/api/v1/dashboard`                  |
+| Roles          | `/api/v1/roles`                      |
 
 > 📦 Importa la colección de Postman incluida en `/postman/GestionProyectos.postman_collection.json`
 
@@ -164,6 +183,10 @@ app/
 └── Services/
 docker/
 └── entrypoint.sh   # Bootstrap automático del contenedor
+frontend/
+├── src/
+├── Dockerfile
+└── vite.config.js
 postman/
 └── GestionProyectos.postman_collection.json
 ```
