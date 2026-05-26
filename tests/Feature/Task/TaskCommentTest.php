@@ -44,7 +44,7 @@ class TaskCommentTest extends TestCase
             ->postJson("/api/v1/tasks/{$this->task->id}/comments", [
                 'comment' => 'Esto es un comentario.',
             ])->assertCreated()
-            ->assertJsonPath('data.comment', 'Esto es un comentario.');
+            ->assertJsonPath('items.comment', 'Esto es un comentario.');
     }
 
     public function test_author_can_delete_own_comment(): void

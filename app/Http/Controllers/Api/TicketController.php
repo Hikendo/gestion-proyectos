@@ -31,14 +31,25 @@ class TicketController extends Controller
     {
         $this->authorize('view', $project);
 
-        $tickets = $project->tickets()
-            ->with(['creator:id,name,email', 'assignee:id,name,email'])
-            ->when($request->status,   fn($q, $s) => $q->where('status', $s))
-            ->when($request->priority, fn($q, $p) => $q->where('priority', $p))
-            ->latest()
-            ->paginate(20);
+        try {
+            $items = Ticket::search($request->string('search', ''))
+                ->query(fn($q) => $q
+                    ->where('project_id', $project->id)
+                    ->with(['creator:id,name,email', 'assignee:id,name,email'])
+                    ->when($request->status,   fn($q, $s) => $q->where('status', $s))
+                    ->when($request->priority, fn($q, $p) => $q->where('priority', $p))
+                    ->latest()
+                )
+                ->paginate(20);
 
-        return TicketResource::collection($tickets)->response();
+            return response()->json([
+                'status'  => true,
+                'items'   => $items,
+                'message' => 'Tickets encontrados.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -48,11 +59,17 @@ class TicketController extends Controller
     {
         $this->authorize('view', $project);
 
-        $ticket = $this->service->create($request->validated(), $project, $request->user());
+        try {
+            $item = $this->service->create($request->validated(), $project, $request->user());
 
-        return TicketResource::make($ticket->load('creator:id,name,email'))
-            ->response()
-            ->setStatusCode(201);
+            return response()->json([
+                'status'  => true,
+                'items'   => $item->load('creator:id,name,email'),
+                'message' => 'Ticket creado.',
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -63,10 +80,20 @@ class TicketController extends Controller
         $this->assertBelongsToProject($ticket, $project->id);
         $this->authorize('view', $ticket);
 
-        return TicketResource::make($ticket->load([
-            'creator:id,name,email',
-            'assignee:id,name,email',
-        ]))->response();
+        try {
+            $ticket->load([
+                'creator:id,name,email',
+                'assignee:id,name,email',
+            ]);
+
+            return response()->json([
+                'status'  => true,
+                'items'   => $ticket,
+                'message' => 'Ticket encontrado.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -77,20 +104,28 @@ class TicketController extends Controller
         $this->assertBelongsToProject($ticket, $project->id);
 
         if ($ticket->status->isClosed()) {
-            throw TicketException::alreadyClosed(); // ← era isClosed()
+            throw TicketException::alreadyClosed();
         }
 
         $this->authorize('update', $ticket);
 
-        $data = $request->validated();
+        try {
+            $data = $request->validated();
 
-        if (isset($data['assigned_to'])) {
-            $this->authorize('assign', $ticket);
+            if (isset($data['assigned_to'])) {
+                $this->authorize('assign', $ticket);
+            }
+
+            $ticket->update($data);
+
+            return response()->json([
+                'status'  => true,
+                'items'   => $ticket->load('assignee:id,name,email'),
+                'message' => 'Ticket actualizado.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
         }
-
-        $ticket->update($data);
-
-        return TicketResource::make($ticket->load('assignee:id,name,email'))->response();
     }
 
     /**
@@ -101,8 +136,12 @@ class TicketController extends Controller
         $this->assertBelongsToProject($ticket, $project->id);
         $this->authorize('delete', $ticket);
 
-        $ticket->delete();
+        try {
+            $ticket->delete();
 
-        return response()->json(['message' => 'Ticket eliminado.']);
+            return response()->json(['status' => true, 'items' => null, 'message' => 'Ticket eliminado.']);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 }

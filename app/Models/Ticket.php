@@ -2,14 +2,23 @@
 
 namespace App\Models;
 
-use App\Enums\TicketStatus;   // ← era TaskStatus
-use App\Enums\TicketPriority; // ← era TaskPriority (si existe), si no usa TaskPriority
+use App\Enums\TicketStatus;
+use App\Enums\TicketPriority;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Laravel\Scout\Searchable;
 
 class Ticket extends Model
 {
-    use HasFactory;
+    use HasFactory, Searchable;
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'subject'     => $this->subject,
+            'description' => $this->description,
+        ];
+    }
 
     protected $fillable = [
         'project_id',

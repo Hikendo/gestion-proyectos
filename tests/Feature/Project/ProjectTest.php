@@ -32,7 +32,7 @@ class ProjectTest extends TestCase
             ->getJson('/api/v1/projects')
             ->assertOk();
 
-        $ids = collect($response->json('data'))->pluck('id');
+        $ids = collect($response->json('items.data'))->pluck('id');
         $this->assertTrue($ids->contains($myProject->id));
         $this->assertFalse($ids->contains($otherProject->id));
     }
@@ -44,7 +44,7 @@ class ProjectTest extends TestCase
                 'name' => 'Proyecto Test',
                 'code' => 'PT-001',
             ])->assertCreated()
-            ->assertJsonPath('data.code', 'PT-001');
+            ->assertJsonPath('items.code', 'PT-001');
     }
 
     public function test_developer_cannot_create_project(): void
@@ -63,7 +63,7 @@ class ProjectTest extends TestCase
         $this->actingAs($this->pm)
             ->putJson("/api/v1/projects/{$project->id}", ['name' => 'Actualizado'])
             ->assertOk()
-            ->assertJsonPath('data.name', 'Actualizado');
+            ->assertJsonPath('items.name', 'Actualizado');
     }
 
     public function test_owner_can_delete_project(): void

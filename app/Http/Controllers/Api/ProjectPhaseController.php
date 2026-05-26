@@ -20,9 +20,17 @@ class ProjectPhaseController extends Controller
     {
         $this->authorize('view', $project);
 
-        return ProjectPhaseResource::collection(
-            $project->phases()->withCount('tasks')->orderBy('start_date')->get()
-        )->response();
+        try {
+            $items = $project->phases()->withCount('tasks')->orderBy('start_date')->get();
+
+            return response()->json([
+                'status'  => true,
+                'items'   => $items,
+                'message' => 'Fases encontradas.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -32,11 +40,17 @@ class ProjectPhaseController extends Controller
     {
         $this->authorize('update', $project);
 
-        $phase = $project->phases()->create($request->validated());
+        try {
+            $item = $project->phases()->create($request->validated());
 
-        return ProjectPhaseResource::make($phase)
-            ->response()
-            ->setStatusCode(201);
+            return response()->json([
+                'status'  => true,
+                'items'   => $item,
+                'message' => 'Fase creada.',
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -47,9 +61,17 @@ class ProjectPhaseController extends Controller
         $this->authorize('update', $project);
         abort_if($phase->project_id !== $project->id, 404);
 
-        $phase->update($request->validated());
+        try {
+            $phase->update($request->validated());
 
-        return ProjectPhaseResource::make($phase)->response();
+            return response()->json([
+                'status'  => true,
+                'items'   => $phase,
+                'message' => 'Fase actualizada.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -60,8 +82,12 @@ class ProjectPhaseController extends Controller
         $this->authorize('update', $project);
         abort_if($phase->project_id !== $project->id, 404);
 
-        $phase->delete();
+        try {
+            $phase->delete();
 
-        return response()->json(['message' => 'Fase eliminada.']);
+            return response()->json(['status' => true, 'items' => null, 'message' => 'Fase eliminada.']);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 }

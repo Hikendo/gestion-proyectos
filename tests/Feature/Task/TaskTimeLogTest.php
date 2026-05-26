@@ -41,8 +41,8 @@ class TaskTimeLogTest extends TestCase
                 'minutes'     => 90,
                 'description' => 'Trabajo en feature X',
             ])->assertCreated()
-            ->assertJsonPath('data.minutes', 90)
-            ->assertJsonPath('data.hours', 1.5);
+            ->assertJsonPath('items.minutes', 90)
+            ->assertJsonPath('items.hours', 1.5);
     }
 
     public function test_non_assigned_user_cannot_log_time(): void
@@ -78,6 +78,6 @@ class TaskTimeLogTest extends TestCase
         $this->actingAs($this->developer)
             ->getJson("/api/v1/tasks/{$this->task->id}/time-logs")
             ->assertOk()
-            ->assertJsonStructure(['data']);
+            ->assertJsonStructure(['status', 'items', 'message']);
     }
 }

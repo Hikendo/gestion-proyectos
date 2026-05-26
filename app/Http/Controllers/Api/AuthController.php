@@ -16,31 +16,41 @@ class AuthController extends Controller
      */
     public function login(Request $request): JsonResponse
     {
-        $request->validate([
-            'email'    => ['required', 'email'],
-            'password' => ['required', 'string'],
-        ]);
-
-        $user = User::where('email', $request->email)->first();
-
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['Credenciales incorrectas.'],
+        try {
+            $request->validate([
+                'email'    => ['required', 'email'],
+                'password' => ['required', 'string'],
             ]);
+
+            $user = User::where('email', $request->email)->first();
+
+            if (! $user || ! Hash::check($request->password, $user->password)) {
+                throw ValidationException::withMessages([
+                    'email' => ['Credenciales incorrectas.'],
+                ]);
+            }
+
+            $token = $user->createToken('api-token')->plainTextToken;
+
+            return response()->json([
+                'status'  => true,
+                'items'   => [
+                    'token' => $token,
+                    'user'  => [
+                        'id'          => $user->id,
+                        'name'        => $user->name,
+                        'email'       => $user->email,
+                        'roles'       => $user->getRoleNames(),
+                        'permissions' => $user->getAllPermissions()->pluck('name'),
+                    ],
+                ],
+                'message' => 'Inicio de sesión correcto.',
+            ]);
+        } catch (ValidationException $e) {
+            throw $e;
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
         }
-
-        $token = $user->createToken('api-token')->plainTextToken;
-
-        return response()->json([
-            'token' => $token,
-            'user'  => [
-                'id'          => $user->id,
-                'name'        => $user->name,
-                'email'       => $user->email,
-                'roles'       => $user->getRoleNames(),
-                'permissions' => $user->getAllPermissions()->pluck('name'),
-            ],
-        ]);
     }
 
     /**
@@ -48,15 +58,17 @@ class AuthController extends Controller
      */
     public function logout(Request $request): JsonResponse
     {
-        $token = $request->user()->currentAccessToken();
+        try {
+            $token = $request->user()->currentAccessToken();
 
-        // TransientToken (usado en tests) no tiene delete()
-        // Solo eliminar si es un token real de Sanctum
-        if ($token instanceof \Laravel\Sanctum\PersonalAccessToken) {
-            $token->delete();
+            if ($token instanceof \Laravel\Sanctum\PersonalAccessToken) {
+                $token->delete();
+            }
+
+            return response()->json(['status' => true, 'items' => null, 'message' => 'Sesi\u00f3n cerrada correctamente.']);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
         }
-
-        return response()->json(['message' => 'Sesión cerrada correctamente.']);
     }
 
     /**
@@ -64,16 +76,24 @@ class AuthController extends Controller
      */
     public function me(Request $request): JsonResponse
     {
-        $user = $request->user()->load(['roles', 'metrics']);
+        try {
+            $user = $request->user()->load(['roles', 'metrics']);
 
-        return response()->json([
-            'id'          => $user->id,
-            'name'        => $user->name,
-            'email'       => $user->email,
-            'roles'       => $user->getRoleNames(),
-            'permissions' => $user->getAllPermissions()->pluck('name'),
-            'metrics'     => $user->metrics,
-        ]);
+            return response()->json([
+                'status'  => true,
+                'items'   => [
+                    'id'          => $user->id,
+                    'name'        => $user->name,
+                    'email'       => $user->email,
+                    'roles'       => $user->getRoleNames(),
+                    'permissions' => $user->getAllPermissions()->pluck('name'),
+                    'metrics'     => $user->metrics,
+                ],
+                'message' => 'Perfil cargado.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -85,25 +105,27 @@ class AuthController extends Controller
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role'     => ['required', 'string', 'exists:roles,name'],
         ]);
 
-        $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        try {
+            $user = User::create([
+                'name'     => $request->name,
+                'email'    => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
 
-        $user->assignRole($request->role);
-
-        return response()->json([
-            'message' => 'Usuario creado.',
-            'user'    => [
-                'id'    => $user->id,
-                'name'  => $user->name,
-                'email' => $user->email,
-                'roles' => $user->getRoleNames(),
-            ],
-        ], 201);
+            return response()->json([
+                'status'  => true,
+                'items'   => [
+                    'id'    => $user->id,
+                    'name'  => $user->name,
+                    'email' => $user->email,
+                    'roles' => $user->getRoleNames(),
+                ],
+                'message' => 'Usuario creado.',
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 }

@@ -15,9 +15,17 @@ class TaskTimeLogController extends Controller
      */
     public function index(Task $task): JsonResponse
     {
-        return TaskTimeLogResource::collection(
-            $task->timeLogs()->with('user:id,name,email')->latest()->get()
-        )->response();
+        try {
+            $items = $task->timeLogs()->with('user:id,name,email')->latest()->get();
+
+            return response()->json([
+                'status'  => true,
+                'items'   => $items,
+                'message' => 'Registros de tiempo encontrados.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -27,16 +35,22 @@ class TaskTimeLogController extends Controller
     {
         $this->authorize('logTime', $task);
 
-        $log = $task->timeLogs()->create([
-            'user_id'     => $request->user()->id,
-            'minutes'     => $request->validated('minutes'),
-            'description' => $request->validated('description'),
-        ]);
+        try {
+            $item = $task->timeLogs()->create([
+                'user_id'     => $request->user()->id,
+                'minutes'     => $request->validated('minutes'),
+                'description' => $request->validated('description'),
+            ]);
 
-        $task->increment('worked_hours', round($request->validated('minutes') / 60, 2));
+            $task->increment('worked_hours', round($request->validated('minutes') / 60, 2));
 
-        return TaskTimeLogResource::make($log->load('user:id,name,email'))
-            ->response()
-            ->setStatusCode(201);
+            return response()->json([
+                'status'  => true,
+                'items'   => $item->load('user:id,name,email'),
+                'message' => 'Registro de tiempo creado.',
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 }

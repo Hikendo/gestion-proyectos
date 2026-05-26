@@ -24,9 +24,17 @@ class MilestoneController extends Controller
     {
         $this->authorize('view', $project);
 
-        return MilestoneResource::collection(
-            $project->milestones()->orderBy('target_date')->get()
-        )->response();
+        try {
+            $items = $project->milestones()->orderBy('target_date')->get();
+
+            return response()->json([
+                'status'  => true,
+                'items'   => $items,
+                'message' => 'Milestones encontrados.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -36,11 +44,17 @@ class MilestoneController extends Controller
     {
         $this->authorize('view', $project);
 
-        $milestone = $project->milestones()->create($request->validated());
+        try {
+            $item = $project->milestones()->create($request->validated());
 
-        return MilestoneResource::make($milestone)
-            ->response()
-            ->setStatusCode(201);
+            return response()->json([
+                'status'  => true,
+                'items'   => $item,
+                'message' => 'Milestone creado.',
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -55,9 +69,17 @@ class MilestoneController extends Controller
             throw MilestoneException::alreadyCompleted();
         }
 
-        $milestone->update($request->validated());
+        try {
+            $milestone->update($request->validated());
 
-        return MilestoneResource::make($milestone)->response();
+            return response()->json([
+                'status'  => true,
+                'items'   => $milestone,
+                'message' => 'Milestone actualizado.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -68,8 +90,12 @@ class MilestoneController extends Controller
         $this->assertBelongsToProject($milestone, $project->id);
         $this->authorize('delete', $milestone);
 
-        $milestone->delete();
+        try {
+            $milestone->delete();
 
-        return response()->json(['message' => 'Milestone eliminado.']);
+            return response()->json(['status' => true, 'items' => null, 'message' => 'Milestone eliminado.']);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 }

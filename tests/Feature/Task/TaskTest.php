@@ -55,7 +55,7 @@ class TaskTest extends TestCase
             ->putJson("/api/v1/projects/{$this->project->id}/tasks/{$task->id}", [
                 'status' => TaskStatus::InProgress->value,
             ])->assertOk()
-            ->assertJsonPath('data.status', TaskStatus::InProgress->value);
+            ->assertJsonPath('items.status', TaskStatus::InProgress->value);
     }
 
     public function test_invalid_status_transition_is_rejected(): void

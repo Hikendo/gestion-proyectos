@@ -35,9 +35,9 @@
               "script": {
                 "exec": [
                   "const res = pm.response.json();",
-                  "if (res.token) {",
-                  "    pm.collectionVariables.set('token', res.token);",
-                  "    console.log('Token guardado:', res.token);",
+                  "if (res.items && res.items.token) {",
+                  "    pm.collectionVariables.set('token', res.items.token);",
+                  "    console.log('Token guardado:', res.items.token);",
                   "}"
                 ]
               }
@@ -68,7 +68,7 @@
             ],
             "body": {
               "mode": "raw",
-"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password\",\n  \"password_confirmation\": \"password\",\n  \"role\": \"super-admin\"\n}",
+"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password\",\n  \"password_confirmation\": \"password\"\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] }
@@ -137,7 +137,7 @@
               "script": {
                 "exec": [
                   "const res = pm.response.json();",
-                  "if (res.data && res.data.id) pm.collectionVariables.set('user_id', res.data.id);"
+                  "if (res.items && res.items.id) pm.collectionVariables.set('user_id', res.items.id);"
                 ]
               }
             }
@@ -150,7 +150,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Nuevo Usuario\",\n  \"email\": \"nuevo@example.com\",\n  \"password\": \"password\",\n  \"password_confirmation\": \"password\",\n  \"role\": \"super-admin\"\n}",
+              "raw": "{\n  \"name\": \"Nuevo Usuario\",\n  \"email\": \"nuevo@example.com\",\n  \"password\": \"password\",\n  \"password_confirmation\": \"password\"\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": { "raw": "{{base_url}}/users", "host": ["{{base_url}}"], "path": ["users"] }
@@ -217,7 +217,7 @@
               "script": {
                 "exec": [
                   "const res = pm.response.json();",
-                  "if (res.data && res.data.id) pm.collectionVariables.set('project_id', res.data.id);"
+                  "if (res.items && res.items.id) pm.collectionVariables.set('project_id', res.items.id);"
                 ]
               }
             }
@@ -355,7 +355,7 @@
               "script": {
                 "exec": [
                   "const res = pm.response.json();",
-                  "if (res.data && res.data.id) pm.collectionVariables.set('phase_id', res.data.id);"
+                  "if (res.items && res.items.id) pm.collectionVariables.set('phase_id', res.items.id);"
                 ]
               }
             }
@@ -419,7 +419,7 @@
               "script": {
                 "exec": [
                   "const res = pm.response.json();",
-                  "if (res.data && res.data.id) pm.collectionVariables.set('objective_id', res.data.id);"
+                  "if (res.items && res.items.id) pm.collectionVariables.set('objective_id', res.items.id);"
                 ]
               }
             }
@@ -475,7 +475,7 @@
               "script": {
                 "exec": [
                   "const res = pm.response.json();",
-                  "if (res.data && res.data.id) pm.collectionVariables.set('risk_id', res.data.id);"
+                  "if (res.items && res.items.id) pm.collectionVariables.set('risk_id', res.items.id);"
                 ]
               }
             }
@@ -539,7 +539,7 @@
               "script": {
                 "exec": [
                   "const res = pm.response.json();",
-                  "if (res.data && res.data.id) pm.collectionVariables.set('milestone_id', res.data.id);"
+                  "if (res.items && res.items.id) pm.collectionVariables.set('milestone_id', res.items.id);"
                 ]
               }
             }
@@ -611,7 +611,7 @@
               "script": {
                 "exec": [
                   "const res = pm.response.json();",
-                  "if (res.data && res.data.id) pm.collectionVariables.set('blocker_id', res.data.id);"
+                  "if (res.items && res.items.id) pm.collectionVariables.set('blocker_id', res.items.id);"
                 ]
               }
             }
@@ -675,7 +675,7 @@
               "script": {
                 "exec": [
                   "const res = pm.response.json();",
-                  "if (res.data && res.data.id) pm.collectionVariables.set('deliverable_id', res.data.id);"
+                  "if (res.items && res.items.id) pm.collectionVariables.set('deliverable_id', res.items.id);"
                 ]
               }
             }
@@ -739,7 +739,7 @@
               "script": {
                 "exec": [
                   "const res = pm.response.json();",
-                  "if (res.data && res.data.id) pm.collectionVariables.set('task_id', res.data.id);"
+                  "if (res.items && res.items.id) pm.collectionVariables.set('task_id', res.items.id);"
                 ]
               }
             }
@@ -811,7 +811,7 @@
               "script": {
                 "exec": [
                   "const res = pm.response.json();",
-                  "if (res.data && res.data.id) pm.collectionVariables.set('comment_id', res.data.id);"
+                  "if (res.items && res.items.id) pm.collectionVariables.set('comment_id', res.items.id);"
                 ]
               }
             }
@@ -859,7 +859,7 @@
               "script": {
                 "exec": [
                   "const res = pm.response.json();",
-                  "if (res.data && res.data.id) pm.collectionVariables.set('timelog_id', res.data.id);"
+                  "if (res.items && res.items.id) pm.collectionVariables.set('timelog_id', res.items.id);"
                 ]
               }
             }
@@ -907,7 +907,7 @@
               "script": {
                 "exec": [
                   "const res = pm.response.json();",
-                  "if (res.data && res.data.id) pm.collectionVariables.set('ticket_id', res.data.id);"
+                  "if (res.items && res.items.id) pm.collectionVariables.set('ticket_id', res.items.id);"
                 ]
               }
             }

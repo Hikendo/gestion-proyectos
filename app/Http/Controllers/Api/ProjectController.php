@@ -20,17 +20,29 @@ class ProjectController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $user = $request->user();
+        try {
+            $user = $request->user();
 
-        $projects = Project::query()
-            ->where('owner_id', $user->id)
-            ->orWhereHas('members', fn($q) => $q->where('user_id', $user->id))
-            ->with(['owner:id,name,email', 'metrics'])
-            ->withCount(['tasks', 'tickets', 'risks', 'blockers'])
-            ->latest()
-            ->paginate(15);
+            $items = Project::search($request->string('search', ''))
+                ->query(fn($q) => $q
+                    ->where(fn($q) => $q
+                        ->where('owner_id', $user->id)
+                        ->orWhereHas('members', fn($q) => $q->where('user_id', $user->id))
+                    )
+                    ->with(['owner:id,name,email', 'metrics'])
+                    ->withCount(['tasks', 'tickets', 'risks', 'blockers'])
+                    ->latest()
+                )
+                ->paginate(15);
 
-        return ProjectResource::collection($projects)->response();
+            return response()->json([
+                'status'  => true,
+                'items'   => $items,
+                'message' => 'Proyectos encontrados.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -38,11 +50,18 @@ class ProjectController extends Controller
      */
     public function store(StoreProjectRequest $request): JsonResponse
     {
-        $project = $this->service->create($request->validated(), $request->user());
+        try {
+            $item = $this->service->create($request->validated(), $request->user());
+            $item->load('owner:id,name,email');
 
-        return ProjectResource::make($project->load('owner:id,name,email'))
-            ->response()
-            ->setStatusCode(201);
+            return response()->json([
+                'status'  => true,
+                'items'   => $item,
+                'message' => 'Proyecto creado.',
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -52,19 +71,27 @@ class ProjectController extends Controller
     {
         $this->authorize('view', $project);
 
-        $project->load([
-            'owner:id,name,email',
-            'members.user:id,name,email',
-            'phases',
-            'objectives',
-            'milestones',
-            'deliverables',
-            'risks',
-            'blockers',
-            'metrics',
-        ])->loadCount(['tasks', 'tickets']);
+        try {
+            $project->load([
+                'owner:id,name,email',
+                'members.user:id,name,email',
+                'phases',
+                'objectives',
+                'milestones',
+                'deliverables',
+                'risks',
+                'blockers',
+                'metrics',
+            ])->loadCount(['tasks', 'tickets']);
 
-        return ProjectResource::make($project)->response();
+            return response()->json([
+                'status'  => true,
+                'items'   => $project,
+                'message' => 'Proyecto encontrado.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -74,9 +101,17 @@ class ProjectController extends Controller
     {
         $this->authorize('update', $project);
 
-        $project->update($request->validated());
+        try {
+            $project->update($request->validated());
 
-        return ProjectResource::make($project)->response();
+            return response()->json([
+                'status'  => true,
+                'items'   => $project,
+                'message' => 'Proyecto actualizado.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -86,8 +121,12 @@ class ProjectController extends Controller
     {
         $this->authorize('delete', $project);
 
-        $project->delete();
+        try {
+            $project->delete();
 
-        return response()->json(['message' => 'Proyecto eliminado.']);
+            return response()->json(['status' => true, 'items' => null, 'message' => 'Proyecto eliminado.']);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 }

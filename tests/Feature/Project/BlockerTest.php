@@ -75,7 +75,7 @@ class BlockerTest extends TestCase
             ->getJson("/api/v1/projects/{$this->project->id}/blockers")
             ->assertOk();
 
-        $this->assertCount(1, $response->json('data'));
+        $this->assertCount(1, $response->json('items'));
     }
 
     public function test_index_includes_resolved_when_requested(): void
@@ -87,6 +87,6 @@ class BlockerTest extends TestCase
             ->getJson("/api/v1/projects/{$this->project->id}/blockers?include_resolved=true")
             ->assertOk();
 
-        $this->assertCount(2, $response->json('data'));
+        $this->assertCount(2, $response->json('items'));
     }
 }

@@ -22,14 +22,22 @@ class UserController extends Controller
     {
         $this->authorize('viewAny', User::class);
 
-        $users = User::query()
-            ->with('roles:name')
-            ->when($request->role,   fn($q, $r) => $q->role($r))
-            ->when($request->search, fn($q, $s) => $q->where('name', 'like', "%{$s}%")
-                ->orWhere('email', 'like', "%{$s}%"))
-            ->paginate(20);
+        try {
+            $items = User::search($request->string('search', ''))
+                ->query(fn($q) => $q
+                    ->with('roles:name')
+                    ->when($request->role, fn($q, $r) => $q->role($r))
+                )
+                ->paginate(20);
 
-        return UserResource::collection($users)->response();
+            return response()->json([
+                'status'  => true,
+                'items'   => $items,
+                'message' => 'Usuarios encontrados.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -40,17 +48,21 @@ class UserController extends Controller
     {
         $this->authorize('create', User::class);
 
-        $user = User::create([
-            'name'     => $request->validated('name'),
-            'email'    => $request->validated('email'),
-            'password' => Hash::make($request->validated('password')),
-        ]);
+        try {
+            $item = User::create([
+                'name'     => $request->validated('name'),
+                'email'    => $request->validated('email'),
+                'password' => Hash::make($request->validated('password')),
+            ]);
 
-        $user->assignRole($request->validated('role'));
-
-        return UserResource::make($user->load('roles:name'))
-            ->response()
-            ->setStatusCode(201);
+            return response()->json([
+                'status'  => true,
+                'items'   => $item->load('roles:name'),
+                'message' => 'Usuario creado.',
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -60,9 +72,17 @@ class UserController extends Controller
     {
         $this->authorize('view', $user);
 
-        $user->load(['roles:name', 'metrics']);
+        try {
+            $user->load(['roles:name', 'metrics']);
 
-        return UserResource::make($user)->response();
+            return response()->json([
+                'status'  => true,
+                'items'   => $user,
+                'message' => 'Usuario encontrado.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -72,23 +92,31 @@ class UserController extends Controller
     {
         $this->authorize('update', $user);
 
-        $isAdmin = $request->user()->hasRole('super-admin');
-        $data    = $request->validated();
+        try {
+            $isAdmin = $request->user()->hasRole('super-admin');
+            $data    = $request->validated();
 
-        if (isset($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
+            if (isset($data['password'])) {
+                $data['password'] = Hash::make($data['password']);
+            }
+
+            $role = $data['role'] ?? null;
+            unset($data['role']);
+
+            $user->update($data);
+
+            if ($role && $isAdmin) {
+                $user->assignRole('super-admin');
+            }
+
+            return response()->json([
+                'status'  => true,
+                'items'   => $user->load('roles:name'),
+                'message' => 'Usuario actualizado.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
         }
-
-        $role = $data['role'] ?? null;
-        unset($data['role']);
-
-        $user->update($data);
-
-        if ($role && $isAdmin) {
-            $user->syncRoles([$role]);
-        }
-
-        return UserResource::make($user->load('roles:name'))->response();
     }
 
     /**
@@ -96,14 +124,17 @@ class UserController extends Controller
      */
     public function destroy(Request $request, User $user): JsonResponse
     {
-        // Impedir que el admin se elimine a sí mismo
         if ($request->user()->id === $user->id) {
-            return response()->json(['message' => 'No puedes eliminarte a ti mismo.'], 422);
+            return response()->json(['status' => false, 'items' => null, 'message' => 'No puedes eliminarte a ti mismo.'], 422);
         }
 
-        $user->delete();
+        try {
+            $user->delete();
 
-        return response()->json(['message' => 'Usuario eliminado.']);
+            return response()->json(['status' => true, 'items' => null, 'message' => 'Usuario eliminado.']);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -111,14 +142,19 @@ class UserController extends Controller
      */
     public function metrics(Request $request, User $user): JsonResponse
     {
-        // Cambiar 201 → 200
-        return response()->json([
-            'data' => [
-                'assigned_tasks'    => $user->assignedTasks()->count(),
-                'completed_tasks'   => $user->assignedTasks()->where('status', 'done')->count(),
-                'worked_hours'      => $user->taskTimeLogs()->sum('hours'),
-                'performance_score' => $user->metrics?->performance_score ?? 0,
-            ],
-        ], 200); // ← asegurar 200
+        try {
+            return response()->json([
+                'status'  => true,
+                'items'   => [
+                    'assigned_tasks'    => $user->assignedTasks()->count(),
+                    'completed_tasks'   => $user->assignedTasks()->where('status', 'done')->count(),
+                    'worked_hours'      => $user->taskTimeLogs()->sum('hours'),
+                    'performance_score' => $user->metrics?->performance_score ?? 0,
+                ],
+                'message' => 'M\u00e9tricas encontradas.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 }

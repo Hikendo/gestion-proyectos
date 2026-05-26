@@ -8,10 +8,20 @@ use App\Enums\ProjectStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 
 class Project extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, Searchable;
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'name'        => $this->name,
+            'code'        => $this->code,
+            'description' => $this->description,
+        ];
+    }
 
     protected $fillable = [
         'name',

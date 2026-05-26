@@ -45,7 +45,7 @@ class TicketTest extends TestCase
                 'subject'  => 'Bug en login',
                 'priority' => 'high',
             ])->assertCreated()
-            ->assertJsonPath('data.status', TicketStatus::Open->value);
+            ->assertJsonPath('items.status', TicketStatus::Open->value);
     }
 
     public function test_client_can_create_ticket(): void
@@ -68,7 +68,7 @@ class TicketTest extends TestCase
             ->putJson("/api/v1/projects/{$this->project->id}/tickets/{$ticket->id}", [
                 'assigned_to' => $this->developer->id,
             ])->assertOk()
-            ->assertJsonPath('data.assignee.id', $this->developer->id);
+            ->assertJsonPath('items.assignee.id', $this->developer->id);
     }
 
     public function test_closed_ticket_cannot_be_updated(): void

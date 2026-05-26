@@ -24,16 +24,24 @@ class BlockerController extends Controller
     {
         $this->authorize('view', $project);
 
-        return BlockerResource::collection(
-            $project->blockers()
+        try {
+            $items = $project->blockers()
                 ->with('task:id,title')
                 ->when(
                     ! $request->boolean('include_resolved'),
                     fn($q) => $q->where('resolved', false)
                 )
                 ->latest()
-                ->get()
-        )->response();
+                ->get();
+
+            return response()->json([
+                'status'  => true,
+                'items'   => $items,
+                'message' => 'Blockers encontrados.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -43,11 +51,17 @@ class BlockerController extends Controller
     {
         $this->authorize('view', $project);
 
-        $blocker = $project->blockers()->create($request->validated());
+        try {
+            $item = $project->blockers()->create($request->validated());
 
-        return BlockerResource::make($blocker)
-            ->response()
-            ->setStatusCode(201);
+            return response()->json([
+                'status'  => true,
+                'items'   => $item,
+                'message' => 'Blocker creado.',
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -58,9 +72,17 @@ class BlockerController extends Controller
         $this->assertBelongsToProject($blocker, $project->id);
         $this->authorize('update', $blocker);
 
-        $blocker->update($request->validated());
+        try {
+            $blocker->update($request->validated());
 
-        return BlockerResource::make($blocker)->response();
+            return response()->json([
+                'status'  => true,
+                'items'   => $blocker,
+                'message' => 'Blocker actualizado.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -70,17 +92,25 @@ class BlockerController extends Controller
     {
         // Chequear con el mismo campo que usa la policy ($blocker->resolved)
         if ($blocker->resolved) {
-            return response()->json(['message' => 'El blocker ya fue resuelto.'], 422);
+            return response()->json(['status' => false, 'items' => null, 'message' => 'El blocker ya fue resuelto.'], 422);
         }
 
         $this->authorize('resolve', $blocker);
 
-        $blocker->update([
-            'resolved'    => true,        // ← campo que usa la policy y el test
-            'resolved_at' => now(),       // ← campo de auditoría
-            'resolved_by' => $request->user()->id,
-        ]);
+        try {
+            $blocker->update([
+                'resolved'    => true,
+                'resolved_at' => now(),
+                'resolved_by' => $request->user()->id,
+            ]);
 
-        return response()->json(['data' => $blocker]);
+            return response()->json([
+                'status'  => true,
+                'items'   => $blocker,
+                'message' => 'Blocker resuelto.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 }

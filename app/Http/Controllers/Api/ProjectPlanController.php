@@ -17,7 +17,17 @@ class ProjectPlanController extends Controller
     {
         $this->authorize('view', $project);
 
-        return response()->json($project->plans()->latest()->first());
+        try {
+            $item = $project->plans()->latest()->first();
+
+            return response()->json([
+                'status'  => true,
+                'items'   => $item,
+                'message' => 'Plan encontrado.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -27,11 +37,19 @@ class ProjectPlanController extends Controller
     {
         $this->authorize('update', $project);
 
-        $plan = $project->plans()->updateOrCreate(
-            ['project_id' => $project->id],
-            $request->validated()
-        );
+        try {
+            $item = $project->plans()->updateOrCreate(
+                ['project_id' => $project->id],
+                $request->validated()
+            );
 
-        return response()->json($plan, 201);
+            return response()->json([
+                'status'  => true,
+                'items'   => $item,
+                'message' => 'Plan guardado.',
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 }

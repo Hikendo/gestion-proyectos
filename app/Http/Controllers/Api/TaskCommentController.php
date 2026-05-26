@@ -16,9 +16,17 @@ class TaskCommentController extends Controller
      */
     public function index(Task $task): JsonResponse
     {
-        return TaskCommentResource::collection(
-            $task->comments()->with('user:id,name,email')->latest()->get()
-        )->response();
+        try {
+            $items = $task->comments()->with('user:id,name,email')->latest()->get();
+
+            return response()->json([
+                'status'  => true,
+                'items'   => $items,
+                'message' => 'Comentarios encontrados.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -26,14 +34,20 @@ class TaskCommentController extends Controller
      */
     public function store(StoreTaskCommentRequest $request, Task $task): JsonResponse
     {
-        $comment = $task->comments()->create([
-            'user_id' => $request->user()->id,
-            'comment' => $request->validated('comment'),
-        ]);
+        try {
+            $item = $task->comments()->create([
+                'user_id' => $request->user()->id,
+                'comment' => $request->validated('comment'),
+            ]);
 
-        return TaskCommentResource::make($comment->load('user:id,name,email'))
-            ->response()
-            ->setStatusCode(201);
+            return response()->json([
+                'status'  => true,
+                'items'   => $item->load('user:id,name,email'),
+                'message' => 'Comentario creado.',
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -49,8 +63,12 @@ class TaskCommentController extends Controller
             403
         );
 
-        $comment->delete();
+        try {
+            $comment->delete();
 
-        return response()->json(['message' => 'Comentario eliminado.']);
+            return response()->json(['status' => true, 'items' => null, 'message' => 'Comentario eliminado.']);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 }

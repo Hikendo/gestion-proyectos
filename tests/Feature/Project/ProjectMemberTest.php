@@ -36,7 +36,7 @@ class ProjectMemberTest extends TestCase
                 'user_id' => $this->developer->id,
                 'role'    => 'developer',
             ])->assertCreated()
-            ->assertJsonPath('data.role', 'developer');
+            ->assertJsonPath('items.role', 'developer');
     }
 
     public function test_cannot_add_duplicate_member(): void

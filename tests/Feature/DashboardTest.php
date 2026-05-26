@@ -27,10 +27,14 @@ class DashboardTest extends TestCase
             ->getJson('/api/v1/dashboard')
             ->assertOk()
             ->assertJsonStructure([
-                'summary' => ['total_projects', 'my_pending_tasks', 'open_tickets'],
-                'projects',
-                'my_tasks',
-                'open_tickets',
+                'status',
+                'items' => [
+                    'summary' => ['total_projects', 'my_pending_tasks', 'open_tickets'],
+                    'projects',
+                    'my_tasks',
+                    'open_tickets',
+                ],
+                'message',
             ]);
     }
 
@@ -46,7 +50,7 @@ class DashboardTest extends TestCase
             ->getJson('/api/v1/dashboard')
             ->assertOk();
 
-        $this->assertEquals(1, $response->json('summary.total_projects'));
+        $this->assertEquals(1, $response->json('items.summary.total_projects'));
     }
 
     public function test_dashboard_summary_counts_pending_tasks(): void
@@ -73,7 +77,7 @@ class DashboardTest extends TestCase
             ->getJson('/api/v1/dashboard')
             ->assertOk();
 
-        $this->assertEquals(3, $response->json('summary.my_pending_tasks'));
+        $this->assertEquals(3, $response->json('items.summary.my_pending_tasks'));
     }
 
     public function test_member_project_appears_in_dashboard(): void
@@ -88,7 +92,7 @@ class DashboardTest extends TestCase
             ->getJson('/api/v1/dashboard')
             ->assertOk();
 
-        $ids = collect($response->json('projects'))->pluck('id');
+        $ids = collect($response->json('items.projects'))->pluck('id');
         $this->assertTrue($ids->contains($project->id));
     }
 

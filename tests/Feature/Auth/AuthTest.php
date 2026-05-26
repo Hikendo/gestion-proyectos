@@ -24,7 +24,7 @@ class AuthTest extends TestCase
             'email'    => $user->email,
             'password' => 'password',
         ])->assertOk()
-            ->assertJsonStructure(['token', 'user']);
+            ->assertJsonStructure(['status', 'items' => ['token', 'user'], 'message']);
     }
 
     public function test_authenticated_user_can_get_own_profile(): void
@@ -32,7 +32,7 @@ class AuthTest extends TestCase
         $this->actingAsUser('developer')
             ->getJson('/api/v1/auth/me')
             ->assertOk()
-            ->assertJsonStructure(['id', 'name', 'email', 'roles']);
+            ->assertJsonStructure(['status', 'items' => ['id', 'name', 'email', 'roles'], 'message']);
     }
 
     public function test_unauthenticated_user_cannot_access_me(): void
@@ -56,7 +56,6 @@ class AuthTest extends TestCase
                 'email'                 => 'nuevo@test.com',
                 'password'              => 'password',
                 'password_confirmation' => 'password',
-                'role'                  => 'developer',
             ])->assertCreated();
     }
 
@@ -68,7 +67,6 @@ class AuthTest extends TestCase
                 'email'                 => 'nuevo@test.com',
                 'password'              => 'password',
                 'password_confirmation' => 'password',
-                'role'                  => 'developer',
             ])->assertForbidden();
     }
 }

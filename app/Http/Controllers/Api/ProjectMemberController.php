@@ -22,9 +22,17 @@ class ProjectMemberController extends Controller
     {
         $this->authorize('view', $project);
 
-        return ProjectMemberResource::collection(
-            $project->members()->with('user:id,name,email')->get()
-        )->response();
+        try {
+            $items = $project->members()->with('user:id,name,email')->get();
+
+            return response()->json([
+                'status'  => true,
+                'items'   => $items,
+                'message' => 'Miembros encontrados.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -34,15 +42,23 @@ class ProjectMemberController extends Controller
     {
         $this->authorize('assignMembers', $project);
 
-        $member = $this->service->addMember(
-            $project,
-            $request->validated('user_id'),
-            $request->validated('role')
-        );
+        try {
+            $item = $this->service->addMember(
+                $project,
+                $request->validated('user_id'),
+                $request->validated('role')
+            );
 
-        return ProjectMemberResource::make($member->load('user:id,name,email'))
-            ->response()
-            ->setStatusCode(201);
+            return response()->json([
+                'status'  => true,
+                'items'   => $item->load('user:id,name,email'),
+                'message' => 'Miembro agregado.',
+            ], 201);
+        } catch (\App\Exceptions\DomainException $e) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $e->getMessage()], $e->getStatusCode());
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -52,8 +68,14 @@ class ProjectMemberController extends Controller
     {
         $this->authorize('assignMembers', $project);
 
-        $this->service->removeMember($project, $userId);
+        try {
+            $this->service->removeMember($project, $userId);
 
-        return response()->json(['message' => 'Miembro removido.']);
+            return response()->json(['status' => true, 'items' => null, 'message' => 'Miembro removido.']);
+        } catch (\App\Exceptions\DomainException $e) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $e->getMessage()], $e->getStatusCode());
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 }

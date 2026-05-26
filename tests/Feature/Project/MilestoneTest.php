@@ -32,7 +32,7 @@ class MilestoneTest extends TestCase
                 'title'       => 'MVP',
                 'target_date' => '2025-06-01',
             ])->assertCreated()
-            ->assertJsonPath('data.title', 'MVP');
+            ->assertJsonPath('items.title', 'MVP');
     }
 
     public function test_pm_can_complete_milestone(): void
@@ -46,7 +46,7 @@ class MilestoneTest extends TestCase
             ->putJson("/api/v1/projects/{$this->project->id}/milestones/{$milestone->id}", [
                 'completed' => true,
             ])->assertOk()
-            ->assertJsonPath('data.completed', true);
+            ->assertJsonPath('items.completed', true);
     }
 
     public function test_completed_milestone_cannot_be_deleted(): void

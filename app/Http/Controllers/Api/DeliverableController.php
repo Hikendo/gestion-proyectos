@@ -24,9 +24,17 @@ class DeliverableController extends Controller
     {
         $this->authorize('view', $project);
 
-        return DeliverableResource::collection(
-            $project->deliverables()->orderBy('delivery_date')->get()
-        )->response();
+        try {
+            $items = $project->deliverables()->orderBy('delivery_date')->get();
+
+            return response()->json([
+                'status'  => true,
+                'items'   => $items,
+                'message' => 'Entregables encontrados.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -36,11 +44,17 @@ class DeliverableController extends Controller
     {
         $this->authorize('view', $project);
 
-        $deliverable = $project->deliverables()->create($request->validated());
+        try {
+            $item = $project->deliverables()->create($request->validated());
 
-        return DeliverableResource::make($deliverable)
-            ->response()
-            ->setStatusCode(201);
+            return response()->json([
+                'status'  => true,
+                'items'   => $item,
+                'message' => 'Entregable creado.',
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -50,15 +64,23 @@ class DeliverableController extends Controller
     {
         $this->assertBelongsToProject($deliverable, $project->id);
 
-        if ($deliverable->approved) {                    // ← mover ANTES del authorize
+        if ($deliverable->approved) {
             throw DeliverableException::alreadyApproved();
         }
 
         $this->authorize('update', $deliverable);
 
-        $deliverable->update($request->validated());
+        try {
+            $deliverable->update($request->validated());
 
-        return DeliverableResource::make($deliverable)->response();
+            return response()->json([
+                'status'  => true,
+                'items'   => $deliverable,
+                'message' => 'Entregable actualizado.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -68,14 +90,22 @@ class DeliverableController extends Controller
     {
         $this->assertBelongsToProject($deliverable, $project->id);
 
-        if ($deliverable->approved) {                    // ← mover ANTES del authorize
+        if ($deliverable->approved) {
             throw DeliverableException::alreadyApproved();
         }
 
         $this->authorize('approve', $deliverable);
 
-        $deliverable->update(['approved' => true]);
+        try {
+            $deliverable->update(['approved' => true]);
 
-        return response()->json(['message' => 'Entregable aprobado.']);
+            return response()->json([
+                'status'  => true,
+                'items'   => $deliverable,
+                'message' => 'Entregable aprobado.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 }

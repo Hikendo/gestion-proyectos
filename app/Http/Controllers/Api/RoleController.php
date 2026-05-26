@@ -14,14 +14,22 @@ class RoleController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        try {
             abort_if($request->user() === null, 403);
 
-            $roles = collect(ProjectMemberRole::cases())->map(fn (ProjectMemberRole $role) => [
+            $items = collect(ProjectMemberRole::cases())->map(fn (ProjectMemberRole $role) => [
                 'name'        => $role->value,
                 'label'       => $role->label(),
                 'permissions' => $role->permissions(),
             ]);
 
-        return response()->json($roles);
+            return response()->json([
+                'status'  => true,
+                'items'   => $items,
+                'message' => 'Roles encontrados.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 }

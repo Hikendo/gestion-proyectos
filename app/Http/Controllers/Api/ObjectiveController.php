@@ -23,9 +23,17 @@ class ObjectiveController extends Controller
     {
         $this->authorize('view', $project);
 
-        return ObjectiveResource::collection(
-            $project->objectives()->orderBy('type')->get()
-        )->response();
+        try {
+            $items = $project->objectives()->orderBy('type')->get();
+
+            return response()->json([
+                'status'  => true,
+                'items'   => $items,
+                'message' => 'Objetivos encontrados.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -35,11 +43,17 @@ class ObjectiveController extends Controller
     {
         $this->authorize('view', $project);
 
-        $objective = $project->objectives()->create($request->validated());
+        try {
+            $item = $project->objectives()->create($request->validated());
 
-        return ObjectiveResource::make($objective)
-            ->response()
-            ->setStatusCode(201);
+            return response()->json([
+                'status'  => true,
+                'items'   => $item,
+                'message' => 'Objetivo creado.',
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -50,8 +64,16 @@ class ObjectiveController extends Controller
         $this->assertBelongsToProject($objective, $project->id);
         $this->authorize('update', $objective);
 
-        $objective->update($request->validated());
+        try {
+            $objective->update($request->validated());
 
-        return ObjectiveResource::make($objective)->response();
+            return response()->json([
+                'status'  => true,
+                'items'   => $objective,
+                'message' => 'Objetivo actualizado.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 }

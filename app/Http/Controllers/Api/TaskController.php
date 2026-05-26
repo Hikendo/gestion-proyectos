@@ -31,15 +31,26 @@ class TaskController extends Controller
     {
         $this->authorize('view', $project);
 
-        $tasks = $project->tasks()
-            ->with(['assignee:id,name,email', 'phase:id,name'])
-            ->when($request->status,      fn($q, $s) => $q->where('status', $s))
-            ->when($request->assigned_to, fn($q, $u) => $q->where('assigned_to', $u))
-            ->when($request->priority,    fn($q, $p) => $q->where('priority', $p))
-            ->orderBy('due_date')
-            ->paginate(20);
+        try {
+            $items = Task::search($request->string('search', ''))
+                ->query(fn($q) => $q
+                    ->where('project_id', $project->id)
+                    ->with(['assignee:id,name,email', 'phase:id,name'])
+                    ->when($request->status,      fn($q, $s) => $q->where('status', $s))
+                    ->when($request->assigned_to, fn($q, $u) => $q->where('assigned_to', $u))
+                    ->when($request->priority,    fn($q, $p) => $q->where('priority', $p))
+                    ->orderBy('due_date')
+                )
+                ->paginate(20);
 
-        return TaskResource::collection($tasks)->response();
+            return response()->json([
+                'status'  => true,
+                'items'   => $items,
+                'message' => 'Tareas encontradas.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -49,11 +60,17 @@ class TaskController extends Controller
     {
         $this->authorize('view', $project);
 
-        $task = $this->service->create($request->validated(), $project, $request->user());
+        try {
+            $item = $this->service->create($request->validated(), $project, $request->user());
 
-        return TaskResource::make($task->load('assignee:id,name,email'))
-            ->response()
-            ->setStatusCode(201);
+            return response()->json([
+                'status'  => true,
+                'items'   => $item->load('assignee:id,name,email'),
+                'message' => 'Tarea creada.',
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -64,16 +81,24 @@ class TaskController extends Controller
         $this->assertBelongsToProject($task, $project->id);
         $this->authorize('view', $task);
 
-        $task->load([
-            'assignee:id,name,email',
-            'creator:id,name,email',
-            'phase:id,name',
-            'comments.user:id,name,email',
-            'timeLogs.user:id,name,email',
-            'blockers',
-        ]);
+        try {
+            $task->load([
+                'assignee:id,name,email',
+                'creator:id,name,email',
+                'phase:id,name',
+                'comments.user:id,name,email',
+                'timeLogs.user:id,name,email',
+                'blockers',
+            ]);
 
-        return TaskResource::make($task)->response();
+            return response()->json([
+                'status'  => true,
+                'items'   => $task,
+                'message' => 'Tarea encontrada.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -84,27 +109,37 @@ class TaskController extends Controller
         $this->assertBelongsToProject($task, $project->id);
         $this->authorize('update', $task);
 
-        $data = $request->validated();
+        try {
+            $data = $request->validated();
 
-        if (isset($data['status'])) {
-            $this->authorize('updateStatus', $task);
-            $this->service->changeStatus(
-                $task,
-                TaskStatus::from($data['status']),
-                $request->user()
-            );
-            unset($data['status']);
+            if (isset($data['status'])) {
+                $this->authorize('updateStatus', $task);
+                $this->service->changeStatus(
+                    $task,
+                    TaskStatus::from($data['status']),
+                    $request->user()
+                );
+                unset($data['status']);
+            }
+
+            if (isset($data['assigned_to'])) {
+                $this->authorize('assign', $task);
+            }
+
+            if (! empty($data)) {
+                $task->update($data);
+            }
+
+            return response()->json([
+                'status'  => true,
+                'items'   => $task->load('assignee:id,name,email'),
+                'message' => 'Tarea actualizada.',
+            ]);
+        } catch (\App\Exceptions\DomainException $e) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $e->getMessage()], $e->getStatusCode());
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
         }
-
-        if (isset($data['assigned_to'])) {
-            $this->authorize('assign', $task);
-        }
-
-        if (! empty($data)) {
-            $task->update($data);
-        }
-
-        return TaskResource::make($task->load('assignee:id,name,email'))->response();
     }
 
     /**
@@ -115,8 +150,12 @@ class TaskController extends Controller
         $this->assertBelongsToProject($task, $project->id);
         $this->authorize('delete', $task);
 
-        $task->delete();
+        try {
+            $task->delete();
 
-        return response()->json(['message' => 'Tarea eliminada.']);
+            return response()->json(['status' => true, 'items' => null, 'message' => 'Tarea eliminada.']);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 }

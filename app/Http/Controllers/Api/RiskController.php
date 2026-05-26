@@ -23,9 +23,17 @@ class RiskController extends Controller
     {
         $this->authorize('view', $project);
 
-        return RiskResource::collection(
-            $project->risks()->latest()->get()
-        )->response();
+        try {
+            $items = $project->risks()->latest()->get();
+
+            return response()->json([
+                'status'  => true,
+                'items'   => $items,
+                'message' => 'Riesgos encontrados.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -35,11 +43,17 @@ class RiskController extends Controller
     {
         $this->authorize('view', $project);
 
-        $risk = $project->risks()->create($request->validated());
+        try {
+            $item = $project->risks()->create($request->validated());
 
-        return RiskResource::make($risk)
-            ->response()
-            ->setStatusCode(201);
+            return response()->json([
+                'status'  => true,
+                'items'   => $item,
+                'message' => 'Riesgo creado.',
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -50,9 +64,17 @@ class RiskController extends Controller
         $this->assertBelongsToProject($risk, $project->id);
         $this->authorize('update', $risk);
 
-        $risk->update($request->validated());
+        try {
+            $risk->update($request->validated());
 
-        return RiskResource::make($risk)->response();
+            return response()->json([
+                'status'  => true,
+                'items'   => $risk,
+                'message' => 'Riesgo actualizado.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**
@@ -63,8 +85,12 @@ class RiskController extends Controller
         $this->assertBelongsToProject($risk, $project->id);
         $this->authorize('delete', $risk);
 
-        $risk->delete();
+        try {
+            $risk->delete();
 
-        return response()->json(['message' => 'Riesgo eliminado.']);
+            return response()->json(['status' => true, 'items' => null, 'message' => 'Riesgo eliminado.']);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 }

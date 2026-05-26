@@ -10,55 +10,30 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $users = [
+        // Super Admin — único rol global
+        $admin = User::firstOrCreate(
+            ['email' => 'superadmin@test.com'],
             [
                 'name'     => 'Super Admin',
-                'email'    => 'superadmin@test.com',
                 'password' => Hash::make('password'),
-                'role'     => 'super-admin',
-            ],
-            [
-                'name'     => 'Project Manager',
-                'email'    => 'pm@test.com',
-                'password' => Hash::make('password'),
-                'role'     => 'project-manager',
-            ],
-            [
-                'name'     => 'Developer',
-                'email'    => 'dev@test.com',
-                'password' => Hash::make('password'),
-                'role'     => 'developer',
-            ],
-            [
-                'name'     => 'QA Engineer',
-                'email'    => 'qa@test.com',
-                'password' => Hash::make('password'),
-                'role'     => 'qa',
-            ],
-            [
-                'name'     => 'Support',
-                'email'    => 'support@test.com',
-                'password' => Hash::make('password'),
-                'role'     => 'support',
-            ],
-            [
-                'name'     => 'Client',
-                'email'    => 'client@test.com',
-                'password' => Hash::make('password'),
-                'role'     => 'client',
-            ],
+            ]
+        );
+        $admin->assignRole('super-admin');
+
+        // Usuarios regulares sin rol global (los roles se asignan por proyecto)
+        $regularUsers = [
+            ['name' => 'Project Manager', 'email' => 'pm@test.com'],
+            ['name' => 'Developer',        'email' => 'dev@test.com'],
+            ['name' => 'QA Engineer',      'email' => 'qa@test.com'],
+            ['name' => 'Support',          'email' => 'support@test.com'],
+            ['name' => 'Client',           'email' => 'client@test.com'],
         ];
 
-        foreach ($users as $data) {
-            $role = $data['role'];
-            unset($data['role']);
-
-            $user = User::firstOrCreate(
+        foreach ($regularUsers as $data) {
+            User::firstOrCreate(
                 ['email' => $data['email']],
-                $data
+                array_merge($data, ['password' => Hash::make('password')])
             );
-
-            $user->assignRole($role);
         }
 
         $this->command->info('Usuarios de prueba creados correctamente.');

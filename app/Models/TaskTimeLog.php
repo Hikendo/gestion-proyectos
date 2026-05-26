@@ -18,6 +18,13 @@ class TaskTimeLog extends Model
         'description',
     ];
 
+    protected $appends = ['hours'];
+
+    public function getHoursAttribute(): float
+    {
+        return round($this->minutes / 60, 1);
+    }
+
     public function task()
     {
         return $this->belongsTo(Task::class);

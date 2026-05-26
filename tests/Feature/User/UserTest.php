@@ -26,7 +26,7 @@ class UserTest extends TestCase
         $this->actingAs($admin)
             ->getJson('/api/v1/users')
             ->assertOk()
-            ->assertJsonStructure(['data', 'meta']);
+            ->assertJsonStructure(['status', 'items', 'message']);
     }
 
     public function test_developer_cannot_list_users(): void
@@ -46,9 +46,8 @@ class UserTest extends TestCase
                 'email'                 => 'juan@test.com',
                 'password'              => 'password',
                 'password_confirmation' => 'password',
-                'role'                  => 'developer',
             ])->assertCreated()
-            ->assertJsonPath('data.email', 'juan@test.com');
+            ->assertJsonPath('items.email', 'juan@test.com');
     }
 
     public function test_create_user_requires_unique_email(): void
@@ -61,7 +60,6 @@ class UserTest extends TestCase
                 'email'                 => 'taken@test.com',
                 'password'              => 'password',
                 'password_confirmation' => 'password',
-                'role'                  => 'developer',
             ])->assertUnprocessable()
             ->assertJsonValidationErrors(['email']);
     }
@@ -75,7 +73,7 @@ class UserTest extends TestCase
         $this->actingAs($user)
             ->getJson("/api/v1/users/{$user->id}")
             ->assertOk()
-            ->assertJsonPath('data.id', $user->id);
+            ->assertJsonPath('items.id', $user->id);
     }
 
     public function test_user_cannot_view_other_profiles(): void
@@ -97,19 +95,29 @@ class UserTest extends TestCase
         $this->actingAs($user)
             ->putJson("/api/v1/users/{$user->id}", ['name' => 'Nuevo Nombre'])
             ->assertOk()
-            ->assertJsonPath('data.name', 'Nuevo Nombre');
+            ->assertJsonPath('items.name', 'Nuevo Nombre');
     }
 
-    public function test_only_admin_can_change_roles(): void
+    public function test_admin_can_promote_user_to_super_admin(): void
     {
         $admin = $this->createUser('super-admin');
-        $user  = $this->createUser('developer');
+        $user  = User::factory()->create();
 
         $this->actingAs($admin)
-            ->putJson("/api/v1/users/{$user->id}", ['role' => 'qa'])
+            ->putJson("/api/v1/users/{$user->id}", ['role' => 'super-admin'])
             ->assertOk();
 
-        $this->assertTrue($user->fresh()->hasRole('qa'));
+        $this->assertTrue($user->fresh()->hasRole('super-admin'));
+    }
+
+    public function test_non_admin_cannot_change_roles(): void
+    {
+        $user  = User::factory()->create();
+        $other = User::factory()->create();
+
+        $this->actingAs($user)
+            ->putJson("/api/v1/users/{$other->id}", ['role' => 'super-admin'])
+            ->assertForbidden();
     }
 
     // ── DESTROY ──────────────────────────────────────────────────────
@@ -144,11 +152,11 @@ class UserTest extends TestCase
         $this->actingAs($user)
             ->getJson("/api/v1/users/{$user->id}/metrics")
             ->assertOk()
-            ->assertJsonStructure(['data' => [
+            ->assertJsonStructure(['status', 'items' => [
                 'assigned_tasks',
                 'completed_tasks',
                 'worked_hours',
                 'performance_score',
-            ]]);
+            ], 'message']);
     }
 }

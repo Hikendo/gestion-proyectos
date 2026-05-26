@@ -13,7 +13,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Arr;
 
 use Laravel\Sanctum\HasApiTokens;
-
+use Laravel\Scout\Searchable;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
@@ -22,6 +22,15 @@ class User extends Authenticatable
     use HasFactory;
     use Notifiable;
     use HasRoles;
+    use Searchable;
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'name'  => $this->name,
+            'email' => $this->email,
+        ];
+    }
 
     /**
      * ----------------------------------------------------------------
@@ -198,26 +207,6 @@ class User extends Authenticatable
     public function isSuperAdmin(): bool
     {
         return $this->hasRole('super-admin');
-    }
-
-    public function isProjectManager(): bool
-    {
-        return $this->hasRole('project-manager');
-    }
-
-    public function isDeveloper(): bool
-    {
-        return $this->hasRole('developer');
-    }
-
-    public function isQa(): bool
-    {
-        return $this->hasRole('qa');
-    }
-
-    public function isClient(): bool
-    {
-        return $this->hasRole('client');
     }
 
     public function projectMembershipRole(Project $project): ?string

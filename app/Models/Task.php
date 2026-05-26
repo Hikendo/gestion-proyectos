@@ -7,10 +7,19 @@ namespace App\Models;
 use App\Enums\TaskStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Laravel\Scout\Searchable;
 
 class Task extends Model
 {
-    use HasFactory;
+    use HasFactory, Searchable;
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'title'       => $this->title,
+            'description' => $this->description,
+        ];
+    }
 
     protected $fillable = [
         'project_id',
