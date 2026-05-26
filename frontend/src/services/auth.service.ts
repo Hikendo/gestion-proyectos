@@ -1,124 +1,106 @@
 import { AxiosError } from "axios";
-import { apiWithToken } from "@/services/http";
+import { apiWithToken, clearAuthToken, setAuthToken } from "@/services/http";
+import { ResponseBaseI } from "@/interfaces/ResponseBaseI";
+import { UserI } from "@/interfaces/UserI";
 
-import {
-  LoginResponse,
-  MeResponse,
-  RegisterResponse,
-  UserPayload,
-} from "./types";
+// ─── Login ───────────────────────────────────────────────────────────────────
 
-import {
-  clearAuthToken,
-  setAuthToken,
-} from "./http";
+interface LoginItemsI {
+  token: string;
+  user: UserI;
+}
 
+interface LoginResponseI extends ResponseBaseI {
+  items: LoginItemsI;
+}
 
 export interface LoginPayload {
   email: string;
   password: string;
 }
 
-export interface RegisterPayload extends UserPayload {
-  name: string;
-  email: string;
-  password: string;
-  password_confirmation: string;
-  role: string;
-}
-
-/**
- * LOGIN
- */
 export const login = async (payload: LoginPayload) => {
   try {
-    const { data } = await apiWithToken.post<LoginResponse>(
-      `/auth/login`,
-      payload
-    );
-
-    setAuthToken(data.token);
-
+    const { data } = await apiWithToken.post<LoginResponseI>("/auth/login", payload);
+    setAuthToken(data.items.token);
     return {
       status: true,
-      message: "Login exitoso",
-      items: data,
+      message: data.message,
+      items: data.items,
     };
   } catch (error) {
     const err = error as AxiosError;
-
-    return {
-      status: false,
-      message: "Error en el servidor",
-    };
+    if (err?.response?.status === 422) {
+      return {
+        status: false,
+        message: "Credenciales incorrectas",
+        errors: err.response.data,
+      };
+    }
+    return { status: false, message: "Error en el servidor" };
   }
 };
 
-/**
- * ME
- */
+// ─── Me ──────────────────────────────────────────────────────────────────────
+
+interface MeResponseI extends ResponseBaseI {
+  items: UserI;
+}
+
 export const me = async () => {
   try {
-    const { data } = await apiWithToken.get<MeResponse>(
-      `/auth/me`
-    );
-
+    const { data } = await apiWithToken.get<MeResponseI>("/auth/me");
     return {
       status: true,
-      message: "OK",
-      items: data,
+      message: data.message,
+      items: data.items,
     };
   } catch (error) {
-    return {
-      status: false,
-      message: "Error en el servidor",
-    };
+    return { status: false, message: "Error en el servidor" };
   }
 };
 
-/**
- * LOGOUT
- */
+// ─── Logout ───────────────────────────────────────────────────────────────────
+
 export const logout = async () => {
   try {
-    const { data } = await apiWithToken.post<{ message: string }>(
-      `/auth/logout`
-    );
-
+    const { data } = await apiWithToken.post<ResponseBaseI>("/auth/logout");
     clearAuthToken();
-
     return {
       status: true,
       message: data.message,
     };
   } catch (error) {
     clearAuthToken();
-
-    return {
-      status: false,
-      message: "Error en el servidor",
-    };
+    return { status: false, message: "Error en el servidor" };
   }
 };
 
-/**
- * REGISTER
- */
+// ─── Register ─────────────────────────────────────────────────────────────────
+
+interface RegisterItemsI extends Pick<UserI, "id" | "name" | "email"> {}
+
+interface RegisterResponseI extends ResponseBaseI {
+  items: RegisterItemsI;
+}
+
+export interface RegisterPayload {
+  name: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+}
+
 export const register = async (payload: RegisterPayload) => {
   try {
-    const { data } = await apiWithToken.post<RegisterResponse>(
-      `/auth/register`,
-      payload
-    );
-
+    const { data } = await apiWithToken.post<RegisterResponseI>("/auth/register", payload);
     return {
       status: true,
-      message: "Usuario registrado correctamente",
-      items: data,
+      message: data.message,
+      items: data.items,
     };
   } catch (error) {
     const err = error as AxiosError;
-
     if (err?.response?.status === 422) {
       return {
         status: false,
@@ -126,10 +108,6 @@ export const register = async (payload: RegisterPayload) => {
         errors: err.response.data,
       };
     }
-
-    return {
-      status: false,
-      message: "Error en el servidor",
-    };
+    return { status: false, message: "Error en el servidor" };
   }
 };

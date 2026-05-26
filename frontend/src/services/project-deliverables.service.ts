@@ -1,34 +1,98 @@
-import type {
-    CollectionResponse,
-    DeliverableItem,
-    DeliverablePayload,
-    MessageResponse,
-    ResourceResponse,
-} from './types';
-import { requestJson } from './http';
+import { AxiosError } from "axios";
+import { apiWithToken } from "@/services/http";
+import { ResponseBaseI } from "@/interfaces/ResponseBaseI";
+import { DeliverableI } from "@/interfaces/DeliverableI";
+import type { DeliverablePayload } from "./types";
 
-export const projectDeliverablesService = {
-    list(projectId: number): Promise<CollectionResponse<DeliverableItem>> {
-        return requestJson<CollectionResponse<DeliverableItem>>(`/projects/${projectId}/deliverables`);
-    },
+// ─── Index ────────────────────────────────────────────────────────────────────
 
-    create(projectId: number, payload: DeliverablePayload): Promise<ResourceResponse<DeliverableItem>> {
-        return requestJson<ResourceResponse<DeliverableItem>>(`/projects/${projectId}/deliverables`, {
-            method: 'POST',
-            body: payload,
-        });
-    },
+interface DeliverablesResponseI extends ResponseBaseI {
+  items: DeliverableI[];
+}
 
-    update(projectId: number, deliverableId: number, payload: DeliverablePayload): Promise<ResourceResponse<DeliverableItem>> {
-        return requestJson<ResourceResponse<DeliverableItem>>(`/projects/${projectId}/deliverables/${deliverableId}`, {
-            method: 'PUT',
-            body: payload,
-        });
-    },
+export const index = async (projectId: number) => {
+  try {
+    const { data } = await apiWithToken.get<DeliverablesResponseI>(`/projects/${projectId}/deliverables`);
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    return { status: false, message: "Error en el servidor" };
+  }
+};
 
-    approve(projectId: number, deliverableId: number): Promise<MessageResponse> {
-        return requestJson<MessageResponse>(`/projects/${projectId}/deliverables/${deliverableId}/approve`, {
-            method: 'PATCH',
-        });
-    },
+// ─── Store ────────────────────────────────────────────────────────────────────
+
+interface DeliverableResponseI extends ResponseBaseI {
+  items: DeliverableI;
+}
+
+export const store = async (projectId: number, payload: DeliverablePayload) => {
+  try {
+    const { data } = await apiWithToken.post<DeliverableResponseI>(`/projects/${projectId}/deliverables`, payload);
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    const err = error as AxiosError;
+    if (err?.response?.status === 422) {
+      return {
+        status: false,
+        message: "Llena correctamente el formulario",
+        errors: (err.response.data as any)?.errors,
+      };
+    }
+    return { status: false, message: "Error en el servidor" };
+  }
+};
+
+// ─── Update ───────────────────────────────────────────────────────────────────
+
+export const update = async (projectId: number, deliverableId: number, payload: DeliverablePayload) => {
+  try {
+    const { data } = await apiWithToken.put<DeliverableResponseI>(`/projects/${projectId}/deliverables/${deliverableId}`, payload);
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    const err = error as AxiosError;
+    if (err?.response?.status === 422) {
+      return {
+        status: false,
+        message: "Llena correctamente el formulario",
+        errors: (err.response.data as any)?.errors,
+      };
+    }
+    return { status: false, message: "Error en el servidor" };
+  }
+};
+
+// ─── Approve ──────────────────────────────────────────────────────────────────
+
+export const approve = async (projectId: number, deliverableId: number) => {
+  try {
+    const { data } = await apiWithToken.patch<DeliverableResponseI>(
+      `/projects/${projectId}/deliverables/${deliverableId}/approve`
+    );
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    const err = error as AxiosError;
+    if (err?.response?.status === 422) {
+      return {
+        status: false,
+        message: (err.response.data as any)?.message || "No se puede aprobar este entregable",
+      };
+    }
+    return { status: false, message: "Error en el servidor" };
+  }
 };

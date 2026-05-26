@@ -95,12 +95,12 @@ export function useUsers() {
     }
 
     function mapBackendErrors(): void {
-        const backendErrors = usersService.validationErrors;
-        errores.name = backendErrors.name || [];
-        errores.email = backendErrors.email || [];
-        errores.password = backendErrors.password || [];
-        errores.password_confirmation = backendErrors.password_confirmation || [];
-        errores.role = backendErrors.role || [];
+        const backendErrors = usersService.validationErrors.value;
+        errores.name = backendErrors?.name || [];
+        errores.email = backendErrors?.email || [];
+        errores.password = backendErrors?.password || [];
+        errores.password_confirmation = backendErrors?.password_confirmation || [];
+        errores.role = backendErrors?.role || [];
     }
 
     async function handleCreate(): Promise<void> {
@@ -115,7 +115,7 @@ export function useUsers() {
 
         isLoading.value = true;
 
-        const response = await usersService.call('create', {
+        const response = await usersService.call('store', {
             name: form.name.trim(),
             email: form.email.trim(),
             password: form.password,
@@ -124,7 +124,7 @@ export function useUsers() {
         });
 
         if (response) {
-            successMessage.value = `Usuario creado con ID ${response.data.id}.`;
+            successMessage.value = `Usuario creado con ID ${response.items?.id}.`;
             resetForm();
         } else {
             mapBackendErrors();
@@ -179,7 +179,7 @@ export function useUsers() {
     async function handleDelete(userId: number): Promise<boolean> {
         isLoading.value = true;
 
-        const response = await usersService.call('remove', userId);
+        const response = await usersService.call('destroy', userId);
 
         isLoading.value = false;
 
@@ -193,13 +193,13 @@ export function useUsers() {
     async function loadUser(userId: number): Promise<void> {
         isLoading.value = true;
 
-        const response = await usersService.call('get', userId);
+        const response = await usersService.call('show', userId);
 
         if (response) {
-            form.id = response.data.id;
-            form.name = response.data.name || '';
-            form.email = response.data.email || '';
-            form.role = response.data.roles?.[0] || '';
+            form.id = response.items?.id;
+            form.name = response.items?.name || '';
+            form.email = response.items?.email || '';
+            form.role = response.items?.roles?.[0] || '';
             form.password = '';
             form.password_confirmation = '';
         }
@@ -208,7 +208,7 @@ export function useUsers() {
     }
 
     async function loadRoles(): Promise<void> {
-        await rolesService.call('list');
+        await rolesService.call('index');
     }
 
     return {

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProjectPhase\StoreProjectPhaseRequest;
 use App\Http\Requests\ProjectPhase\UpdateProjectPhaseRequest;
-use App\Http\Resources\ProjectPhaseResource;
 use App\Models\Project;
 use App\Models\ProjectPhase;
 use Illuminate\Http\JsonResponse;

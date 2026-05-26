@@ -14,12 +14,12 @@ export function useRolesList() {
     async function loadRoles(): Promise<boolean> {
         isLoading.value = true;
 
-        const response = await rolesService.call('list');
+        const response = await rolesService.call('index');
 
         isLoading.value = false;
 
         if (response) {
-            roles.value = Array.isArray(response) ? response : [];
+            roles.value = Array.isArray(response.items) ? response.items : [];
             return true;
         }
 

@@ -15,6 +15,7 @@ class Blocker extends Model
     protected $fillable = [
         'project_id',
         'task_id',
+        'created_by',
         'title',
         'description',
         'severity',
@@ -35,4 +36,10 @@ class Blocker extends Model
     {
         return $this->belongsTo(Task::class);
     }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }
+

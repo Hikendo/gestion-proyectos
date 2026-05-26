@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Risk\StoreRiskRequest;
 use App\Http\Requests\Risk\UpdateRiskRequest;
-use App\Http\Resources\RiskResource;
 use App\Models\Project;
 use App\Models\Risk;
 use App\Traits\BelongsToProject;

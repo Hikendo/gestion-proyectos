@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exceptions\BlockerException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Blocker\StoreBlockerRequest;
 use App\Http\Requests\Blocker\UpdateBlockerRequest;
-use App\Http\Resources\BlockerResource;
 use App\Models\Blocker;
 use App\Models\Project;
 use App\Traits\BelongsToProject;

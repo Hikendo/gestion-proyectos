@@ -14,7 +14,7 @@ export function createServiceComposable<TService extends ServiceMap, TField exte
             method: TKey,
             ...args: Parameters<TService[TKey]>
         ): Promise<Awaited<ReturnType<TService[TKey]>> | null> {
-            const handler = service[method] as (...innerArgs: Parameters<TService[TKey]>) => ReturnType<TService[TKey]>;
+            const handler = service[method] as unknown as (...innerArgs: Parameters<TService[TKey]>) => ReturnType<TService[TKey]>;
 
             return state.execute(() => handler(...args)) as Promise<Awaited<ReturnType<TService[TKey]>> | null>;
         }

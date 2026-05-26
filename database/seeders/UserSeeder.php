@@ -36,6 +36,12 @@ class UserSeeder extends Seeder
             );
         }
 
+        // Asignar rol global project-manager al PM de prueba
+        $pm = User::where('email', 'pm@test.com')->first();
+        if ($pm) {
+            $pm->syncRoles(['project-manager']);
+        }
+
         $this->command->info('Usuarios de prueba creados correctamente.');
     }
 }

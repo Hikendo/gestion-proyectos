@@ -1,3 +1,18 @@
+import axios from 'axios';
+
+export const apiWithToken = axios.create({
+    baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+    headers: { Accept: 'application/json' },
+});
+
+apiWithToken.interceptors.request.use((config) => {
+    const token = getAuthToken();
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
 export type QueryValue = string | number | boolean | null | undefined;
 export type QueryParams = Record<string, QueryValue>;
 export type FieldErrors<TField extends string = string> = Partial<Record<TField, string[]>>;

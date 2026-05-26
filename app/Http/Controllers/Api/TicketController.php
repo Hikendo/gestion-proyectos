@@ -6,7 +6,6 @@ use App\Exceptions\TicketException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Ticket\StoreTicketRequest;
 use App\Http\Requests\Ticket\UpdateTicketRequest;
-use App\Http\Resources\TicketResource;
 use App\Models\Project;
 use App\Models\Ticket;
 use App\Services\ProjectService;

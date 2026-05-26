@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
-use App\Http\Resources\UserMetricResource;
-use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Models\UserMetric;
 use Illuminate\Http\JsonResponse;
@@ -18,6 +16,23 @@ class UserController extends Controller
     /**
      * GET /api/users
      */
+    public function all(Request $request): JsonResponse
+    {
+        $this->authorize('viewAny', User::class);
+
+        try {
+            $items = User::orderBy('name')->get(['id', 'name', 'email']);
+
+            return response()->json([
+                'status'  => true,
+                'items'   => $items,
+                'message' => 'Usuarios encontrados.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
+    }
+
     public function index(Request $request): JsonResponse
     {
         $this->authorize('viewAny', User::class);
@@ -55,9 +70,13 @@ class UserController extends Controller
                 'password' => Hash::make($request->validated('password')),
             ]);
 
+            if ($role = $request->validated('role')) {
+                $item->assignRole($role);
+            }
+
             return response()->json([
                 'status'  => true,
-                'items'   => $item->load('roles:name'),
+                'items'   => array_merge($item->toArray(), ['roles' => $item->getRoleNames()]),
                 'message' => 'Usuario creado.',
             ], 201);
         } catch (\Throwable $th) {
@@ -73,11 +92,11 @@ class UserController extends Controller
         $this->authorize('view', $user);
 
         try {
-            $user->load(['roles:name', 'metrics']);
+            $user->load(['metrics']);
 
             return response()->json([
                 'status'  => true,
-                'items'   => $user,
+                'items'   => array_merge($user->toArray(), ['roles' => $user->getRoleNames()]),
                 'message' => 'Usuario encontrado.',
             ]);
         } catch (\Throwable $th) {
@@ -100,18 +119,23 @@ class UserController extends Controller
                 $data['password'] = Hash::make($data['password']);
             }
 
-            $role = $data['role'] ?? null;
+            $role       = $data['role'] ?? null;
+            $roleIsSet  = array_key_exists('role', $data);
             unset($data['role']);
 
             $user->update($data);
 
-            if ($role && $isAdmin) {
-                $user->assignRole('super-admin');
+            if ($isAdmin && $roleIsSet) {
+                $globalRoles = ['super-admin', 'project-manager'];
+                $user->removeRole($globalRoles);
+                if ($role) {
+                    $user->assignRole($role);
+                }
             }
 
             return response()->json([
                 'status'  => true,
-                'items'   => $user->load('roles:name'),
+                'items'   => array_merge($user->fresh()->toArray(), ['roles' => $user->fresh()->getRoleNames()]),
                 'message' => 'Usuario actualizado.',
             ]);
         } catch (\Throwable $th) {

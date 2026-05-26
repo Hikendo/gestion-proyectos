@@ -1,27 +1,67 @@
-import type {
-    CollectionResponse,
-    MessageResponse,
-    ProjectMemberPayload,
-    ProjectMemberItem,
-    ResourceResponse,
-} from './types';
-import { requestJson } from './http';
+import { AxiosError } from "axios";
+import { apiWithToken } from "@/services/http";
+import { ResponseBaseI } from "@/interfaces/ResponseBaseI";
+import { ProjectMemberI } from "@/interfaces/ProjectMemberI";
+import { ProjectMemberAxiosErrorI } from "@/interfaces/ProjectMemberI";
+import type { ProjectMemberPayload } from "./types";
 
-export const projectMembersService = {
-    list(projectId: number): Promise<CollectionResponse<ProjectMemberItem>> {
-        return requestJson<CollectionResponse<ProjectMemberItem>>(`/projects/${projectId}/members`);
-    },
+// ─── Index ────────────────────────────────────────────────────────────────────
 
-    add(projectId: number, payload: ProjectMemberPayload): Promise<ResourceResponse<ProjectMemberItem>> {
-        return requestJson<ResourceResponse<ProjectMemberItem>>(`/projects/${projectId}/members`, {
-            method: 'POST',
-            body: payload,
-        });
-    },
+interface MembersResponseI extends ResponseBaseI {
+  items: ProjectMemberI[];
+}
 
-    remove(projectId: number, userId: number): Promise<MessageResponse> {
-        return requestJson<MessageResponse>(`/projects/${projectId}/members/${userId}`, {
-            method: 'DELETE',
-        });
-    },
+export const index = async (projectId: number) => {
+  try {
+    const { data } = await apiWithToken.get<MembersResponseI>(`/projects/${projectId}/members`);
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    return { status: false, message: "Error en el servidor" };
+  }
+};
+
+// ─── Store ────────────────────────────────────────────────────────────────────
+
+interface MemberResponseI extends ResponseBaseI {
+  items: ProjectMemberI;
+}
+
+export const store = async (projectId: number, payload: ProjectMemberPayload) => {
+  try {
+    const { data } = await apiWithToken.post<MemberResponseI>(`/projects/${projectId}/members`, payload);
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    const err = error as AxiosError;
+    if (err?.response?.status === 422 || err?.response?.status === 409) {
+      const errorsForm = err.response.data as ProjectMemberAxiosErrorI;
+      return {
+        status: false,
+        message: errorsForm.message || "Llena correctamente el formulario",
+        errors: errorsForm.errors,
+      };
+    }
+    return { status: false, message: "Error en el servidor" };
+  }
+};
+
+// ─── Destroy ──────────────────────────────────────────────────────────────────
+
+export const destroy = async (projectId: number, userId: number) => {
+  try {
+    const { data } = await apiWithToken.delete<ResponseBaseI>(`/projects/${projectId}/members/${userId}`);
+    return {
+      status: true,
+      message: data.message,
+    };
+  } catch (error) {
+    return { status: false, message: "Error en el servidor" };
+  }
 };

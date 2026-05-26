@@ -1,6 +1,6 @@
 import { ref, reactive } from 'vue';
 import { useUsersService } from './index';
-import type { User } from '../interfaces/UserI';
+import type { UserI } from '../interfaces/UserI';
 
 export interface UserListState {
     page: number;
@@ -11,7 +11,7 @@ export interface UserListState {
 export function useUserList() {
     const usersService = useUsersService();
     const isLoading = ref(false);
-    const users = ref<User[]>([]);
+    const users = ref<UserI[]>([]);
     const listState = reactive<UserListState>({
         page: 1,
         search: '',
@@ -21,12 +21,12 @@ export function useUserList() {
     async function loadUsers(): Promise<boolean> {
         isLoading.value = true;
 
-        const response = await usersService.call('list');
+        const response = await usersService.call('index');
 
         isLoading.value = false;
 
         if (response) {
-            users.value = Array.isArray(response) ? response : [];
+            users.value = response.items?.data ?? [];
             return true;
         }
 

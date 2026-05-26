@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Objective\StoreObjectiveRequest;
 use App\Http\Requests\Objective\UpdateObjectiveRequest;
-use App\Http\Resources\ObjectiveResource;
 use App\Models\Objective;
 use App\Models\Project;
 use App\Traits\BelongsToProject;

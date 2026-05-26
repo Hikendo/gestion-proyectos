@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from "vite";
 import vue from "@vitejs/plugin-vue";
+import vuetify from "vite-plugin-vuetify";
 import path from "path";
 
 export default defineConfig(({ mode }) => {
@@ -9,7 +10,7 @@ export default defineConfig(({ mode }) => {
     env.VITE_BACKEND_PROXY || "http://backend:8000";
 
   return {
-    plugins: [vue()],
+    plugins: [vue(), vuetify({ autoImport: true })],
 
     resolve: {
       alias: {

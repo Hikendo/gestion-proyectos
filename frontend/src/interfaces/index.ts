@@ -30,3 +30,5 @@ export type { TaskTimeLogI } from '@/interfaces/TaskTimeLogI';
 export type { TicketI } from '@/interfaces/TicketI';
 export type { UserI } from '@/interfaces/UserI';
 export type { UserMetricI } from '@/interfaces/UserMetricI';
+export type { ResponseBaseI } from '@/interfaces/ResponseBaseI';
+export type { PaginacionScoutI, PaginacionScoutParamsI, PaginacionYQueryI } from '@/interfaces/PaginacionScoutI';

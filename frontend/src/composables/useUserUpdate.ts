@@ -24,7 +24,7 @@ export function useUserUpdate() {
         }
 
         // Return true if valid (no local errors)
-        const hasLocalErrors = Object.values(errors).some((errs) => errs && errs.length > 0);
+        const hasLocalErrors = Object.values(errors).some((errs) => Array.isArray(errs) && errs.length > 0);
         return !hasLocalErrors;
     }
 
@@ -40,7 +40,7 @@ export function useUserUpdate() {
         const response = await usersService.call('update', userId, {
             name: form.name.trim(),
             email: form.email.trim(),
-            role: form.role,
+            role: form.role || null,
             password: form.password || undefined,
         });
 
@@ -50,7 +50,7 @@ export function useUserUpdate() {
             successMessage.value = `Usuario actualizado correctamente.`;
             return true;
         } else {
-            setBackendErrors(usersService.validationErrors);
+            setBackendErrors(usersService.validationErrors.value);
             return false;
         }
     }
@@ -58,14 +58,14 @@ export function useUserUpdate() {
     async function loadUser(userId: number): Promise<boolean> {
         isLoading.value = true;
 
-        const response = await usersService.call('get', userId);
+        const response = await usersService.call('show', userId);
 
         isLoading.value = false;
 
         if (response) {
-            form.name = response.data.name || '';
-            form.email = response.data.email || '';
-            form.role = response.data.roles?.[0] || '';
+            form.name = response.items?.name || '';
+            form.email = response.items?.email || '';
+            form.role = response.items?.roles?.[0] || '';
             form.password = '';
             form.password_confirmation = '';
             return true;

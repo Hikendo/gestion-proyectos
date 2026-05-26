@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exceptions\ProjectException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Member\StoreProjectMemberRequest;
-use App\Http\Resources\ProjectMemberResource;
 use App\Models\Project;
 use App\Services\ProjectService;
 use Illuminate\Http\JsonResponse;

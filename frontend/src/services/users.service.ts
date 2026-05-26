@@ -1,44 +1,150 @@
-import type {
-    MessageResponse,
-    PaginatedResponse,
-    ResourceResponse,
-    UserListQuery,
-    UserMetricsResponse,
-    UserPayload,
-    UserResourceItem,
-} from './types';
-import { requestJson } from './http';
+import { AxiosError } from "axios";
+import { apiWithToken } from "@/services/http";
+import { ResponseBaseI } from "@/interfaces/ResponseBaseI";
+import { PaginacionScoutI } from "@/interfaces/PaginacionScoutI";
+import { UserI } from "@/interfaces/UserI";
+import { UserAxiosErrorI } from "@/interfaces/UserI";
+import { UserMetricI } from "@/interfaces/UserMetricI";
+import type { UserListQuery, UserPayload } from "./types";
 
-export const usersService = {
-    list(query?: UserListQuery): Promise<PaginatedResponse<UserResourceItem>> {
-        return requestJson<PaginatedResponse<UserResourceItem>>('/users', { query });
-    },
+// ─── All (sin paginación) ─────────────────────────────────────────────────────
 
-    get(userId: number): Promise<ResourceResponse<UserResourceItem>> {
-        return requestJson<ResourceResponse<UserResourceItem>>(`/users/${userId}`);
-    },
+interface UsersAllResponseI extends ResponseBaseI {
+  items: Pick<UserI, 'id' | 'name' | 'email'>[];
+}
 
-    create(payload: UserPayload): Promise<ResourceResponse<UserResourceItem>> {
-        return requestJson<ResourceResponse<UserResourceItem>>('/users', {
-            method: 'POST',
-            body: payload,
-        });
-    },
+export const all = async () => {
+  try {
+    const { data } = await apiWithToken.get<UsersAllResponseI>("/users/all");
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    return { status: false, message: "Error en el servidor", items: [] as Pick<UserI, 'id' | 'name' | 'email'>[] };
+  }
+};
 
-    update(userId: number, payload: UserPayload): Promise<ResourceResponse<UserResourceItem>> {
-        return requestJson<ResourceResponse<UserResourceItem>>(`/users/${userId}`, {
-            method: 'PUT',
-            body: payload,
-        });
-    },
+// ─── Index ────────────────────────────────────────────────────────────────────
 
-    remove(userId: number): Promise<MessageResponse> {
-        return requestJson<MessageResponse>(`/users/${userId}`, {
-            method: 'DELETE',
-        });
-    },
+interface UsersItemsI extends PaginacionScoutI {
+  data: UserI[];
+}
 
-    metrics(userId: number): Promise<UserMetricsResponse> {
-        return requestJson<UserMetricsResponse>(`/users/${userId}/metrics`);
-    },
+interface UsersResponseI extends ResponseBaseI {
+  items: UsersItemsI;
+}
+
+export const index = async (query?: UserListQuery) => {
+  try {
+    const { data } = await apiWithToken.get<UsersResponseI>("/users", { params: query });
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    return { status: false, message: "Error en el servidor" };
+  }
+};
+
+// ─── Show ─────────────────────────────────────────────────────────────────────
+
+interface UserResponseI extends ResponseBaseI {
+  items: UserI;
+}
+
+export const show = async (userId: number) => {
+  try {
+    const { data } = await apiWithToken.get<UserResponseI>(`/users/${userId}`);
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    return { status: false, message: "Error en el servidor" };
+  }
+};
+
+// ─── Store ────────────────────────────────────────────────────────────────────
+
+export const store = async (payload: UserPayload) => {
+  try {
+    const { data } = await apiWithToken.post<UserResponseI>("/users", payload);
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    const err = error as AxiosError;
+    if (err?.response?.status === 422) {
+      const errorsForm = err.response.data as UserAxiosErrorI;
+      return {
+        status: false,
+        message: "Llena correctamente el formulario",
+        errors: errorsForm.errors,
+      };
+    }
+    return { status: false, message: "Error en el servidor" };
+  }
+};
+
+// ─── Update ───────────────────────────────────────────────────────────────────
+
+export const update = async (userId: number, payload: UserPayload) => {
+  try {
+    const { data } = await apiWithToken.put<UserResponseI>(`/users/${userId}`, payload);
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    const err = error as AxiosError;
+    if (err?.response?.status === 422) {
+      const errorsForm = err.response.data as UserAxiosErrorI;
+      return {
+        status: false,
+        message: "Llena correctamente el formulario",
+        errors: errorsForm.errors,
+      };
+    }
+    return { status: false, message: "Error en el servidor" };
+  }
+};
+
+// ─── Destroy ──────────────────────────────────────────────────────────────────
+
+export const destroy = async (userId: number) => {
+  try {
+    const { data } = await apiWithToken.delete<ResponseBaseI>(`/users/${userId}`);
+    return {
+      status: true,
+      message: data.message,
+    };
+  } catch (error) {
+    return { status: false, message: "Error en el servidor" };
+  }
+};
+
+// ─── Metrics ──────────────────────────────────────────────────────────────────
+
+interface UserMetricResponseI extends ResponseBaseI {
+  items: UserMetricI;
+}
+
+export const metrics = async (userId: number) => {
+  try {
+    const { data } = await apiWithToken.get<UserMetricResponseI>(`/users/${userId}/metrics`);
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    return { status: false, message: "Error en el servidor" };
+  }
 };

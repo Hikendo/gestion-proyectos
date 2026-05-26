@@ -1,5 +1,5 @@
 import { reactive, ref } from 'vue';
-import type { User, UserValidationErrors } from '../interfaces/UserI';
+import type { UserErroresFormI } from '../interfaces/UserI';
 
 export interface UserFormState {
     name: string;
@@ -17,7 +17,7 @@ const initialFormState: UserFormState = {
     role: '',
 };
 
-const initialErrorsState: UserValidationErrors = {
+const initialErrorsState: UserErroresFormI = {
     name: [],
     email: [],
     password: [],
@@ -27,8 +27,8 @@ const initialErrorsState: UserValidationErrors = {
 
 export function useUserForm() {
     const form = reactive<UserFormState>({ ...initialFormState });
-    const errors = reactive<UserValidationErrors>({ ...initialErrorsState });
-    const localErrors = reactive<UserValidationErrors>({ ...initialErrorsState });
+    const errors = reactive<UserErroresFormI>({ ...initialErrorsState });
+    const localErrors = reactive<UserErroresFormI>({ ...initialErrorsState });
 
     function resetForm(): void {
         form.name = '';
@@ -52,7 +52,7 @@ export function useUserForm() {
         localErrors.role = [];
     }
 
-    function setBackendErrors(backendErrors: UserValidationErrors): void {
+    function setBackendErrors(backendErrors: UserErroresFormI): void {
         errors.name = backendErrors.name || [];
         errors.email = backendErrors.email || [];
         errors.password = backendErrors.password || [];
@@ -60,7 +60,7 @@ export function useUserForm() {
         errors.role = backendErrors.role || [];
     }
 
-    function setLocalError(field: keyof UserValidationErrors, message: string): void {
+    function setLocalError(field: keyof UserErroresFormI, message: string): void {
         if (!localErrors[field]) {
             localErrors[field] = [];
         }
@@ -75,7 +75,7 @@ export function useUserForm() {
         localErrors.role = [];
     }
 
-    function getFieldErrors(field: keyof UserValidationErrors): string[] {
+    function getFieldErrors(field: keyof UserErroresFormI): string[] {
         const backendErrs = errors[field] || [];
         const localErrs = localErrors[field] || [];
         return [...localErrs, ...backendErrs];

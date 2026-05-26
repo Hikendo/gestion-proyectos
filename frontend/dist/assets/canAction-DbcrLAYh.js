@@ -1,0 +1,1 @@
+import{M as e}from"./index-C7Za4_Nx.js";function t(t){return!!e()}export{t};

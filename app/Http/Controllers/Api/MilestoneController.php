@@ -6,7 +6,6 @@ use App\Exceptions\MilestoneException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Milestone\StoreMilestoneRequest;
 use App\Http\Requests\Milestone\UpdateMilestoneRequest;
-use App\Http\Resources\MilestoneResource;
 use App\Models\Milestone;
 use App\Models\Project;
 use App\Traits\BelongsToProject;

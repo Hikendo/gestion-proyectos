@@ -10,7 +10,7 @@ export function useUserDelete() {
         successMessage.value = '';
         isLoading.value = true;
 
-        const response = await usersService.call('remove', userId);
+        const response = await usersService.call('destroy', userId);
 
         isLoading.value = false;
 

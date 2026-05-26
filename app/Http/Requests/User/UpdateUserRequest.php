@@ -22,8 +22,7 @@ class UpdateUserRequest extends FormRequest
         ];
 
         if ($this->user()->hasRole('super-admin')) {
-            // El único rol global asignable es super-admin
-            $rules['role'] = ['sometimes', 'string', 'in:super-admin'];
+            $rules['role'] = ['sometimes', 'nullable', 'string', 'in:super-admin,project-manager'];
         }
 
         return $rules;

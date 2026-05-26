@@ -1,34 +1,88 @@
-import type {
-    CollectionResponse,
-    MessageResponse,
-    ProjectPhaseItem,
-    ProjectPhasePayload,
-    ResourceResponse,
-} from './types';
-import { requestJson } from './http';
+import { AxiosError } from "axios";
+import { apiWithToken } from "@/services/http";
+import { ResponseBaseI } from "@/interfaces/ResponseBaseI";
+import { ProjectPhaseI } from "@/interfaces/ProjectPhaseI";
+import type { ProjectPhasePayload } from "./types";
 
-export const projectPhasesService = {
-    list(projectId: number): Promise<CollectionResponse<ProjectPhaseItem>> {
-        return requestJson<CollectionResponse<ProjectPhaseItem>>(`/projects/${projectId}/phases`);
-    },
+// ─── Index ────────────────────────────────────────────────────────────────────
 
-    create(projectId: number, payload: ProjectPhasePayload): Promise<ResourceResponse<ProjectPhaseItem>> {
-        return requestJson<ResourceResponse<ProjectPhaseItem>>(`/projects/${projectId}/phases`, {
-            method: 'POST',
-            body: payload,
-        });
-    },
+interface PhasesResponseI extends ResponseBaseI {
+  items: ProjectPhaseI[];
+}
 
-    update(projectId: number, phaseId: number, payload: ProjectPhasePayload): Promise<ResourceResponse<ProjectPhaseItem>> {
-        return requestJson<ResourceResponse<ProjectPhaseItem>>(`/projects/${projectId}/phases/${phaseId}`, {
-            method: 'PUT',
-            body: payload,
-        });
-    },
+export const index = async (projectId: number) => {
+  try {
+    const { data } = await apiWithToken.get<PhasesResponseI>(`/projects/${projectId}/phases`);
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    return { status: false, message: "Error en el servidor" };
+  }
+};
 
-    remove(projectId: number, phaseId: number): Promise<MessageResponse> {
-        return requestJson<MessageResponse>(`/projects/${projectId}/phases/${phaseId}`, {
-            method: 'DELETE',
-        });
-    },
+// ─── Store ────────────────────────────────────────────────────────────────────
+
+interface PhaseResponseI extends ResponseBaseI {
+  items: ProjectPhaseI;
+}
+
+export const store = async (projectId: number, payload: ProjectPhasePayload) => {
+  try {
+    const { data } = await apiWithToken.post<PhaseResponseI>(`/projects/${projectId}/phases`, payload);
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    const err = error as AxiosError;
+    if (err?.response?.status === 422) {
+      return {
+        status: false,
+        message: "Llena correctamente el formulario",
+        errors: (err.response.data as any)?.errors,
+      };
+    }
+    return { status: false, message: "Error en el servidor" };
+  }
+};
+
+// ─── Update ───────────────────────────────────────────────────────────────────
+
+export const update = async (projectId: number, phaseId: number, payload: ProjectPhasePayload) => {
+  try {
+    const { data } = await apiWithToken.put<PhaseResponseI>(`/projects/${projectId}/phases/${phaseId}`, payload);
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    const err = error as AxiosError;
+    if (err?.response?.status === 422) {
+      return {
+        status: false,
+        message: "Llena correctamente el formulario",
+        errors: (err.response.data as any)?.errors,
+      };
+    }
+    return { status: false, message: "Error en el servidor" };
+  }
+};
+
+// ─── Destroy ──────────────────────────────────────────────────────────────────
+
+export const destroy = async (projectId: number, phaseId: number) => {
+  try {
+    const { data } = await apiWithToken.delete<ResponseBaseI>(`/projects/${projectId}/phases/${phaseId}`);
+    return {
+      status: true,
+      message: data.message,
+    };
+  } catch (error) {
+    return { status: false, message: "Error en el servidor" };
+  }
 };

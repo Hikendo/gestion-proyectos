@@ -6,7 +6,6 @@ use App\Exceptions\DeliverableException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Deliverable\StoreDeliverableRequest;
 use App\Http\Requests\Deliverable\UpdateDeliverableRequest;
-use App\Http\Resources\DeliverableResource;
 use App\Models\Deliverable;
 use App\Models\Project;
 use App\Traits\BelongsToProject;

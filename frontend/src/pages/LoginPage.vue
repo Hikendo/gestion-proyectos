@@ -1,75 +1,105 @@
-<script setup>
-import { reactive, ref } from 'vue';
+<script setup lang="ts">
+import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useAuthService } from '../composables';
-import ValidationErrors from '../components/ValidationErrors.vue';
-import RequestState from '../components/RequestState.vue';
+import { storeToRefs } from 'pinia';
+import { useAppStore } from '@/store/useAppStore';
+import { useAuthStore } from '@/store/useAuthStore';
+import * as authService from '@/services/auth.service';
 
-const route = useRoute();
+const route  = useRoute();
 const router = useRouter();
-const { call, loading, errorMessage, validationErrors } = useAuthService();
+const appStore  = useAppStore();
+const authStore = useAuthStore();
+const { loader } = storeToRefs(appStore);
 
-const form = reactive({
-    email: '',
-    password: '',
-    remember: true,
-});
-const successMessage = ref('');
+const form = ref({ email: '', password: '' });
+const errors = ref<{ email?: string[]; password?: string[] }>({});
+const showPassword = ref(false);
 
-async function login() {
-    successMessage.value = '';
+async function handleLogin() {
+    errors.value = {};
+    loader.value = true;
 
-    const response = await call('login', {
-        email: form.email,
-        password: form.password,
-    });
+    const response = await authService.login(form.value);
 
-    if (!response) {
-        return;
+    if (response.status && response.items) {
+        authStore.setSession(response.items.user, response.items.token);
+        const redirect = typeof route.query.redirect === 'string'
+            ? route.query.redirect
+            : '/dashboard';
+        router.push(redirect);
+    } else {
+        if ('errors' in response && (response as any).errors?.errors) {
+            errors.value = (response as any).errors.errors;
+        }
+        appStore.showError(response.message);
     }
 
-    successMessage.value = 'Sesion iniciada correctamente.';
-    const redirectTarget = typeof route.query.redirect === 'string' ? route.query.redirect : '/dashboard';
-    await router.push(redirectTarget);
+    loader.value = false;
 }
 </script>
 
 <template>
-    <main class="auth-shell">
-        <section class="auth-card">
-            <header class="auth-card__header">
-                <p>Autenticacion</p>
-                <h1>Ingresar al sistema</h1>
-                <span>Usa tu correo y contrasena para continuar.</span>
-            </header>
+  <VApp>
+    <VMain class="d-flex align-center justify-center"
+      style="min-height: 100vh; background: rgba(var(--v-theme-surface-variant), 0.3);">
+      <VCard width="440" class="pa-2" elevation="4">
 
-            <form class="form-grid" @submit.prevent="login">
-                <label>
-                    <span>Email</span>
-                    <input v-model="form.email" type="email" autocomplete="email" required>
-                    <ValidationErrors :errors="validationErrors.email || []" />
-                </label>
+        <VCardItem class="pt-8 px-6 pb-2 text-center">
+          <VIcon icon="mdi-chart-gantt" size="52" color="primary" class="mb-2" />
+          <VCardTitle class="text-h5 font-weight-bold">Gestión de Proyectos</VCardTitle>
+          <VCardSubtitle class="pb-1">Ingresa con tus credenciales para continuar</VCardSubtitle>
+        </VCardItem>
 
-                <label>
-                    <span>Password</span>
-                    <input v-model="form.password" type="password" autocomplete="current-password" required>
-                    <ValidationErrors :errors="validationErrors.password || []" />
-                </label>
+        <VCardText class="px-6 pb-8">
+          <VForm @submit.prevent="handleLogin">
+            <VTextField
+              v-model="form.email"
+              label="Correo electrónico"
+              type="email"
+              prepend-inner-icon="mdi-email-outline"
+              variant="outlined"
+              density="comfortable"
+              :error-messages="errors.email"
+              class="mb-3"
+              autocomplete="email"
+              autofocus
+            />
+            <VTextField
+              v-model="form.password"
+              label="Contraseña"
+              :type="showPassword ? 'text' : 'password'"
+              prepend-inner-icon="mdi-lock-outline"
+              :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+              @click:append-inner="showPassword = !showPassword"
+              variant="outlined"
+              density="comfortable"
+              :error-messages="errors.password"
+              class="mb-4"
+              autocomplete="current-password"
+            />
 
-                <label class="checkbox-field">
-                    <input v-model="form.remember" type="checkbox">
-                    <span>Recordarme</span>
-                </label>
+            <VBtn
+              type="submit"
+              color="primary"
+              block
+              size="large"
+              :loading="loader"
+              prepend-icon="mdi-login"
+            >
+              Iniciar sesión
+            </VBtn>
+          </VForm>
 
-                <div class="form-actions">
-                    <button type="submit" class="button primary" :disabled="loading">Login</button>
-                    <RouterLink class="button secondary" :to="{ name: 'forgot-password' }">
-                        Recuperar contrasena
-                    </RouterLink>
-                </div>
-            </form>
+          <div class="text-center mt-4">
+            <RouterLink :to="{ name: 'forgot-password' }"
+              class="text-primary text-decoration-none text-body-2">
+              ¿Olvidaste tu contraseña?
+            </RouterLink>
+          </div>
+        </VCardText>
 
-            <RequestState :loading="loading" :error-message="errorMessage" :success-message="successMessage" />
-        </section>
-    </main>
+      </VCard>
+    </VMain>
+  </VApp>
 </template>

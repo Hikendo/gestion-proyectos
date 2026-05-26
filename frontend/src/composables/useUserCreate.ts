@@ -20,7 +20,7 @@ export function useUserCreate() {
         }
 
         // Return true if valid (no errors)
-        return form.password && form.password.length >= 8 && form.password === form.password_confirmation;
+        return !!(form.password && form.password.length >= 8 && form.password === form.password_confirmation);
     }
 
     async function handleCreate(): Promise<boolean> {
@@ -33,21 +33,21 @@ export function useUserCreate() {
 
         isLoading.value = true;
 
-        const response = await usersService.call('create', {
+        const response = await usersService.call('store', {
             name: form.name.trim(),
             email: form.email.trim(),
             password: form.password,
             password_confirmation: form.password_confirmation,
-            role: form.role,
+            role: form.role || null,
         });
 
         isLoading.value = false;
 
         if (response) {
-            successMessage.value = `Usuario creado con ID ${response.data.id}.`;
+            successMessage.value = `Usuario creado con ID ${response.items?.id}.`;
             return true;
         } else {
-            setBackendErrors(usersService.validationErrors);
+            setBackendErrors(usersService.validationErrors.value);
             return false;
         }
     }

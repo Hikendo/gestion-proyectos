@@ -1,69 +1,29 @@
 import type {
-    Blocker,
-    Deliverable,
-    Milestone,
-    Objective,
-    Project,
-    ProjectMember,
-    ProjectPhase,
-    ProjectPlan,
-    Risk,
-    Task,
-    TaskAttachment,
-    TaskComment,
-    TaskTimeLog,
-    Ticket,
-    User,
-    UserMetric,
+    BlockerI,
+    DeliverableI,
+    MilestoneI,
+    ObjectiveI,
+    ProjectI,
+    ProjectMemberI,
+    ProjectPhaseI,
+    ProjectPlanI,
+    RiskI,
+    TaskI,
+    TaskAttachmentI,
+    TaskCommentI,
+    TaskTimeLogI,
+    TicketI,
+    UserI,
+    UserMetricI,
     ProjectStatus,
     TaskPriority,
     TaskStatus,
     TicketPriority,
     TicketStatus,
-    BlockerSeverity,
-    RiskImpact,
-    RiskProbability,
     ProjectMemberRole,
-    ObjectiveType,
 } from '../interfaces';
 
-export type { CollectionResponse, MessageResponse, PaginatedResponse, ResourceResponse } from './http';
-
-export interface AuthSessionUser {
-    id: number;
-    name: string;
-    email: string;
-    roles: string[];
-    permissions: string[];
-    metrics?: UserMetric | null;
-}
-
-export interface LoginResponse {
-    token: string;
-    user: AuthSessionUser;
-}
-
-export interface RegisterResponse {
-    message: string;
-    user: Pick<User, 'id' | 'name' | 'email'> & { roles: string[] };
-}
-
-export interface MeResponse extends AuthSessionUser {}
-
-export interface RoleItem {
-    name: ProjectMemberRole;
-    label: string;
-    permissions: string[];
-}
-
-export interface UserMetricsResponse {
-    data: {
-        assigned_tasks: number;
-        completed_tasks: number;
-        worked_hours: number;
-        performance_score: number;
-    };
-}
+// ─── Dashboard ────────────────────────────────────────────────────────────────
 
 export interface DashboardSummary {
     total_projects: number;
@@ -71,18 +31,18 @@ export interface DashboardSummary {
     open_tickets: number;
 }
 
-export interface DashboardProjectItem extends Pick<Project, 'id' | 'name' | 'code' | 'status' | 'progress' | 'end_date'> {
+export interface DashboardProjectItem extends Pick<ProjectI, 'id' | 'name' | 'code' | 'status' | 'progress' | 'end_date'> {
     tasks_count?: number;
     tickets_count?: number;
 }
 
-export interface DashboardTaskItem extends Pick<Task, 'id' | 'title' | 'status' | 'priority' | 'due_date' | 'project_id'> {
-    project?: Pick<Project, 'id' | 'name' | 'code'>;
+export interface DashboardTaskItem extends Pick<TaskI, 'id' | 'title' | 'status' | 'priority' | 'due_date' | 'project_id'> {
+    project?: Pick<ProjectI, 'id' | 'name' | 'code'>;
 }
 
-export interface DashboardTicketItem extends Pick<Ticket, 'id' | 'subject' | 'priority' | 'project_id'> {
+export interface DashboardTicketItem extends Pick<TicketI, 'id' | 'subject' | 'priority' | 'project_id'> {
     created_at?: string;
-    project?: Pick<Project, 'id' | 'name' | 'code'>;
+    project?: Pick<ProjectI, 'id' | 'name' | 'code'>;
 }
 
 export interface DashboardResponse {
@@ -92,73 +52,15 @@ export interface DashboardResponse {
     open_tickets: DashboardTicketItem[];
 }
 
-export interface ProjectMemberItem extends Pick<ProjectMember, 'id' | 'role'> {
-    user?: User;
-}
-
-export interface ProjectPhaseItem extends Pick<ProjectPhase, 'id' | 'name' | 'start_date' | 'end_date' | 'progress'> {
-    tasks_count?: number;
-}
-
-export interface ProjectPlanItem extends ProjectPlan {}
-
-export interface ObjectiveItem extends Pick<Objective, 'id' | 'type' | 'title' | 'description' | 'completed'> {}
-
-export interface MilestoneItem extends Pick<Milestone, 'id' | 'title' | 'target_date' | 'completed'> {}
-
-export interface DeliverableItem extends Pick<Deliverable, 'id' | 'name' | 'description' | 'delivery_date' | 'approved'> {}
-
-export interface RiskItem extends Pick<Risk, 'id' | 'title' | 'description' | 'impact' | 'probability' | 'mitigation_plan'> {
-    created_at?: string;
-}
-
-export interface BlockerItem extends Pick<Blocker, 'id' | 'title' | 'description' | 'severity' | 'resolved'> {
-    task?: Pick<Task, 'id' | 'title'>;
-    created_at?: string;
-}
-
-export interface TaskCommentItem extends Pick<TaskComment, 'id' | 'comment'> {
-    user?: User;
-    created_at: string;
-}
-
-export interface TaskTimeLogItem extends Pick<TaskTimeLog, 'id' | 'minutes' | 'description'> {
-    hours: number;
-    user?: User;
-    created_at: string;
-}
-
-export interface BlockerResolutionResponse {
-    data: Blocker;
-}
-
-export interface TaskAttachmentItem extends Pick<TaskAttachment, 'id' | 'file_name' | 'file_path' | 'mime_type'> {
-    user?: User;
-}
-
-export interface ProjectSummaryItem extends Pick<Project, 'id' | 'name' | 'code' | 'status' | 'progress' | 'start_date' | 'end_date' | 'budget'> {
-    owner?: User;
-    tasks_count?: number;
-    tickets_count?: number;
-    risks_count?: number;
-    blockers_count?: number;
-}
-
-export interface ProjectResourceItem extends Project {}
-
-export interface TaskResourceItem extends Task {}
-
-export interface TicketResourceItem extends Ticket {}
-
-export interface UserResourceItem extends User {}
+// ─── Query params ─────────────────────────────────────────────────────────────
 
 export interface PaginationQuery {
     page?: number;
+    query?: string;
 }
 
 export interface UserListQuery extends PaginationQuery {
     role?: string;
-    search?: string;
 }
 
 export interface TaskListQuery extends PaginationQuery {
@@ -177,40 +79,41 @@ export interface BlockerListQuery {
 }
 
 export interface ProjectListQuery extends PaginationQuery {
-    search?: string;
     status?: ProjectStatus;
 }
 
-export interface ProjectPayload extends Partial<Project> {}
+// ─── Payload types ────────────────────────────────────────────────────────────
 
-export interface UserPayload extends Partial<User> {
+export interface ProjectPayload extends Partial<ProjectI> {}
+
+export interface UserPayload extends Partial<UserI> {
     password?: string;
     password_confirmation?: string;
     role?: string;
 }
 
-export interface TaskPayload extends Partial<Task> {}
+export interface TaskPayload extends Partial<TaskI> {}
 
-export interface TicketPayload extends Partial<Ticket> {}
+export interface TicketPayload extends Partial<TicketI> {}
 
 export interface ProjectMemberPayload {
     user_id: number;
     role: ProjectMemberRole;
 }
 
-export interface ProjectPhasePayload extends Partial<ProjectPhase> {}
+export interface ProjectPhasePayload extends Partial<ProjectPhaseI> {}
 
-export interface ProjectPlanPayload extends Partial<ProjectPlan> {}
+export interface ProjectPlanPayload extends Partial<ProjectPlanI> {}
 
-export interface ObjectivePayload extends Partial<Objective> {}
+export interface ObjectivePayload extends Partial<ObjectiveI> {}
 
-export interface MilestonePayload extends Partial<Milestone> {}
+export interface MilestonePayload extends Partial<MilestoneI> {}
 
-export interface DeliverablePayload extends Partial<Deliverable> {}
+export interface DeliverablePayload extends Partial<DeliverableI> {}
 
-export interface RiskPayload extends Partial<Risk> {}
+export interface RiskPayload extends Partial<RiskI> {}
 
-export interface BlockerPayload extends Partial<Blocker> {}
+export interface BlockerPayload extends Partial<BlockerI> {}
 
 export interface TaskCommentPayload {
     comment: string;

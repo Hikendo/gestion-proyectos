@@ -1,216 +1,148 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { getAuthToken } from '../services';
 import MainLayout from '../layouts/MainLayout.vue';
-import LoginPage from '../pages/LoginPage.vue';
-import ForgotPasswordPage from '../pages/ForgotPasswordPage.vue';
-import DashboardPage from '../pages/DashboardPage.vue';
-import ProjectsPage from '../pages/ProjectsPage.vue';
-import RolesPage from '../pages/RolesPage.vue';
-import UsersLayoutPage from '../pages/users/UsersLayoutPage.vue';
-import UsersListPage from '../pages/users/UsersListPage.vue';
-import UsersCreatePage from '../pages/users/UsersCreatePage.vue';
-import UsersUpdatePage from '../pages/users/UsersUpdatePage.vue';
-import UsersDeletePage from '../pages/users/UsersDeletePage.vue';
-import ProjectFeaturesLayoutPage from '../pages/projects/ProjectFeaturesLayoutPage.vue';
-import MembersFeature from '../features/projects/members/MembersFeature.vue';
-import PhasesFeature from '../features/projects/phases/PhasesFeature.vue';
-import PlansFeature from '../features/projects/plans/PlansFeature.vue';
-import ObjectivesFeature from '../features/projects/objectives/ObjectivesFeature.vue';
-import MilestonesFeature from '../features/projects/milestones/MilestonesFeature.vue';
-import DeliverablesFeature from '../features/projects/deliverables/DeliverablesFeature.vue';
-import TasksFeature from '../features/projects/tasks/TasksFeature.vue';
-import TicketsFeature from '../features/projects/tickets/TicketsFeature.vue';
-import RisksFeature from '../features/projects/risks/RisksFeature.vue';
-import BlockersFeature from '../features/projects/blockers/BlockersFeature.vue';
 
-const projectFeatureProps = (route) => ({
-    projectId: Number(route.params.id),
-});
+// ── Auth / Guest pages ─────────────────────────────────────────────────────
+const LoginPage          = () => import('../pages/LoginPage.vue');
+const ForgotPasswordPage = () => import('../pages/ForgotPasswordPage.vue');
+
+// ── Core ───────────────────────────────────────────────────────────────────
+const DashboardPage  = () => import('../pages/DashboardPage.vue');
+const ProfilePage    = () => import('../pages/profile/index.vue');
+const ProfileEditPage= () => import('../pages/profile/edit.vue');
+
+// ── Projects ───────────────────────────────────────────────────────────────
+const ProjectsIndexPage = () => import('../pages/projects/index.vue');
+const ProjectsNewPage   = () => import('../pages/projects/new.vue');
+const ProjectDetailPage = () => import('../pages/projects/[id].vue');
+const ProjectEditPage   = () => import('../pages/projects/edit.vue');
+
+// ── Admin ──────────────────────────────────────────────────────────────────
+const AdminPage       = () => import('../pages/admin/index.vue');
+const AdminUsersIndex = () => import('../pages/admin/users/index.vue');
+const AdminUsersNew   = () => import('../pages/admin/users/new.vue');
+const AdminUsersEdit  = () => import('../pages/admin/users/[id].vue');
+
+// ── Helper: lazy sub-resource pages ────────────────────────────────────────
+const p = (path) => () => import(`../pages/${path}`);
 
 const routes = [
-    {
-        path: '/',
-        redirect: '/login',
-    },
-    {
-        path: '/login',
-        name: 'login',
-        component: LoginPage,
-        meta: {
-            requiresGuest: true,
-        },
-    },
-    {
-        path: '/forgot-password',
-        name: 'forgot-password',
-        component: ForgotPasswordPage,
-        meta: {
-            requiresGuest: true,
-        },
-    },
+    { path: '/', redirect: '/login' },
+
+    // ── Guest ──────────────────────────────────────────────────────────────
+    { path: '/login',           name: 'login',           component: LoginPage,          meta: { requiresGuest: true } },
+    { path: '/forgot-password', name: 'forgot-password', component: ForgotPasswordPage, meta: { requiresGuest: true } },
+
+    // ── Authenticated ──────────────────────────────────────────────────────
     {
         path: '/app',
         component: MainLayout,
-        meta: {
-            requiresAuth: true,
-        },
+        meta: { requiresAuth: true },
         children: [
-            {
-                path: '',
-                redirect: '/dashboard',
-            },
-            {
-                path: '/dashboard',
-                name: 'dashboard',
-                component: DashboardPage,
-            },
-            {
-                path: '/users',
-                component: UsersLayoutPage,
-                children: [
-                    {
-                        path: '',
-                        redirect: '/users/list',
-                    },
-                    {
-                        path: 'list',
-                        name: 'users-list',
-                        component: UsersListPage,
-                    },
-                    {
-                        path: 'create',
-                        name: 'users-create',
-                        component: UsersCreatePage,
-                    },
-                    {
-                        path: 'update',
-                        name: 'users-update',
-                        component: UsersUpdatePage,
-                    },
-                    {
-                        path: 'delete',
-                        name: 'users-delete',
-                        component: UsersDeletePage,
-                    },
-                ],
-            },
-            {
-                path: '/roles',
-                name: 'roles',
-                component: RolesPage,
-            },
-            {
-                path: '/projects',
-                name: 'projects',
-                component: ProjectsPage,
-            },
-            {
-                path: '/projects/:id',
-                name: 'projects-detail',
-                component: ProjectFeaturesLayoutPage,
-                children: [
-                    {
-                        path: '',
-                        redirect: (to) => ({
-                            name: 'project-members',
-                            params: to.params,
-                        }),
-                    },
-                    {
-                        path: 'members',
-                        name: 'project-members',
-                        component: MembersFeature,
-                        props: projectFeatureProps,
-                    },
-                    {
-                        path: 'phases',
-                        name: 'project-phases',
-                        component: PhasesFeature,
-                        props: projectFeatureProps,
-                    },
-                    {
-                        path: 'plan',
-                        name: 'project-plan',
-                        component: PlansFeature,
-                        props: projectFeatureProps,
-                    },
-                    {
-                        path: 'objectives',
-                        name: 'project-objectives',
-                        component: ObjectivesFeature,
-                        props: projectFeatureProps,
-                    },
-                    {
-                        path: 'milestones',
-                        name: 'project-milestones',
-                        component: MilestonesFeature,
-                        props: projectFeatureProps,
-                    },
-                    {
-                        path: 'deliverables',
-                        name: 'project-deliverables',
-                        component: DeliverablesFeature,
-                        props: projectFeatureProps,
-                    },
-                    {
-                        path: 'tasks',
-                        name: 'project-tasks',
-                        component: TasksFeature,
-                        props: projectFeatureProps,
-                    },
-                    {
-                        path: 'tickets',
-                        name: 'project-tickets',
-                        component: TicketsFeature,
-                        props: projectFeatureProps,
-                    },
-                    {
-                        path: 'risks',
-                        name: 'project-risks',
-                        component: RisksFeature,
-                        props: projectFeatureProps,
-                    },
-                    {
-                        path: 'blockers',
-                        name: 'project-blockers',
-                        component: BlockersFeature,
-                        props: projectFeatureProps,
-                    },
-                ],
-            },
+            { path: '', redirect: '/dashboard' },
+
+            // Dashboard + Perfil
+            { path: '/dashboard',    name: 'dashboard',    component: DashboardPage },
+            { path: '/profile',      name: 'profile',      component: ProfilePage },
+            { path: '/profile/edit', name: 'profile-edit', component: ProfileEditPage },
+
+            // Proyectos
+            { path: '/projects',            name: 'projects',        component: ProjectsIndexPage },
+            { path: '/projects/new',        name: 'projects-new',    component: ProjectsNewPage },
+            { path: '/projects/:projectId', name: 'project-detail',  component: ProjectDetailPage },
+            { path: '/projects/:projectId/edit', name: 'project-edit', component: ProjectEditPage },
+
+            // Members
+            { path: '/projects/:projectId/members',     name: 'members',     component: p('members/index.vue') },
+            { path: '/projects/:projectId/members/new', name: 'members-new', component: p('members/new.vue') },
+            { path: '/projects/:projectId/members/:id', name: 'members-id',  component: p('members/[id].vue') },
+
+            // Objectives
+            { path: '/projects/:projectId/objectives',     name: 'objectives',     component: p('objectives/index.vue') },
+            { path: '/projects/:projectId/objectives/new', name: 'objectives-new', component: p('objectives/new.vue') },
+            { path: '/projects/:projectId/objectives/:id', name: 'objectives-id',  component: p('objectives/[id].vue') },
+
+            // Phases
+            { path: '/projects/:projectId/phases',     name: 'phases',     component: p('phases/index.vue') },
+            { path: '/projects/:projectId/phases/new', name: 'phases-new', component: p('phases/new.vue') },
+            { path: '/projects/:projectId/phases/:id', name: 'phases-id',  component: p('phases/[id].vue') },
+
+            // Plans
+            { path: '/projects/:projectId/plans',     name: 'plans',     component: p('plans/index.vue') },
+            { path: '/projects/:projectId/plans/new', name: 'plans-new', component: p('plans/new.vue') },
+            { path: '/projects/:projectId/plans/:id', name: 'plans-id',  component: p('plans/[id].vue') },
+
+            // Tasks
+            { path: '/projects/:projectId/tasks',     name: 'tasks',     component: p('tasks/index.vue') },
+            { path: '/projects/:projectId/tasks/new', name: 'tasks-new', component: p('tasks/new.vue') },
+            { path: '/projects/:projectId/tasks/:id', name: 'tasks-id',  component: p('tasks/[id].vue') },
+
+            // Tickets
+            { path: '/projects/:projectId/tickets',     name: 'tickets',     component: p('tickets/index.vue') },
+            { path: '/projects/:projectId/tickets/new', name: 'tickets-new', component: p('tickets/new.vue') },
+            { path: '/projects/:projectId/tickets/:id', name: 'tickets-id',  component: p('tickets/[id].vue') },
+
+            // Risks
+            { path: '/projects/:projectId/risks',     name: 'risks',     component: p('risks/index.vue') },
+            { path: '/projects/:projectId/risks/new', name: 'risks-new', component: p('risks/new.vue') },
+            { path: '/projects/:projectId/risks/:id', name: 'risks-id',  component: p('risks/[id].vue') },
+
+            // Blockers
+            { path: '/projects/:projectId/blockers',     name: 'blockers',     component: p('blockers/index.vue') },
+            { path: '/projects/:projectId/blockers/new', name: 'blockers-new', component: p('blockers/new.vue') },
+            { path: '/projects/:projectId/blockers/:id', name: 'blockers-id',  component: p('blockers/[id].vue') },
+
+            // Deliverables
+            { path: '/projects/:projectId/deliverables',     name: 'deliverables',     component: p('deliverables/index.vue') },
+            { path: '/projects/:projectId/deliverables/new', name: 'deliverables-new', component: p('deliverables/new.vue') },
+            { path: '/projects/:projectId/deliverables/:id', name: 'deliverables-id',  component: p('deliverables/[id].vue') },
+
+            // Milestones
+            { path: '/projects/:projectId/milestones',     name: 'milestones',     component: p('milestones/index.vue') },
+            { path: '/projects/:projectId/milestones/new', name: 'milestones-new', component: p('milestones/new.vue') },
+            { path: '/projects/:projectId/milestones/:id', name: 'milestones-id',  component: p('milestones/[id].vue') },
+
+            // Metrics
+            { path: '/projects/:projectId/metrics', name: 'metrics', component: p('metrics/index.vue') },
+
+            // Admin (superadmin)
+            { path: '/admin',           name: 'admin',          component: AdminPage,       meta: { requiresSuperAdmin: true } },
+            { path: '/admin/users',     name: 'admin-users',    component: AdminUsersIndex, meta: { requiresSuperAdmin: true } },
+            { path: '/admin/users/new', name: 'admin-users-new',component: AdminUsersNew,   meta: { requiresSuperAdmin: true } },
+            { path: '/admin/users/:id', name: 'admin-users-id', component: AdminUsersEdit,  meta: { requiresSuperAdmin: true } },
+
+            // Roles
+            { path: '/roles', name: 'roles', component: () => import('../pages/RolesPage.vue') },
         ],
     },
-    {
-        path: '/auth',
-        redirect: '/login',
-    },
-    {
-        path: '/admin',
-        redirect: '/users/list',
-    },
+
+    // ── Catch-all ──────────────────────────────────────────────────────────
+    { path: '/:pathMatch(.*)*', redirect: '/login' },
 ];
 
 export const router = createRouter({
     history: createWebHistory(),
     routes,
+    scrollBehavior: () => ({ top: 0 }),
 });
 
+// ── Navigation guard ────────────────────────────────────────────────────────
 router.beforeEach((to) => {
     const isAuthenticated = Boolean(getAuthToken());
 
     if (to.meta.requiresAuth && !isAuthenticated) {
-        return {
-            name: 'login',
-            query: {
-                redirect: to.fullPath,
-            },
-        };
+        return { name: 'login', query: { redirect: to.fullPath } };
     }
 
     if (to.meta.requiresGuest && isAuthenticated) {
-        const redirectTarget = typeof to.query.redirect === 'string' ? to.query.redirect : '/dashboard';
+        const redirect = typeof to.query.redirect === 'string'
+            ? to.query.redirect
+            : '/dashboard';
+        return redirect;
+    }
 
-        return redirectTarget;
+    if (to.meta.requiresSuperAdmin && !isAuthenticated) {
+        return { name: 'login' };
     }
 
     return true;

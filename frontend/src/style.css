@@ -276,13 +276,24 @@ input,
 textarea,
 select {
     width: 100%;
-    min-height: 46px;
-    padding: 12px 14px;
-    border-radius: 14px;
-    border: 1px solid var(--surface-border);
-    background: rgba(8, 17, 31, 0.8);
-    color: var(--text);
+    background: transparent;
+    color: #0f172a;
     font: inherit;
+}
+
+/* Vuetify field containers — white background, dark text */
+.v-input .v-field {
+    background: #ffffff;
+    color: #0f172a;
+}
+
+.v-input .v-field .v-field-label {
+    color: #475569;
+}
+
+.v-input .v-field input,
+.v-input .v-field textarea {
+    color: #0f172a;
 }
 
 button {
