@@ -1,29 +1,74 @@
-*.log
+
+# =========================================================
+# GLOBAL
+# =========================================================
+
 .DS_Store
-.env
-.env.backup
-.env.production
-.phpactor.json
-.phpunit.result.cache
-/.codex
-/.cursor/
-/.idea
-/.nova
-/.phpunit.cache
-/.vscode
-/.zed
-/auth.json
-/node_modules
-node_modules/
-/public/build
-/public/fonts-manifest.dev.json
-/public/hot
-/public/storage
-/storage/*.key
-/storage/pail
-/vendor
-_ide_helper.php
-Homestead.json
-Homestead.yaml
 Thumbs.db
-!.env.example
+
+.idea/
+.vscode/
+.cursor/
+.zed/
+
+*.log
+
+# =========================================================
+# DATABASES / DUMPS
+# =========================================================
+
+*.sql
+gestion_db/
+
+# =========================================================
+# DOCKER
+# =========================================================
+
+docker_data/
+dbdata/
+
+# =========================================================
+# BACKEND / LARAVEL
+# =========================================================
+
+backend/vendor/
+backend/node_modules/
+
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+backend/storage/logs/*
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+
+backend/storage/*.key
+
+backend/bootstrap/cache/*.php
+
+backend/public/storage
+backend/public/hot
+backend/public/build
+
+backend/.phpunit.result.cache
+backend/.phpactor.json
+
+# =========================================================
+# FRONTEND / VITE
+# =========================================================
+
+frontend/node_modules/
+
+frontend/dist/
+frontend/.env
+frontend/.env.*
+
+# =========================================================
+# TESTS / TEMP
+# =========================================================
+
+coverage/
+.tmp/
+temp/
+

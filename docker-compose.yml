@@ -1,78 +1,141 @@
+
 services:
+
+  # ─────────────────────────────────────────────────────────────
+  # PHP-FPM / Laravel
+  # ─────────────────────────────────────────────────────────────
   backend:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
+
     image: gestion_proyectos_backend_app
+
     container_name: gestion_proyectos_backend_app
+
     restart: unless-stopped
-    ports:
-      - "8085:8000"
+
+    expose:
+      - "9000"
+
     volumes:
-      - .:/var/www
+      - ./backend:/var/www
+
     networks:
       - gestion_network
+
     depends_on:
       db:
         condition: service_healthy
+
     environment:
       DB_HOST: db
       DB_PORT: 3306
       DB_DATABASE: gestion_db
       DB_USERNAME: gestion_user
       DB_PASSWORD: gestion_password_local
-      # ── Credenciales del primer admin ──────────────────
+
       ADMIN_NAME: "Administrador"
       ADMIN_EMAIL: "admin@admin.com"
       ADMIN_PASSWORD: "Admin1234!"
 
+  # ─────────────────────────────────────────────────────────────
+  # NGINX
+  # ─────────────────────────────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+
+    container_name: gestion_proyectos_nginx
+
+    restart: unless-stopped
+
+    ports:
+      - "8000:80"
+
+    volumes:
+      - ./backend:/var/www
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+
+    depends_on:
+      - backend
+
+    networks:
+      - gestion_network
+
+  # ─────────────────────────────────────────────────────────────
+  # FRONTEND VITE
+  # ─────────────────────────────────────────────────────────────
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+
     container_name: gestion_proyectos_frontend_app
+
     restart: unless-stopped
+
     ports:
       - "5173:5173"
+
     volumes:
       - ./frontend:/app
       - frontend_node_modules:/app/node_modules
-    networks:
-      - gestion_network
-    depends_on:
-      - backend
+
     environment:
       VITE_API_BASE_URL: /api/v1
-      VITE_BACKEND_PROXY: http://backend:8000
+      VITE_BACKEND_PROXY: http://nginx
 
+    depends_on:
+      - nginx
+
+    networks:
+      - gestion_network
+
+  # ─────────────────────────────────────────────────────────────
+  # MYSQL
+  # ─────────────────────────────────────────────────────────────
   db:
     image: mysql:8.4
+
     container_name: gestion_proyectos_mysql
+
     restart: unless-stopped
+
     ports:
       - "3319:3306"
+
     environment:
       MYSQL_DATABASE: gestion_db
       MYSQL_ROOT_PASSWORD: root_password_local
       MYSQL_USER: gestion_user
       MYSQL_PASSWORD: gestion_password_local
+
     volumes:
       - dbdata:/var/lib/mysql
+
     networks:
       - gestion_network
+
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-ugestion_user", "-pgestion_password_local"]
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD"]
       interval: 5s
       timeout: 5s
       retries: 20
       start_period: 30s
 
+# ─────────────────────────────────────────────────────────────
+# NETWORKS
+# ─────────────────────────────────────────────────────────────
 networks:
   gestion_network:
     driver: bridge
 
+# ─────────────────────────────────────────────────────────────
+# VOLUMES
+# ─────────────────────────────────────────────────────────────
 volumes:
   dbdata:
     driver: local
+
   frontend_node_modules:
     driver: local

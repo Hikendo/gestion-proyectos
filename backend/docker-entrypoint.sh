@@ -7,11 +7,13 @@ git config --global --add safe.directory /var/www 2>/dev/null || true
 echo "================================================"
 echo " Instalando dependencias..."
 echo "================================================"
+
 composer install --no-interaction --optimize-autoloader
 
 echo "================================================"
 echo " Generando APP_KEY si no existe..."
 echo "================================================"
+
 if [ -z "${APP_KEY}" ] || [ "${APP_KEY}" = "" ]; then
     php artisan key:generate --force
     echo " ✓ APP_KEY generado."
@@ -43,7 +45,9 @@ echo " ✓ Base de datos disponible."
 echo "================================================"
 echo " Ejecutando migraciones pendientes..."
 echo "================================================"
+
 php artisan migrate --force
+
 echo " ✓ Migraciones al día."
 
 echo "================================================"
@@ -55,11 +59,17 @@ ROLES_COUNT=$(php artisan tinker --no-interaction \
     2>/dev/null | tail -1 | tr -d '[:space:]')
 
 if [ "$ROLES_COUNT" = "0" ] || [ -z "$ROLES_COUNT" ]; then
+
     echo " → Ejecutando RolesAndPermissionsSeeder..."
+
     php artisan db:seed --class=RolesAndPermissionsSeeder --force
+
     echo " ✓ Roles y permisos creados."
+
 else
+
     echo " → Roles ya existen ($ROLES_COUNT), seeder omitido."
+
 fi
 
 echo "================================================"
@@ -71,6 +81,7 @@ ADMIN_COUNT=$(php artisan tinker --no-interaction \
     2>/dev/null | tail -1 | tr -d '[:space:]')
 
 if [ "$ADMIN_COUNT" = "0" ] || [ -z "$ADMIN_COUNT" ]; then
+
     echo " → Creando super-admin desde variables de entorno..."
 
     php artisan admin:create \
@@ -79,19 +90,28 @@ if [ "$ADMIN_COUNT" = "0" ] || [ -z "$ADMIN_COUNT" ]; then
         --password="${ADMIN_PASSWORD:-Admin1234!}"
 
     echo " ✓ Super-admin creado."
+
 else
+
     echo " → Super-admin ya existe ($ADMIN_COUNT), omitido."
+
 fi
 
 echo "================================================"
-echo " Limpiando cachés..."
+echo " Limpiando y optimizando cachés..."
 echo "================================================"
-php artisan config:clear
-php artisan route:clear
-php artisan cache:clear
-echo " ✓ Cachés limpias."
+
+php artisan optimize:clear
+
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+echo " ✓ Laravel optimizado."
 
 echo "================================================"
-echo " Iniciando servidor en http://0.0.0.0:8000"
+echo " Iniciando PHP-FPM..."
 echo "================================================"
-exec php -S 0.0.0.0:8000 -t public
+
+exec php-fpm -F
+
