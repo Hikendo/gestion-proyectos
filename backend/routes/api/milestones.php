@@ -16,4 +16,6 @@ Route::middleware('auth:sanctum')->prefix('projects/{project}')->group(function 
 
     Route::delete('milestones/{milestone}', [MilestoneController::class, 'destroy'])
         ->name('projects.milestones.destroy');
+    Route::get('milestones/{milestone}', [MilestoneController::class, 'show'])
+        ->name('projects.milestones.show');
 });

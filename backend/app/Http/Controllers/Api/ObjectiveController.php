@@ -56,6 +56,21 @@ class ObjectiveController extends Controller
     }
 
     /**
+     * GET /api/projects/{project}/objectives/{objective}
+     */
+    public function show(Request $request, Project $project, Objective $objective): JsonResponse
+    {
+        $this->assertBelongsToProject($objective, $project->id);
+        $this->authorize('view', $objective);
+
+        return response()->json([
+            'status'  => true,
+            'items'   => $objective,
+            'message' => 'Objetivo encontrado.',
+        ]);
+    }
+
+    /**
      * PUT /api/projects/{project}/objectives/{objective}
      */
     public function update(UpdateObjectiveRequest $request, Project $project, Objective $objective): JsonResponse

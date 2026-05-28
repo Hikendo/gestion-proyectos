@@ -63,6 +63,21 @@ class BlockerController extends Controller
     }
 
     /**
+     * GET /api/projects/{project}/blockers/{blocker}
+     */
+    public function show(Request $request, Project $project, Blocker $blocker): JsonResponse
+    {
+        $this->assertBelongsToProject($blocker, $project->id);
+        $this->authorize('view', $blocker);
+
+        return response()->json([
+            'status'  => true,
+            'items'   => $blocker->load('task:id,title', 'createdBy:id,name'),
+            'message' => 'Blocker encontrado.',
+        ]);
+    }
+
+    /**
      * PUT /api/projects/{project}/blockers/{blocker}
      */
     public function update(UpdateBlockerRequest $request, Project $project, Blocker $blocker): JsonResponse

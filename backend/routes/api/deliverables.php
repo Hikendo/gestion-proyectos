@@ -10,6 +10,8 @@ Route::middleware('auth:sanctum')->prefix('projects/{project}')->group(function 
 
     Route::post('deliverables', [DeliverableController::class, 'store'])
         ->name('projects.deliverables.store');
+    Route::get('deliverables/{deliverable}', [DeliverableController::class, 'show'])
+        ->name('projects.deliverables.show');
 
     Route::put('deliverables/{deliverable}', [DeliverableController::class, 'update'])
         ->name('projects.deliverables.update');

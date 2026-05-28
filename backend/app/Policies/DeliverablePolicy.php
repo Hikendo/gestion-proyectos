@@ -17,6 +17,11 @@ class DeliverablePolicy
         return $user->can('deliverable.view');
     }
 
+    public function view(User $user, Deliverable $deliverable): bool
+    {
+        return $user->canForProject($deliverable->project, 'deliverable.view');
+    }
+
     public function create(User $user): bool
     {
         return $user->can('deliverable.create');

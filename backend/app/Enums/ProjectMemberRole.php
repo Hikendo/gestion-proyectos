@@ -7,7 +7,7 @@ enum ProjectMemberRole: string
     case Manager   = 'manager';
     case Developer = 'developer';
     case Qa        = 'qa';
-    case Support   = 'support';
+    case Analyst   = 'analyst';
     case Client    = 'client';
 
     public function label(): string
@@ -16,7 +16,7 @@ enum ProjectMemberRole: string
             self::Manager   => 'Project Manager',
             self::Developer => 'Developer',
             self::Qa        => 'QA',
-            self::Support   => 'Support',
+            self::Analyst   => 'Analyst',
             self::Client    => 'Cliente',
         };
     }
@@ -25,6 +25,7 @@ enum ProjectMemberRole: string
     {
         return match ($this) {
             self::Manager => [
+                'dashboard.view',
                 'project.view',
                 'project.create',
                 'project.edit',
@@ -68,9 +69,8 @@ enum ProjectMemberRole: string
                 'reports.view',
             ],
             self::Developer => [
+                'dashboard.view',
                 'project.view',
-                'phase.view',
-                'task.view',
                 'task.create',
                 'task.edit',
                 'task.update-status',
@@ -86,8 +86,8 @@ enum ProjectMemberRole: string
                 'metrics.view',
             ],
             self::Qa => [
+                'dashboard.view',
                 'project.view',
-                'phase.view',
                 'task.view',
                 'task.create',
                 'task.edit',
@@ -103,9 +103,9 @@ enum ProjectMemberRole: string
                 'objective.view',
                 'metrics.view',
             ],
-            self::Support => [
+            self::Analyst => [
+                'dashboard.view',
                 'project.view',
-                'task.view',
                 'ticket.view',
                 'ticket.create',
                 'ticket.edit',
@@ -114,8 +114,8 @@ enum ProjectMemberRole: string
                 'user.view',
             ],
             self::Client => [
+                'dashboard.view',
                 'project.view',
-                'ticket.view',
                 'ticket.create',
                 'milestone.view',
                 'deliverable.view',

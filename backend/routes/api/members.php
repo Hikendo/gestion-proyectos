@@ -13,4 +13,6 @@ Route::middleware('auth:sanctum')->prefix('projects/{project}')->group(function 
 
     Route::delete('members/{user}', [ProjectMemberController::class, 'destroy'])
         ->name('projects.members.destroy');
+    Route::get('members/{member}', [ProjectMemberController::class, 'show'])
+        ->name('projects.members.show');
 });

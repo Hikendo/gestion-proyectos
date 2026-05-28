@@ -17,6 +17,11 @@ class RiskPolicy
         return $user->can('risk.view');
     }
 
+    public function view(User $user, Risk $risk): bool
+    {
+        return $user->canForProject($risk->project, 'risk.view');
+    }
+
     public function create(User $user): bool
     {
         return $user->can('risk.create');

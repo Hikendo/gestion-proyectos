@@ -13,4 +13,6 @@ Route::middleware('auth:sanctum')->prefix('projects/{project}')->group(function 
 
     Route::put('objectives/{objective}', [ObjectiveController::class, 'update'])
         ->name('projects.objectives.update');
+    Route::get('objectives/{objective}', [ObjectiveController::class, 'show'])
+        ->name('projects.objectives.show');
 });

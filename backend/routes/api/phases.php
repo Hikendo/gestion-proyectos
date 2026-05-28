@@ -16,4 +16,6 @@ Route::middleware('auth:sanctum')->prefix('projects/{project}')->group(function 
 
     Route::delete('phases/{phase}', [ProjectPhaseController::class, 'destroy'])
         ->name('projects.phases.destroy');
+    Route::get('phases/{phase}', [ProjectPhaseController::class, 'show'])
+        ->name('projects.phases.show');
 });

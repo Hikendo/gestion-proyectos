@@ -97,4 +97,19 @@ class MilestoneController extends Controller
             return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
         }
     }
+    public function show(Request $request, Project $project, Milestone $milestone): JsonResponse
+    {
+        $this->assertBelongsToProject($milestone, $project->id);
+        $this->authorize('view', $milestone);
+
+        try {
+            return response()->json([
+                'status'  => true,
+                'items'   => $milestone,
+                'message' => 'Milestone encontrado.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
+    }
 }

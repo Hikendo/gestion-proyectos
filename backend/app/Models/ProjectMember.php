@@ -7,9 +7,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
+
 class ProjectMember extends Model
 {
     use HasFactory;
+
 
     protected $table = 'project_members';
 
@@ -18,6 +20,7 @@ class ProjectMember extends Model
         'user_id',
         'role',
     ];
+
 
     public function project()
     {

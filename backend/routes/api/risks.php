@@ -16,4 +16,7 @@ Route::middleware('auth:sanctum')->prefix('projects/{project}')->group(function 
 
     Route::delete('risks/{risk}', [RiskController::class, 'destroy'])
         ->name('projects.risks.destroy');
+
+        Route::get('risks/{risk}', [RiskController::class, 'show'])
+        ->name('projects.risks.show');
 });

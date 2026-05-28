@@ -87,6 +87,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'user.create',
             'user.edit',
             'user.delete',
+
+            // Dashboard
+            'dashboard.view',
         ];
 
         foreach ($permissions as $permission) {
@@ -108,6 +111,7 @@ class RolesAndPermissionsSeeder extends Seeder
         // Crea proyectos, arma equipo, asigna tareas, gestiona todo el ciclo.
         $projectManager = Role::firstOrCreate(['name' => 'project-manager']);
         $projectManager->syncPermissions([
+            'dashboard.view',
             'project.view',
             'project.create',
             'project.edit',
@@ -150,6 +154,7 @@ class RolesAndPermissionsSeeder extends Seeder
         // Recibe tareas, registra tiempo, reporta blockers, abre tickets.
         $developer = Role::firstOrCreate(['name' => 'developer']);
         $developer->syncPermissions([
+            'dashboard.view',
             'project.view',
             'phase.view',
             'task.view',
@@ -172,6 +177,7 @@ class RolesAndPermissionsSeeder extends Seeder
         // Valida entregables, reporta bugs via tickets, mueve estados de tarea.
         $qa = Role::firstOrCreate(['name' => 'qa']);
         $qa->syncPermissions([
+            'dashboard.view',
             'project.view',
             'phase.view',
             'task.view',
@@ -194,6 +200,7 @@ class RolesAndPermissionsSeeder extends Seeder
         // Gestiona tickets de soporte, los asigna internamente.
         $support = Role::firstOrCreate(['name' => 'support']);
         $support->syncPermissions([
+            'dashboard.view',
             'project.view',
             'task.view',
             'ticket.view',
@@ -208,6 +215,7 @@ class RolesAndPermissionsSeeder extends Seeder
         // Ve el progreso, abre tickets, ve entregables y milestones.
         $client = Role::firstOrCreate(['name' => 'client']);
         $client->syncPermissions([
+            'dashboard.view',
             'project.view',
             'ticket.view',
             'ticket.create',

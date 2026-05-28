@@ -17,6 +17,11 @@ class BlockerPolicy
         return $user->can('blocker.view');
     }
 
+    public function view(User $user, Blocker $blocker): bool
+    {
+        return $user->canForProject($blocker->project, 'blocker.view');
+    }
+
     public function create(User $user): bool
     {
         return true;

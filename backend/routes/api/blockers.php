@@ -16,4 +16,6 @@ Route::middleware('auth:sanctum')->prefix('projects/{project}')->group(function 
 
     Route::patch('blockers/{blocker}/resolve', [BlockerController::class, 'resolve'])
         ->name('projects.blockers.resolve');
+    Route::get('blockers/{blocker}', [BlockerController::class, 'show'])
+        ->name('projects.blockers.show');
 });

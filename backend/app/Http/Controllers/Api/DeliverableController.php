@@ -57,6 +57,21 @@ class DeliverableController extends Controller
     }
 
     /**
+     * GET /api/projects/{project}/deliverables/{deliverable}
+     */
+    public function show(Request $request, Project $project, Deliverable $deliverable): JsonResponse
+    {
+        $this->assertBelongsToProject($deliverable, $project->id);
+        $this->authorize('view', $deliverable);
+
+        return response()->json([
+            'status'  => true,
+            'items'   => $deliverable,
+            'message' => 'Entregable encontrado.',
+        ]);
+    }
+
+    /**
      * PUT /api/projects/{project}/deliverables/{deliverable}
      */
     public function update(UpdateDeliverableRequest $request, Project $project, Deliverable $deliverable): JsonResponse

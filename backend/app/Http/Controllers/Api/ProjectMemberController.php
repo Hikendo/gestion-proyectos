@@ -60,6 +60,21 @@ class ProjectMemberController extends Controller
     }
 
     /**
+     * GET /api/projects/{project}/members/{member}
+     */
+    public function show(Request $request, Project $project, \App\Models\ProjectMember $member): JsonResponse
+    {
+        $this->authorize('view', $project);
+        abort_if($member->project_id !== $project->id, 404);
+
+        return response()->json([
+            'status'  => true,
+            'items'   => $member->load('user:id,name,email'),
+            'message' => 'Miembro encontrado.',
+        ]);
+    }
+
+    /**
      * DELETE /api/projects/{project}/members/{user}
      */
     public function destroy(Request $request, Project $project, int $userId): JsonResponse

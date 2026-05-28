@@ -17,6 +17,11 @@ class MilestonePolicy
         return $user->can('milestone.view');
     }
 
+    public function view(User $user, Milestone $milestone): bool
+    {
+        return $user->canForProject($milestone->project, 'milestone.view');
+    }
+
     public function create(User $user): bool
     {
         return $user->can('milestone.create');

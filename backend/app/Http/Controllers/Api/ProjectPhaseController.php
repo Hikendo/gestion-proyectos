@@ -53,6 +53,21 @@ class ProjectPhaseController extends Controller
     }
 
     /**
+     * GET /api/projects/{project}/phases/{phase}
+     */
+    public function show(Request $request, Project $project, ProjectPhase $phase): JsonResponse
+    {
+        $this->authorize('view', $project);
+        abort_if($phase->project_id !== $project->id, 404);
+
+        return response()->json([
+            'status'  => true,
+            'items'   => $phase->loadCount('tasks'),
+            'message' => 'Fase encontrada.',
+        ]);
+    }
+
+    /**
      * PUT /api/projects/{project}/phases/{phase}
      */
     public function update(UpdateProjectPhaseRequest $request, Project $project, ProjectPhase $phase): JsonResponse

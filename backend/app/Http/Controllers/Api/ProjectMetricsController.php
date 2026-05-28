@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Enums\BlockerSeverity;
 use App\Enums\RiskImpact;
 use App\Enums\RiskStatus;
@@ -10,7 +11,6 @@ use App\Enums\TaskStatus;
 use App\Enums\TicketStatus;
 use App\Models\Project;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class ProjectMetricsController extends Controller
 {
@@ -28,7 +28,7 @@ class ProjectMetricsController extends Controller
                 'tasks.assignee:id,name',
                 'tickets',
                 'risks',
-                'blockers.creator:id,name',
+                'blockers.createdBy:id,name',
                 'objectives',
                 'milestones',
                 'deliverables',

@@ -17,6 +17,11 @@ class ObjectivePolicy
         return $user->can('objective.view');
     }
 
+    public function view(User $user, Objective $objective): bool
+    {
+        return $user->canForProject($objective->project, 'objective.view');
+    }
+
     public function create(User $user): bool
     {
         return $user->can('objective.create');

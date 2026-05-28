@@ -22,17 +22,10 @@ class ProjectController extends Controller
         try {
             $user = $request->user();
 
-            $items = Project::search($request->string('search', ''))
-                ->query(fn($q) => $q
-                    ->where(fn($q) => $q
-                        ->where('owner_id', $user->id)
-                        ->orWhereHas('members', fn($q) => $q->where('user_id', $user->id))
-                    )
-                    ->with(['owner:id,name,email', 'metrics'])
-                    ->withCount(['tasks', 'tickets', 'risks', 'blockers'])
-                    ->latest()
-                )
-                ->paginate(15);
+            $items = Project::search(trim($request->get('query')) ?? '')->orderBy('id', 'DESC')->paginate(10);
+
+
+          
 
             return response()->json([
                 'status'  => true,

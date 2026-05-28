@@ -37,7 +37,7 @@ class Blocker extends Model
         return $this->belongsTo(Task::class);
     }
 
-    public function creator()
+    public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');
     }

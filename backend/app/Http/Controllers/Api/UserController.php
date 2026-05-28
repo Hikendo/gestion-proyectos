@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Models\User;
-use App\Models\UserMetric;
+
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -44,6 +44,7 @@ class UserController extends Controller
                     ->when($request->role, fn($q, $r) => $q->role($r))
                 )
                 ->paginate(20);
+                $items->getCollection()->transform(fn($u) => array_merge($u->toArray(), ['roles' => $u->getRoleNames()]));
 
             return response()->json([
                 'status'  => true,

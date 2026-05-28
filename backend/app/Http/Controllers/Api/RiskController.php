@@ -56,6 +56,21 @@ class RiskController extends Controller
     }
 
     /**
+     * GET /api/projects/{project}/risks/{risk}
+     */
+    public function show(Request $request, Project $project, Risk $risk): JsonResponse
+    {
+        $this->assertBelongsToProject($risk, $project->id);
+        $this->authorize('view', $risk);
+
+        return response()->json([
+            'status'  => true,
+            'items'   => $risk,
+            'message' => 'Riesgo encontrado.',
+        ]);
+    }
+
+    /**
      * PUT /api/projects/{project}/risks/{risk}
      */
     public function update(UpdateRiskRequest $request, Project $project, Risk $risk): JsonResponse
