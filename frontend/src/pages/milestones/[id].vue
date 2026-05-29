@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
@@ -62,7 +61,7 @@ onMounted(async () => {
         <MilestoneForm :form="form" :errores="errores" />
       </VForm>
     </VCol>
-  
+
     <VDialog v-model="confirmVisible" persistent max-width="400">
       <VCard>
         <VCardTitle class="text-h6">Confirmar acción</VCardTitle>

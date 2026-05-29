@@ -71,4 +71,17 @@ export const update = async (projectId: number, objectiveId: number, payload: Ob
     }
     return { status: false, message: "Error en el servidor" };
   }
+
+};
+export const show = async (projectId: number, objectiveId: number) => {
+  try {
+    const { data } = await apiWithToken.get<ObjectiveResponseI>(`/projects/${projectId}/objectives/${objectiveId}`);
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    return { status: false, message: "Error en el servidor" };
+  }
 };

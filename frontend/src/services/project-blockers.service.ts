@@ -98,4 +98,18 @@ export const resolve = async (projectId: number, blockerId: number) => {
     }
     return { status: false, message: "Error en el servidor" };
   }
+
+
 };
+  export const show = async (projectId: number, blockerId: number) => {
+    try {
+      const { data } = await apiWithToken.get<BlockerResponseI>(`/projects/${projectId}/blockers/${blockerId}`);
+      return {
+        status: true,
+        message: data.message,
+        items: data.items,
+      };
+    } catch (error) {
+      return { status: false, message: "Error en el servidor" };
+    }
+  };

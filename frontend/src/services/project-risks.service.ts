@@ -85,4 +85,17 @@ export const destroy = async (projectId: number, riskId: number) => {
   } catch (error) {
     return { status: false, message: "Error en el servidor" };
   }
+
+};
+export const show = async (projectId: number, riskId: number) => {
+  try {
+    const { data } = await apiWithToken.get<RiskResponseI>(`/projects/${projectId}/risks/${riskId}`);
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    return { status: false, message: "Error en el servidor" };
+  }
 };

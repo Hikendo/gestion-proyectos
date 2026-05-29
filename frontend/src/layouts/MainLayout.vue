@@ -5,6 +5,7 @@ import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import * as authService from '@/services/auth.service';
+import ThemeSelector from '@/components/ThemeSelector.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -67,6 +68,8 @@ function isActive(name: string) {
 function navigate(name: string, params?: Record<string, unknown>) {
   router.push({ name, params });
 }
+
+const themeDialogOpen = ref(false);
 
 async function handleLogout() {
   loader.value = true;
@@ -139,11 +142,36 @@ async function handleLogout() {
       <VList density="compact" nav class="pb-2">
         <VListItem prepend-icon="mdi-account-outline" title="Mi perfil" :active="isActive('profile')"
           @click="navigate('profile')" active-color="primary" />
+        <VListItem
+          prepend-icon="mdi-palette-outline"
+          title="Apariencia"
+          @click="themeDialogOpen = true"
+          active-color="primary"
+        />
         <VListItem prepend-icon="mdi-logout" title="Cerrar sesión" @click="handleLogout" base-color="error" />
       </VList>
     </template>
 
   </VNavigationDrawer>
+
+  <!-- ── Theme selector dialog ───────────────────────────────────── -->
+  <VDialog v-model="themeDialogOpen" max-width="440" scrollable>
+    <VCard>
+      <VCardItem>
+        <VCardTitle class="d-flex align-center gap-2">
+          <VIcon icon="mdi-palette-outline" color="primary" />
+          Apariencia
+        </VCardTitle>
+        <template #append>
+          <VBtn icon="mdi-close" variant="text" size="small" @click="themeDialogOpen = false" />
+        </template>
+      </VCardItem>
+      <VDivider />
+      <VCardText class="pa-0">
+        <ThemeSelector />
+      </VCardText>
+    </VCard>
+  </VDialog>
 
   <!-- ── Main content ───────────────────────────────────────────── -->
   <VMain>

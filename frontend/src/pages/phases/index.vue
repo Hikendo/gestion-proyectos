@@ -6,6 +6,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { canAction } from '@/helpers/canAction';
 import * as phasesService from '@/services/project-phases.service';
 import type { PaginacionYQueryI } from '@/interfaces/PaginacionScoutI';
+import { formatDate } from '@/utils/util';
 
 const route  = useRoute();
 const router = useRouter();
@@ -89,18 +90,18 @@ onMounted(handleGetData);
                 <td>{{ item.id }}</td>
                 <td>{{ item.name }}</td>
                 <td>{{ item.order }}</td>
-                <td>{{ item.start_date }}</td>
-                <td>{{ item.end_date }}</td>
+                <td>{{ formatDate(item.start_date) ?? '—' }}</td>
+                <td>{{ formatDate(item.end_date) ?? '—' }}</td>
                 <td>
                   <div class="d-flex gap-1">
-                    <VBtn icon size="small" color="warning"
+                    <VBtn icon size="small" variant="flat"
                       :to="{ name: 'phases-id', params: { projectId: projectId(), id: item.id } }"
                       v-if="canAction('Fase.Update')">
-                      <VIcon icon="mdi-pencil" />
+                      <VIcon icon="mdi-pencil" color="warning"/>
                     </VBtn>
-                                        <VBtn icon size="small" color="error"
-                      @click="() => { itemDestroy.value = item; isDialogVisible.value = true; }">
-                      <VIcon icon="mdi-delete" />
+                                        <VBtn icon size="small" variant="flat" 
+                      @click="() => { itemDestroy.value = item; isDialogVisible = true; }">
+                      <VIcon icon="mdi-delete" color="error"/>
                     </VBtn>
                   </div>
                 </td>
@@ -114,12 +115,12 @@ onMounted(handleGetData);
       v-model="paginacionYquery.page"
       :total-visible="7" :length="paginacionYquery.last_page"
       style="margin-left: auto;" @update:model-value="handleGetData" />
-    
+
     <VDialog v-model="isDialogVisible" persistent class="v-dialog-sm">
       <VCard title="Eliminar Fase">
         <VCardText>¿Eliminar este fase?</VCardText>
         <VCardText class="d-flex justify-end flex-wrap gap-4">
-          <VBtn variant="outlined" @click="isDialogVisible.value = false">Cancelar</VBtn>
+          <VBtn variant="outlined" @click="isDialogVisible = false">Cancelar</VBtn>
           <VBtn color="error" @click="handleDestroy">Eliminar</VBtn>
         </VCardText>
       </VCard>

@@ -4,9 +4,11 @@ import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import { useEnsureCurrentProject } from '@/composables/useEnsureCurrentProject';
 import { canAction } from '@/helpers/canAction';
 import * as projectsService from '@/services/projects.service';
 import type { ProjectI } from '@/interfaces/ProjectI';
+import { formatDate } from '@/utils/util';
 
 const route   = useRoute();
 const router  = useRouter();
@@ -163,11 +165,11 @@ function navigateToFeature(routeName: string) {
               </VCol>
               <VCol cols="12" md="3">
                 <div class="text-caption text-medium-emphasis">Fecha inicio</div>
-                <div class="text-body-1">{{ project.start_date ?? '—' }}</div>
+                <div class="text-body-1">{{ formatDate(project.start_date!) ?? '—' }}</div>
               </VCol>
               <VCol cols="12" md="3">
                 <div class="text-caption text-medium-emphasis">Fecha fin</div>
-                <div class="text-body-1">{{ project.end_date ?? '—' }}</div>
+                <div class="text-body-1">{{ formatDate(project.end_date!) ?? '—' }}</div>
               </VCol>
               <VCol cols="12" md="3">
                 <div class="text-caption text-medium-emphasis">Presupuesto</div>

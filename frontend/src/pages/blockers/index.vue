@@ -84,12 +84,12 @@ onMounted(handleGetData);
                 <td>{{ item.resolved }}</td>
                 <td>
                   <div class="d-flex gap-1">
-                    <VBtn icon size="small" color="warning"
+                    <VBtn icon size="small" variant="flat"
                       :to="{ name: 'blockers-id', params: { projectId: projectId(), id: item.id } }"
                       v-if="canAction('Bloqueador.Update')">
-                      <VIcon icon="mdi-pencil" />
+                      <VIcon icon="mdi-pencil" color="warning"/>
                     </VBtn>
-                    
+
                   </div>
                 </td>
               </tr>
@@ -105,6 +105,6 @@ onMounted(handleGetData);
       :length="paginacionYquery.last_page"
       style="margin-left: auto;"
       @update:model-value="handleGetData" />
-    
+
   </VRow>
 </template>

@@ -6,6 +6,8 @@ import { canAction } from '@/helpers/canAction';
 import * as projectsService from '@/services/projects.service';
 import type { ProjectI } from '@/interfaces/ProjectI';
 import type { PaginacionYQueryI } from '@/interfaces/PaginacionScoutI';
+import { formatDate } from '@/utils/util';
+import { ProjectStatus } from "@/interfaces/enums";
 
 const appStore = useAppStore();
 const { loader, snackbar } = storeToRefs(appStore);
@@ -39,6 +41,24 @@ const handleDestroy = async () => {
     isDialogVisible.value = false;
 };
 
+// Helper tipado con los estados reales de tu aplicación
+const getStatusConfig = (status: ProjectStatus) => {
+  switch (status) {
+    case 'completed':
+      return { color: 'success', icon: 'mdi-check-circle-outline', text: 'Completado' };
+    case 'active':
+      return { color: 'info', icon: 'mdi-play-circle-outline', text: 'Activo' };
+    case 'planning':
+      return { color: 'secondary', icon: 'mdi-calendar-clock', text: 'Planificación' };
+    case 'on_hold':
+      return { color: 'warning', icon: 'mdi-pause-circle-outline', text: 'En Espera' };
+    case 'cancelled':
+      return { color: 'error', icon: 'mdi-close-circle-outline', text: 'Cancelado' };
+    default:
+      return { color: 'grey', icon: 'mdi-help-circle-outline', text: status };
+  }
+};
+
 watch(() => isDialogVisible.value, (val) => {
     if (!val) itemDestroy.value = null;
 });
@@ -47,14 +67,14 @@ onMounted(handleGetData);
 
 <template>
   <VRow>
+    <!-- Encabezado (Se mantiene igual) -->
     <VCol cols="12">
       <VCard>
         <VCardItem class="pb-4">
           <VCardTitle>
             <div class="d-flex justify-space-between flex-wrap">
               <h4 class="text-h4 text-wrap me-3">Listado de <strong>Proyectos</strong></h4>
-              <VBtn variant="flat" :to="{ name: 'projects-new' }"
-                v-if="canAction('Proyecto.Store')">
+              <VBtn variant="flat" :to="{ name: 'projects-new' }" v-if="canAction('Proyecto.Store')">
                 Nuevo proyecto
               </VBtn>
             </div>
@@ -63,6 +83,7 @@ onMounted(handleGetData);
       </VCard>
     </VCol>
 
+    <!-- Buscador (Se mantiene igual) -->
     <VCol cols="12">
       <VCard>
         <VCardItem>
@@ -75,54 +96,133 @@ onMounted(handleGetData);
             </VCol>
           </VRow>
         </VCardItem>
-        <VDivider />
-        <VCardText class="pa-0">
-          <VTable height="500" fixed-header>
-            <thead>
-              <tr>
-                <th class="text-uppercase">ID</th>
-                <th class="text-uppercase">Nombre</th>
-                <th class="text-uppercase">Código</th>
-                <th class="text-uppercase">Estado</th>
-                <th class="text-uppercase">Inicio</th>
-                <th class="text-uppercase">Fin</th>
-                <th class="text-uppercase">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in data" :key="item.id">
-                <td>{{ item.id }}</td>
-                <td>{{ item.name }}</td>
-                <td>{{ item.code }}</td>
-                <td>{{ item.status }}</td>
-                <td>{{ item.start_date }}</td>
-                <td>{{ item.end_date }}</td>
-                <td>
-                  <div class="d-flex gap-1">
-                    <VBtn icon size="small" color="primary"
-                      :to="{ name: 'project-detail', params: { projectId: item.id } }"
-                      title="Ver detalle">
-                      <VIcon icon="mdi-folder-open" />
-                    </VBtn>
-                    <VBtn icon size="small" color="warning"
-                      :to="{ name: 'project-detail', params: { projectId: item.id } }"
-                      v-if="canAction('Proyecto.Update')"
-                      title="Editar">
-                      <VIcon icon="mdi-pencil" />
-                    </VBtn>
-                                        <VBtn icon size="small" color="error" v-if="canAction('Proyecto.Destroy')"
-                      @click="() => { itemDestroy.value = item; isDialogVisible.value = true; }">
-                      <VIcon icon="mdi-delete" />
-                    </VBtn>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </VTable>
-        </VCardText>
       </VCard>
     </VCol>
 
+    <!-- Listado en Estilo Premium Card -->
+    <VCol cols="12">
+      <VRow v-if="data.length > 0">
+        <VCol
+          v-for="item in data"
+          :key="item.id"
+          cols="12"
+          sm="6"
+          md="4"
+          lg="4"
+        >
+          <VCard variant="flat" border class="h-100 d-flex flex-column justify-space-between">
+            <!-- Barra superior semántica discreta -->
+            <div :class="`bg-${getStatusConfig(item.status).color}`" style="height: 4px;"></div>
+
+            <!-- Encabezado de la Card estilo tu ejemplo -->
+            <VCardItem class="pb-0">
+              <div class="d-flex justify-space-between align-center mb-2">
+                <span class="text-overline text-medium-emphasis">#{{ item.id }} - {{ item.code || 'SIN CÓDIGO' }}</span>
+
+                <!-- Chip de Estado -->
+                <VChip
+                  :color="getStatusConfig(item.status).color"
+                  size="x-small"
+                  label
+                  class="font-weight-bold"
+                >
+                  <VIcon start :icon="getStatusConfig(item.status).icon" size="12" />
+                  {{ getStatusConfig(item.status).text }}
+                </VChip>
+              </div>
+
+              <!-- Nombre del Proyecto -->
+              <div class="text-h5 font-weight-bold text-truncate mb-1" :title="item.name">
+                {{ item.name }}
+              </div>
+
+              <!-- Progreso en Porcentaje Grande -->
+              <div :class="`text-${getStatusConfig(item.status).color} text-h3 font-weight-bold my-1`">
+                {{ item.progress ?? 0 }}%
+              </div>
+
+              <!-- Subtexto de presupuesto (usando item.budget)
+              <div class="text-body-1 text-medium-emphasis font-weight-regular">
+                Presupuesto: {{ item.budget ? `$${Number(item.budget).toLocaleString()}` : 'No asignado' }}
+              </div>-->
+            </VCardItem>
+
+            <!-- Bloque de la Barra de Progreso Avanzada -->
+            <VCardText class="pt-2 mt-8 flex-grow-1 position-relative">
+
+              <!-- Línea de revisión flotante (Simulada a la mitad (50%) para propósitos visuales dinámicos) -->
+              <div
+                style="right: calc(50% - 32px)"
+                :class="`position-absolute mt-n7 text-caption font-weight-medium text-${getStatusConfig(item.status).color}`"
+              >
+                Revisión
+              </div>
+
+              <!-- Barra Lineal con Badge incrustado -->
+              <VProgressLinear
+                :color="getStatusConfig(item.status).color"
+                height="16"
+                :model-value="item.progress ?? 0"
+                rounded="lg"
+              >
+                <VBadge
+                  style="right: 50%"
+                  class="position-absolute"
+                  color="white"
+                  dot
+                  inline
+                ></VBadge>
+              </VProgressLinear>
+
+              <!-- Fechas del proyecto en el espacio inferior de la barra -->
+              <div class="d-flex justify-space-between py-3 text-body-2">
+                <span :class="`text-${getStatusConfig(item.status).color} font-weight-medium`">
+                  F. Inicio: {{ item.start_date ? formatDate(item.start_date) : 'N/A' }}
+                </span>
+                <span class="text-medium-emphasis">
+                  F. Fin: {{ item.end_date ? formatDate(item.end_date) : 'N/A' }}
+                </span>
+              </div>
+            </VCardText>
+
+            <VDivider />
+
+            <!-- Acceso inferior estilo v-list-item de tu diseño -->
+            <VListItem
+              append-icon="mdi-chevron-right"
+              lines="two"
+              subtitle="Ver detalles y documentación"
+              link
+              :to="{ name: 'project-detail', params: { projectId: item.id } }"
+              class="pe-4"
+            >
+              <!-- Botón de eliminar encapsulado de forma limpia a la izquierda del chevron -->
+              <template v-slot:append>
+                <div class="d-flex align-center gap-1">
+                  <VBtn
+                    icon
+                    size="small"
+                    variant="text"
+                    v-if="canAction('Proyecto.Destroy')"
+                    @click.stop.prevent="() => { itemDestroy = item; isDialogVisible = true; }"
+                  >
+                    <VIcon icon="mdi-delete" color="error" />
+                  </VBtn>
+                  <VIcon icon="mdi-chevron-right" class="ms-2" />
+                </div>
+              </template>
+            </VListItem>
+          </VCard>
+        </VCol>
+      </VRow>
+
+      <!-- Estado vacío -->
+      <VCard v-else class="text-center pa-6">
+        <VCardText class="text-disabled">No se encontraron proyectos.</VCardText>
+      </VCard>
+    </VCol>
+
+    <!-- Paginación (Se mantiene igual) -->
     <VPagination class="mt-4 mr-3" color="primary"
       v-model="paginacionYquery.page"
       :total-visible="7"
@@ -130,11 +230,12 @@ onMounted(handleGetData);
       style="margin-left: auto;"
       @update:model-value="handleGetData" />
 
+    <!-- Diálogo de eliminación (Se mantiene igual) -->
     <VDialog v-model="isDialogVisible" persistent class="v-dialog-sm">
       <VCard title="Eliminar Proyecto">
         <VCardText>¿Eliminar este proyecto?</VCardText>
         <VCardText class="d-flex justify-end flex-wrap gap-4">
-          <VBtn variant="outlined" @click="isDialogVisible.value = false">Cancelar</VBtn>
+          <VBtn variant="outlined" @click="isDialogVisible = false">Cancelar</VBtn>
           <VBtn color="error" @click="handleDestroy">Eliminar</VBtn>
         </VCardText>
       </VCard>

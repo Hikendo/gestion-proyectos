@@ -89,14 +89,14 @@ onMounted(handleGetData);
                 <td>{{ item.role }}</td>
                 <td>
                   <div class="d-flex gap-1">
-                    <VBtn icon size="small" color="warning"
+                    <VBtn icon size="small" variant="flat"
                       :to="{ name: 'members-id', params: { projectId: projectId(), id: item.id } }"
                       v-if="canAction('Miembro.Update')">
-                      <VIcon icon="mdi-pencil" />
+                      <VIcon icon="mdi-pencil" color="warning"/>
                     </VBtn>
-                                        <VBtn icon size="small" color="error"
-                      @click="() => { itemDestroy.value = item; isDialogVisible.value = true; }">
-                      <VIcon icon="mdi-delete" />
+                                        <VBtn icon size="small" variant="flat"
+                      @click="() => { itemDestroy.value = item; isDialogVisible = true; }">
+                      <VIcon icon="mdi-delete" color="error"/>
                     </VBtn>
                   </div>
                 </td>
@@ -115,7 +115,7 @@ onMounted(handleGetData);
       <VCard title="Eliminar Miembro">
         <VCardText>¿Eliminar este miembro?</VCardText>
         <VCardText class="d-flex justify-end flex-wrap gap-4">
-          <VBtn variant="outlined" @click="isDialogVisible.value = false">Cancelar</VBtn>
+          <VBtn variant="outlined" @click="isDialogVisible = false">Cancelar</VBtn>
           <VBtn color="error" @click="handleDestroy">Eliminar</VBtn>
         </VCardText>
       </VCard>

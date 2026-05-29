@@ -101,14 +101,14 @@ onMounted(handleGetData);
                 <td>{{ item.priority }}</td>
                 <td>
                   <div class="d-flex gap-1">
-                    <VBtn icon size="small" color="warning"
+                    <VBtn icon size="small" variant="flat"
                       :to="{ name: 'tickets-id', params: { projectId: projectId(), id: item.id } }"
                       v-if="canAction('Ticket.Update')">
-                      <VIcon icon="mdi-pencil" />
+                      <VIcon icon="mdi-pencil"  color="warning"/>
                     </VBtn>
-                                        <VBtn icon size="small" color="error" v-if="canAction('Ticket.Destroy')"
-                      @click="() => { itemDestroy.value = item; isDialogVisible.value = true; }">
-                      <VIcon icon="mdi-delete" />
+                                        <VBtn icon size="small" variant="flat" v-if="canAction('Ticket.Destroy')"
+                      @click="() => { itemDestroy = item; isDialogVisible = true; }">
+                      <VIcon icon="mdi-delete" color="error"/>
                     </VBtn>
                   </div>
                 </td>
@@ -125,12 +125,12 @@ onMounted(handleGetData);
       :length="paginacionYquery.last_page"
       style="margin-left: auto;"
       @update:model-value="handleGetData" />
-    
+
     <VDialog v-model="isDialogVisible" persistent class="v-dialog-sm">
       <VCard title="Eliminar Ticket">
         <VCardText>¿Eliminar este ticket?</VCardText>
         <VCardText class="d-flex justify-end flex-wrap gap-4">
-          <VBtn variant="outlined" @click="isDialogVisible.value = false">Cancelar</VBtn>
+          <VBtn variant="outlined" @click="isDialogVisible = false">Cancelar</VBtn>
           <VBtn color="error" @click="handleDestroy">Eliminar</VBtn>
         </VCardText>
       </VCard>

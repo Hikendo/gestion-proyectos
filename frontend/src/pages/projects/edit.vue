@@ -3,6 +3,8 @@ import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
+import { useAuthStore } from '@/store/useAuthStore';
+import { useEnsureCurrentProject } from '@/composables/useEnsureCurrentProject';
 import { useProjects } from '@/composables/useProjects';
 import ProjectForm from '@/components/projects/ProjectForm.vue';
 import * as projectsService from '@/services/projects.service';
@@ -11,9 +13,12 @@ import type { ProjectI } from '@/interfaces/ProjectI';
 const route = useRoute();
 const router = useRouter();
 const appStore = useAppStore();
+const authStore = useAuthStore();
 const { loader, snackbar } = storeToRefs(appStore);
 
 const { errores, form, handleUpdate } = useProjects();
+// Garantiza currentProject en el store (menú lateral) sin doble loader
+useEnsureCurrentProject();
 
 const projectId = Number(route.params.projectId);
 
@@ -22,6 +27,8 @@ onMounted(async () => {
     const response = await projectsService.show(projectId);
     if (response.status && response.items) {
         form.value = response.items as ProjectI;
+        // También actualizamos el store con el dato fresco
+        authStore.setCurrentProject(response.items as ProjectI);
     } else {
         snackbar.value = { show: true, text: 'Proyecto no encontrado', color: 'error' };
         router.push({ name: 'projects' });

@@ -1,9 +1,15 @@
 <script setup lang="ts">
+import { onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
+import { useThemeStore } from '@/store/useThemeStore';
 
 const appStore = useAppStore();
 const { loader, snackbar } = storeToRefs(appStore);
+
+// Apply CSS variables and sync Vuetify theme on first render
+const themeStore = useThemeStore();
+onMounted(() => themeStore.init());
 </script>
 
 <template>

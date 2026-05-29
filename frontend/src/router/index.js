@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { getAuthToken } from '../services';
+import { getAuthToken, clearAuthToken } from '../services';
+import { me } from '../services/auth.service';
+import { useAuthStore } from '../store/useAuthStore';
 import MainLayout from '../layouts/MainLayout.vue';
 
 // ── Auth / Guest pages ─────────────────────────────────────────────────────
@@ -127,8 +129,28 @@ export const router = createRouter({
 });
 
 // ── Navigation guard ────────────────────────────────────────────────────────
-router.beforeEach((to) => {
-    const isAuthenticated = Boolean(getAuthToken());
+router.beforeEach(async (to) => {
+    const token = getAuthToken();
+    const isAuthenticated = Boolean(token);
+
+    // ── Restaurar sesión tras recarga ──────────────────────────────────────
+    // Si hay token pero Pinia perdió el usuario (recarga de página),
+    // llamamos a /me para rehidratar authUser con sus roles.
+    if (token) {
+        const authStore = useAuthStore();
+        if (!authStore.authUser) {
+            const result = await me();
+            if (result.status) {
+                authStore.setSession(result.items, token);
+            } else {
+                // Token inválido o expirado: limpiar y redirigir al login
+                clearAuthToken();
+                if (to.meta.requiresAuth || to.meta.requiresSuperAdmin) {
+                    return { name: 'login', query: { redirect: to.fullPath } };
+                }
+            }
+        }
+    }
 
     if (to.meta.requiresAuth && !isAuthenticated) {
         return { name: 'login', query: { redirect: to.fullPath } };
@@ -143,6 +165,12 @@ router.beforeEach((to) => {
 
     if (to.meta.requiresSuperAdmin && !isAuthenticated) {
         return { name: 'login' };
+    }
+    if (to.meta.requiresSuperAdmin && isAuthenticated) {
+        const authStore = useAuthStore();
+        if (!authStore.isSuperAdmin) {
+            return { name: 'dashboard' };
+        }
     }
 
     return true;

@@ -7,7 +7,7 @@ import { canAction } from '@/helpers/canAction';
 import * as deliverablesService from '@/services/project-deliverables.service';
 import type { DeliverableI } from '@/interfaces/DeliverableI';
 import type { PaginacionYQueryI } from '@/interfaces/PaginacionScoutI';
-
+import { formatDate } from '@/utils/util';
 const route  = useRoute();
 const router = useRouter();
 const appStore = useAppStore();
@@ -80,16 +80,16 @@ onMounted(handleGetData);
               <tr v-for="item in data" :key="item.id">
                 <td>{{ item.id }}</td>
                 <td>{{ item.name }}</td>
-                <td>{{ item.delivery_date }}</td>
+                <td>{{ formatDate(item.delivery_date!) ?? '—' }}</td>
                 <td>{{ item.approved }}</td>
                 <td>
                   <div class="d-flex gap-1">
-                    <VBtn icon size="small" color="warning"
+                    <VBtn icon size="small" variant="flat"
                       :to="{ name: 'deliverables-id', params: { projectId: projectId(), id: item.id } }"
                       v-if="canAction('Entregable.Update')">
-                      <VIcon icon="mdi-pencil" />
+                      <VIcon icon="mdi-pencil" color="warning"/>
                     </VBtn>
-                    
+
                   </div>
                 </td>
               </tr>
@@ -105,6 +105,6 @@ onMounted(handleGetData);
       :length="paginacionYquery.last_page"
       style="margin-left: auto;"
       @update:model-value="handleGetData" />
-    
+
   </VRow>
 </template>

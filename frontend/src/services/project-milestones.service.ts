@@ -23,6 +23,18 @@ export const index = async (projectId: number) => {
   }
 };
 
+export const show = async (projectId: number, milestoneId: number) => {
+  try {
+    const { data } = await apiWithToken.get<MilestoneResponseI>(`/projects/${projectId}/milestones/${milestoneId}`);
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    return { status: false, message: "Error en el servidor" };
+  }
+};
 // ─── Store ────────────────────────────────────────────────────────────────────
 
 interface MilestoneResponseI extends ResponseBaseI {

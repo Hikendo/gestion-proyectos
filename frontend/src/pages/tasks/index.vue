@@ -7,6 +7,7 @@ import { canAction } from '@/helpers/canAction';
 import * as tasksService from '@/services/project-tasks.service';
 import type { TaskI } from '@/interfaces/TaskI';
 import type { PaginacionYQueryI } from '@/interfaces/PaginacionScoutI';
+import { formatDate } from '@/utils/util';
 
 const route  = useRoute();
 const router = useRouter();
@@ -100,17 +101,17 @@ onMounted(handleGetData);
                 <td>{{ item.title }}</td>
                 <td>{{ item.status }}</td>
                 <td>{{ item.priority }}</td>
-                <td>{{ item.due_date }}</td>
+                <td>{{ formatDate(item.due_date!) ?? '—' }}</td>
                 <td>
                   <div class="d-flex gap-1">
-                    <VBtn icon size="small" color="warning"
+                    <VBtn icon size="small" variant="flat"
                       :to="{ name: 'tasks-id', params: { projectId: projectId(), id: item.id } }"
                       v-if="canAction('Tarea.Update')">
-                      <VIcon icon="mdi-pencil" />
+                      <VIcon icon="mdi-pencil" color="warning"/>
                     </VBtn>
-                                        <VBtn icon size="small" color="error" v-if="canAction('Tarea.Destroy')"
-                      @click="() => { itemDestroy.value = item; isDialogVisible.value = true; }">
-                      <VIcon icon="mdi-delete" />
+                                        <VBtn icon size="small" variant="flat" v-if="canAction('Tarea.Destroy')"
+                      @click="() => { itemDestroy = item; isDialogVisible = true; }">
+                      <VIcon icon="mdi-delete" color="error"/>
                     </VBtn>
                   </div>
                 </td>
@@ -127,12 +128,12 @@ onMounted(handleGetData);
       :length="paginacionYquery.last_page"
       style="margin-left: auto;"
       @update:model-value="handleGetData" />
-    
+
     <VDialog v-model="isDialogVisible" persistent class="v-dialog-sm">
       <VCard title="Eliminar Tarea">
         <VCardText>¿Eliminar este tarea?</VCardText>
         <VCardText class="d-flex justify-end flex-wrap gap-4">
-          <VBtn variant="outlined" @click="isDialogVisible.value = false">Cancelar</VBtn>
+          <VBtn variant="outlined" @click="isDialogVisible = false">Cancelar</VBtn>
           <VBtn color="error" @click="handleDestroy">Eliminar</VBtn>
         </VCardText>
       </VCard>

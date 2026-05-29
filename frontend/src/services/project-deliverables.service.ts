@@ -49,7 +49,18 @@ export const store = async (projectId: number, payload: DeliverablePayload) => {
     return { status: false, message: "Error en el servidor" };
   }
 };
-
+export const show = async (projectId: number, deliverableId: number) => {
+  try {
+    const { data } = await apiWithToken.get<DeliverableResponseI>(`/projects/${projectId}/deliverables/${deliverableId}`);
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    return { status: false, message: "Error en el servidor" };
+  }
+}
 // ─── Update ───────────────────────────────────────────────────────────────────
 
 export const update = async (projectId: number, deliverableId: number, payload: DeliverablePayload) => {
@@ -95,4 +106,5 @@ export const approve = async (projectId: number, deliverableId: number) => {
     }
     return { status: false, message: "Error en el servidor" };
   }
+
 };

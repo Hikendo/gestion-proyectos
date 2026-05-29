@@ -7,7 +7,7 @@ import { canAction } from '@/helpers/canAction';
 import * as milestonesService from '@/services/project-milestones.service';
 import type { MilestoneI } from '@/interfaces/MilestoneI';
 import type { PaginacionYQueryI } from '@/interfaces/PaginacionScoutI';
-
+import { formatDate } from '@/utils/util';
 const route  = useRoute();
 const router = useRouter();
 const appStore = useAppStore();
@@ -97,18 +97,18 @@ onMounted(handleGetData);
               <tr v-for="item in data" :key="item.id">
                 <td>{{ item.id }}</td>
                 <td>{{ item.title }}</td>
-                <td>{{ item.target_date }}</td>
+                <td>{{ formatDate(item.target_date!) ?? '—' }}</td>
                 <td>{{ item.completed }}</td>
                 <td>
                   <div class="d-flex gap-1">
-                    <VBtn icon size="small" color="warning"
+                    <VBtn icon size="small" variant="flat"
                       :to="{ name: 'milestones-id', params: { projectId: projectId(), id: item.id } }"
                       v-if="canAction('Hito.Update')">
-                      <VIcon icon="mdi-pencil" />
+                      <VIcon icon="mdi-pencil" color="warning"/>
                     </VBtn>
-                                        <VBtn icon size="small" color="error" v-if="canAction('Hito.Destroy')"
-                      @click="() => { itemDestroy.value = item; isDialogVisible.value = true; }">
-                      <VIcon icon="mdi-delete" />
+                                        <VBtn icon size="small" variant="flat" v-if="canAction('Hito.Destroy')"
+                      @click="() => { itemDestroy = item; isDialogVisible = true; }">
+                      <VIcon icon="mdi-delete" color="error"/>
                     </VBtn>
                   </div>
                 </td>
@@ -125,12 +125,12 @@ onMounted(handleGetData);
       :length="paginacionYquery.last_page"
       style="margin-left: auto;"
       @update:model-value="handleGetData" />
-    
+
     <VDialog v-model="isDialogVisible" persistent class="v-dialog-sm">
       <VCard title="Eliminar Hito">
         <VCardText>¿Eliminar este hito?</VCardText>
         <VCardText class="d-flex justify-end flex-wrap gap-4">
-          <VBtn variant="outlined" @click="isDialogVisible.value = false">Cancelar</VBtn>
+          <VBtn variant="outlined" @click="isDialogVisible = false">Cancelar</VBtn>
           <VBtn color="error" @click="handleDestroy">Eliminar</VBtn>
         </VCardText>
       </VCard>
