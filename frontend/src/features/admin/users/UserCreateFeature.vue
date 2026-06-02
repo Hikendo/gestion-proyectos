@@ -4,10 +4,10 @@ import FeaturePanel from '../../../components/FeaturePanel.vue';
 import RequestState from '../../../components/RequestState.vue';
 import UserForm from './UserForm.vue';
 import { useUserCreate } from '../../../composables/useUserCreate';
-import { useRolesList } from '../../../composables/useRolesList';
+import { useRoles } from '../../../composables/useRolesList';
 
 const { form, errors, isLoading, successMessage, handleCreate, usersService } = useUserCreate();
-const { roles, loadRoles } = useRolesList();
+const { roles, loadRoles } = useRoles();
 
 const errorMessage = computed(() => '');
 

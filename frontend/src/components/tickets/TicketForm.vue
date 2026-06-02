@@ -1,11 +1,22 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
 import type { TicketI, TicketErroresFormI } from '@/interfaces/TicketI';
 import type { TicketStatus, TicketPriority } from '@/interfaces/enums';
+import * as usersService from '@/services/users.service';
 
 defineProps<{
   form: TicketI;
   errores: TicketErroresFormI;
 }>();
+
+const users = ref<{ id: number; name: string; email: string }[]>([]);
+
+onMounted(async () => {
+  const response = await usersService.all();
+  if (response.status && response.items) {
+    users.value = response.items;
+  }
+});
 
 const statuses: { title: string; value: TicketStatus }[] = [
   { title: 'Abierto',      value: 'open' },
@@ -53,8 +64,31 @@ const priorities: { title: string; value: TicketPriority }[] = [
         </VCol>
 
         <VCol cols="12" md="4">
-          <VTextField v-model="form.assigned_to" :error-messages="errores.assigned_to"
-            name="assigned_to" type="number" label="Asignado a (ID)" placeholder="ID del usuario" />
+          <VSelect
+            v-model="form.assigned_to"
+            :error-messages="errores.assigned_to"
+            :items="users"
+            item-title="name"
+            item-value="id"
+            name="assigned_to"
+            label="Asignado a"
+            placeholder="Selecciona un usuario"
+            clearable
+            eager
+          >
+            <template #item="{ item, props: ip }">
+              <VListItem v-bind="ip">
+                <template #prepend>
+                  <VAvatar size="28" color="primary" variant="tonal">
+                    <span style="font-size: 0.6rem; font-weight: 700;">
+                      {{ item.name.split(' ').slice(0, 2).map((w: string) => w[0]).join('').toUpperCase() }}
+                    </span>
+                  </VAvatar>
+                </template>
+                <VListItemSubtitle>{{ item.email }}</VListItemSubtitle>
+              </VListItem>
+            </template>
+          </VSelect>
         </VCol>
 
         <VCol cols="12" class="d-flex gap-4">

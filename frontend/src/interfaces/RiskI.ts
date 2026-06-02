@@ -2,6 +2,7 @@ import { ModelBaseI } from "@/interfaces/ModelBaseI";
 import {
   RiskImpact,
   RiskProbability,
+  RiskStatus,
 } from "@/interfaces/enums";
 
 import { ProjectI } from "@/interfaces/ProjectI";
@@ -14,6 +15,7 @@ export interface RiskI extends ModelBaseI {
 
   impact: RiskImpact; // Enum Laravel
   probability: RiskProbability; // Enum Laravel
+  status: RiskStatus; // Enum Laravel
 
   mitigation_plan?: string | null; // Nullable en Laravel
 

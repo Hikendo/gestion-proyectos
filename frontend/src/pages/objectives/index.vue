@@ -15,7 +15,10 @@ const { loader, snackbar } = storeToRefs(appStore);
 
 const projectId = () => Number(route.params.projectId);
 
-
+const TYPE_LABELS: Record<string, string> = {
+  general:  'GENERAL',
+  specific: 'ESPECÍFICO',
+};
 
 const paginacionYquery = ref<PaginacionYQueryI>({ page: 1, query: '', last_page: 1 });
 const data = ref<ObjectiveI[]>([]);
@@ -28,6 +31,16 @@ const handleGetData = async () => {
         paginacionYquery.value.last_page = (response.items as any).last_page ?? 1;
     }
     loader.value = false;
+};
+
+const toggleCompleted = async (item: ObjectiveI) => {
+    const newValue = !item.completed;
+    const response = await objectivesService.update(projectId(), item.id, { completed: newValue });
+    if (response.status) {
+        item.completed = newValue;
+    } else {
+        snackbar.value = { show: true, text: response.message ?? 'Error al actualizar', color: 'error' };
+    }
 };
 
 onMounted(handleGetData);
@@ -69,7 +82,6 @@ onMounted(handleGetData);
           <VTable height="500" fixed-header>
             <thead>
               <tr>
-                <th class="text-uppercase">ID</th>
                 <th class="text-uppercase">Tipo</th>
                 <th class="text-uppercase">Título</th>
                 <th class="text-uppercase">Completado</th>
@@ -78,10 +90,25 @@ onMounted(handleGetData);
             </thead>
             <tbody>
               <tr v-for="item in data" :key="item.id">
-                <td>{{ item.id }}</td>
-                <td>{{ item.type }}</td>
+                <td>
+                  <VChip
+                    :color="item.completed ? 'success' : 'warning'"
+                    size="small"
+                    label
+                  >
+                    {{ TYPE_LABELS[item.type] ?? item.type.toUpperCase() }}
+                  </VChip>
+                </td>
                 <td>{{ item.title }}</td>
-                <td>{{ item.completed }}</td>
+                <td>
+                  <VSwitch
+                    :model-value="item.completed"
+                    :color="item.completed ? 'success' : 'warning'"
+                    hide-details
+                    density="compact"
+                    @update:model-value="toggleCompleted(item)"
+                  />
+                </td>
                 <td>
                   <div class="d-flex gap-1">
                     <VBtn icon size="small" variant="flat"

@@ -31,6 +31,27 @@ export const index = async (projectId: number, query?: TaskListQuery) => {
   }
 };
 
+// ─── Active (sin completadas, para selects) ───────────────────────────────────
+
+interface TasksActiveResponseI extends ResponseBaseI {
+  items: Pick<TaskI, 'id' | 'title' | 'status' | 'priority'>[];
+}
+
+export const active = async (projectId: number) => {
+  try {
+    const { data } = await apiWithToken.get<TasksActiveResponseI>(
+      `/projects/${projectId}/tasks/active`
+    );
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    return { status: false, message: "Error en el servidor", items: [] as Pick<TaskI, 'id' | 'title' | 'status' | 'priority'>[] };
+  }
+};
+
 // ─── Show ─────────────────────────────────────────────────────────────────────
 
 interface TaskResponseI extends ResponseBaseI {

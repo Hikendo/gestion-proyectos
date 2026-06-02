@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue';
 import type { BlockerI, BlockerErroresFormI } from '@/interfaces/BlockerI';
 import type { BlockerSeverity } from '@/interfaces/enums';
+import * as tasksService from '@/services/project-tasks.service';
 
-defineProps<{
+const props = defineProps<{
   form: BlockerI;
   errores: BlockerErroresFormI;
+  projectId: number;
 }>();
 
 const severities: { title: string; value: BlockerSeverity }[] = [
@@ -13,6 +16,25 @@ const severities: { title: string; value: BlockerSeverity }[] = [
   { title: 'Alta',     value: 'high' },
   { title: 'Crítica',  value: 'critical' },
 ];
+
+const tasks = ref<{ id: number; title: string; subtitle: string }[]>([]);
+
+onMounted(async () => {
+  const pid = props.projectId;
+  if (!pid || isNaN(pid)) return;
+  const response = await tasksService.active(pid);
+  if (response.status && response.items) {
+    tasks.value = response.items.map(t => ({
+      id: t.id,
+      title: t.title,
+      subtitle: TASK_STATUS_LABELS[t.status ?? ''] ?? (t.status ?? ''),
+    }));
+  }
+});
+
+const TASK_STATUS_LABELS: Record<string, string> = {
+  pending: 'Pendiente', in_progress: 'En Progreso', review: 'En Revisión', blocked: 'Bloqueada',
+};
 </script>
 
 <template>
@@ -40,8 +62,19 @@ const severities: { title: string; value: BlockerSeverity }[] = [
         </VCol>
 
         <VCol cols="12" md="6">
-          <VTextField v-model="form.task_id" :error-messages="errores.task_id"
-            name="task_id" type="number" label="Tarea (ID)" placeholder="ID de la tarea" />
+          <VSelect
+            v-model="form.task_id"
+            :error-messages="errores.task_id"
+            :items="tasks"
+            item-title="title"
+            item-value="id"
+            item-subtitle="subtitle"
+            name="task_id"
+            label="Tarea asociada"
+            placeholder="Selecciona una tarea"
+            clearable
+            eager
+          />
         </VCol>
 
         <VCol cols="12" md="6" class="d-flex align-center">

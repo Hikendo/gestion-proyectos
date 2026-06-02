@@ -13,9 +13,18 @@
   --app-text:      #0F172A;
   --app-muted:     #64748B;
   --app-border:    #CBD5E1;
-  --app-success:   #4CAF50;
-  --app-warning:   #FB8C00;
-  --app-danger:    #E53935;
+  --app-success:   #16A34A;
+  --app-warning:   #D97706;
+  --app-danger:    #DC2626;
+
+  /* on-* tokens: text/icon color for use ON a colored background.
+     Never substitute with --app-text. */
+  --app-on-primary:   #FFFFFF;
+  --app-on-secondary: #FFFFFF;
+  --app-on-accent:    #111111;
+  --app-on-success:   #FFFFFF;
+  --app-on-warning:   #111111;
+  --app-on-danger:    #FFFFFF;
 }
 
 /* ── Smooth theme transitions ────────────────────────────────────────────── */
@@ -44,7 +53,7 @@ body {
 }
 
 a {
-  color: inherit;
+/*  color: inherit; */
   text-decoration: none;
 }
 

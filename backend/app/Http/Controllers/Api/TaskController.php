@@ -157,4 +157,28 @@ class TaskController extends Controller
             return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
         }
     }
+
+    /**
+     * GET /api/projects/{project}/tasks/active
+     * Returns tasks that are not completed (done) or cancelled, for use in selects.
+     */
+    public function active(Request $request, Project $project): JsonResponse
+    {
+        $this->authorize('view', $project);
+
+        try {
+            $items = Task::where('project_id', $project->id)
+                ->where('status', '!=', TaskStatus::Done)
+                ->orderBy('title')
+                ->get(['id', 'title', 'status', 'priority']);
+
+            return response()->json([
+                'status'  => true,
+                'items'   => $items,
+                'message' => 'Tareas activas encontradas.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
+    }
 }

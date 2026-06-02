@@ -10,13 +10,29 @@ export function createServiceComposable<TService extends ServiceMap, TField exte
     return function useGeneratedService() {
         const state = useServiceRequest(fields);
 
-        function call<TKey extends keyof TService>(
+        async function call<TKey extends keyof TService>(
             method: TKey,
             ...args: Parameters<TService[TKey]>
         ): Promise<Awaited<ReturnType<TService[TKey]>> | null> {
-            const handler = service[method] as unknown as (...innerArgs: Parameters<TService[TKey]>) => ReturnType<TService[TKey]>;
+            const handler = service[method];
 
-            return state.execute(() => handler(...args)) as Promise<Awaited<ReturnType<TService[TKey]>> | null>;
+            // Validación más detallada
+            if (!handler) {
+                console.error(`Method "${String(method)}" does not exist in service`);
+                return null;
+            }
+
+            if (typeof handler !== 'function') {
+                console.error(`Method "${String(method)}" is not a function, got: ${typeof handler}`);
+                return null;
+            }
+
+            try {
+                return await state.execute(() => handler(...args));
+            } catch (error) {
+                console.error(`Error calling method "${String(method)}":`, error);
+                return null;
+            }
         }
 
         return {

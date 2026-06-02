@@ -43,10 +43,10 @@ async function confirmAction() {
     </VCol>
     <VCol cols="12">
       <VForm @submit.prevent="requestSave(handleStore)">
-        <BlockerForm :form="form" :errores="errores" />
+        <BlockerForm :form="form" :errores="errores" :project-id="Number(route.params.projectId)" />
       </VForm>
     </VCol>
-  
+
     <VDialog v-model="confirmVisible" persistent max-width="400">
       <VCard>
         <VCardTitle class="text-h6">Confirmar acción</VCardTitle>

@@ -1,38 +1,35 @@
-import { ref, computed } from 'vue';
-import { useRolesService } from './index';
+// composables/useRoles.ts
+import { ref } from 'vue';
+import { index, type RoleI } from '../services/roles.service';
 
-export interface RoleOption {
-    name: string;
-    label: string;
-}
+export function useRoles() {
+  const roles = ref<RoleI[]>([]);
+  const loading = ref(false);
+  const errorMessage = ref('');
 
-export function useRolesList() {
-    const rolesService = useRolesService();
-    const isLoading = ref(false);
-    const roles = ref<RoleOption[]>([]);
+  const loadRoles = async () => {
+    loading.value = true;
+    errorMessage.value = '';
 
-    async function loadRoles(): Promise<boolean> {
-        isLoading.value = true;
-
-        const response = await rolesService.call('index');
-
-        isLoading.value = false;
-
-        if (response) {
-            roles.value = Array.isArray(response.items) ? response.items : [];
-            return true;
-        }
-
-        return false;
+    try {
+      const response = await index();
+      if (response.status && response.items) {
+        roles.value = response.items;
+      } else {
+        errorMessage.value = response.message || 'Error al cargar roles';
+      }
+    } catch (error) {
+      errorMessage.value = 'Error en el servidor';
+      console.error(error);
+    } finally {
+      loading.value = false;
     }
+  };
 
-    const hasRoles = computed(() => roles.value.length > 0);
-
-    return {
-        roles,
-        isLoading,
-        hasRoles,
-        rolesService,
-        loadRoles,
-    };
+  return {
+    roles,
+    loading,
+    errorMessage,
+    loadRoles,
+  };
 }
