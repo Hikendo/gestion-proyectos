@@ -4,6 +4,8 @@ import { getAuthToken, setAuthToken, clearAuthToken } from '@/services/http';
 import type { UserI } from '@/interfaces/UserI';
 import type { ProjectI } from '@/interfaces/ProjectI';
 import type { ProjectMemberRole } from '@/interfaces/enums';
+// 🔔 Importamos las utilidades de Firebase de forma asíncrona
+import { requestNotificationPermission, listenForegroundNotifications } from '@/services/firebase';
 
 export const useAuthStore = defineStore('auth', () => {
     const authUser = ref<UserI | null>(null);
@@ -24,9 +26,19 @@ export const useAuthStore = defineStore('auth', () => {
         isGlobalProjectManager.value || currentProjectRole.value === 'manager' || isSuperAdmin.value,
     );
 
-    function setSession(user: UserI, token: string) {
+    // 🚀 Modificamos setSession para que sea asíncrona
+    async function setSession(user: UserI, token: string) {
         setAuthToken(token);
         authUser.value = user;
+
+        // 🔔 El token ya está asegurado en las cabeceras de Axios.
+        // Ahora es 100% seguro arrancar Firebase sin riesgo de lanzar un 401.
+        try {
+            await requestNotificationPermission();
+            listenForegroundNotifications();
+        } catch (error) {
+            console.error('Error al inicializar el servicio de notificaciones:', error);
+        }
     }
 
     function setCurrentProject(project: ProjectI, role?: ProjectMemberRole | null) {

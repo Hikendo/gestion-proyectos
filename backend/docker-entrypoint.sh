@@ -12,7 +12,9 @@ composer install --no-interaction --optimize-autoloader
 echo "================================================"
 echo " Generando APP_KEY si no existe..."
 echo "================================================"
-if [ -z "${APP_KEY}" ] || [ "${APP_KEY}" = "" ]; then
+# Solo generar si no viene en el entorno NI en el .env
+ENV_KEY=$(grep -E '^APP_KEY=' /var/www/.env 2>/dev/null | cut -d= -f2 | tr -d '[:space:]')
+if [ -z "${APP_KEY}" ] && ( [ -z "${ENV_KEY}" ] || [ "${ENV_KEY}" = "SomeRandomString" ] ); then
     php artisan key:generate --force
     echo " ✓ APP_KEY generado."
 else
@@ -48,10 +50,14 @@ echo " ✓ Migraciones al día."
 echo "================================================"
 echo " Ejecutando seeders (solo si es primera vez)..."
 echo "================================================"
-# Consultamos si ya existen roles en la base de datos
-ROLES_COUNT=$(php artisan tinker --no-interaction \
-    --execute="echo \Spatie\Permission\Models\Role::count();" \
-    2>/dev/null | tail -1 | tr -d '[:space:]')
+# Consultamos si ya existen roles en la base de datos (sin bootstrap de Laravel
+# para evitar que tinker se quede colgado en versiones recientes de PsySH)
+ROLES_COUNT=$(php -r "
+    \$conn = @new mysqli('${DB_HOST}', '${DB_USERNAME}', '${DB_PASSWORD}', '${DB_DATABASE}', ${DB_PORT});
+    if (\$conn->connect_error) { echo '0'; exit; }
+    \$result = \$conn->query('SELECT COUNT(*) AS cnt FROM roles');
+    if (\$result) { \$row = \$result->fetch_assoc(); echo \$row['cnt']; } else { echo '0'; }
+" 2>/dev/null || echo "0")
 
 if [ "$ROLES_COUNT" = "0" ] || [ -z "$ROLES_COUNT" ]; then
     echo " → Ejecutando RolesAndPermissionsSeeder..."
@@ -60,6 +66,15 @@ if [ "$ROLES_COUNT" = "0" ] || [ -z "$ROLES_COUNT" ]; then
 else
     echo " → Roles ya existen ($ROLES_COUNT), seeder omitido."
 fi
+
+echo "================================================"
+echo " Configurando permisos de Storage y Cache..."
+echo "================================================"
+# Forzamos que pertenezcan a www-data por encima del volumen montado
+# El 2>/dev/null || true silencia errores de bind-mount en WSL2/Windows
+chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache 2>/dev/null || true
+chmod -R 775 /var/www/storage /var/www/bootstrap/cache 2>/dev/null || true
+echo " ✓ Permisos corregidos para el servidor web."
 
 echo "================================================"
 echo " Limpiando y optimizando cachés..."

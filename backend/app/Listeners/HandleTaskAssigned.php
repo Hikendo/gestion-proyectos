@@ -1,18 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Listeners;
 
 use App\Events\TaskAssigned;
 use App\Jobs\LogActivityJob;
 use App\Jobs\RecalculateUserMetricsJob;
-use App\Notifications\TaskAssignedNotification;
+use App\Services\Notifications\Domain\TaskAssignedNotificationService;
 
 class HandleTaskAssigned
 {
+    public function __construct(
+        private readonly TaskAssignedNotificationService $notificationService
+    ) {}
+
     public function handle(TaskAssigned $event): void
     {
-        // Notificar al asignado
-        $event->assignee->notify(new TaskAssignedNotification($event->task));
+        // Push notification via FCM (role-aware + policy-aware)
+        $this->notificationService->notify($event->task, $event->assignee, $event->actor);
 
         LogActivityJob::dispatch(
             userId: $event->actor->id,

@@ -18,4 +18,6 @@ Route::prefix('v1')->group(function () {
     require __DIR__ . '/api/tickets.php';
     require __DIR__ . '/api/risks.php';
     require __DIR__ . '/api/blockers.php';
+    require __DIR__ . '/api/reports.php';
+    require __DIR__ . '/api/notifications.php';
 });

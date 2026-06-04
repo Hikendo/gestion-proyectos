@@ -9,7 +9,10 @@ const { loader, snackbar } = storeToRefs(appStore);
 
 // Apply CSS variables and sync Vuetify theme on first render
 const themeStore = useThemeStore();
-onMounted(() => themeStore.init());
+onMounted(() => {
+    themeStore.init();
+
+});
 </script>
 
 <template>

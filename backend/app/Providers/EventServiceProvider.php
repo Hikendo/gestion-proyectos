@@ -4,20 +4,28 @@ namespace App\Providers;
 
 use App\Events\BlockerCreated;
 use App\Events\BlockerResolved;
+use App\Events\CommentCreated;
 use App\Events\DeliverableApproved;
 use App\Events\MilestoneCompleted;
 use App\Events\ProjectCreated;
+use App\Events\ProjectMemberAdded;
+use App\Events\ProjectUpdated;
 use App\Events\TaskAssigned;
+use App\Events\TaskCompleted;
 use App\Events\TaskCreated;
 use App\Events\TaskStatusChanged;
 use App\Events\TicketAssigned;
 use App\Events\TicketCreated;
 use App\Listeners\HandleBlockerCreated;
 use App\Listeners\HandleBlockerResolved;
+use App\Listeners\HandleCommentCreated;
 use App\Listeners\HandleDeliverableApproved;
 use App\Listeners\HandleMilestoneCompleted;
 use App\Listeners\HandleProjectCreated;
+use App\Listeners\HandleProjectMemberAdded;
+use App\Listeners\HandleProjectUpdated;
 use App\Listeners\HandleTaskAssigned;
+use App\Listeners\HandleTaskCompleted;
 use App\Listeners\HandleTaskCreated;
 use App\Listeners\HandleTaskStatusChanged;
 use App\Listeners\HandleTicketAssigned;
@@ -39,16 +47,29 @@ use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvi
 class EventServiceProvider extends ServiceProvider
 {
     protected $listen = [
-        ProjectCreated::class     => [HandleProjectCreated::class],
-        TaskCreated::class        => [HandleTaskCreated::class],
-        TaskAssigned::class       => [HandleTaskAssigned::class],
-        TaskStatusChanged::class  => [HandleTaskStatusChanged::class],
-        TicketCreated::class      => [HandleTicketCreated::class],
-        TicketAssigned::class     => [HandleTicketAssigned::class],
-        BlockerCreated::class     => [HandleBlockerCreated::class],
-        BlockerResolved::class    => [HandleBlockerResolved::class],
-        MilestoneCompleted::class => [HandleMilestoneCompleted::class],
+        // ── Proyecto ──────────────────────────────────────────────────────────
+        ProjectCreated::class      => [HandleProjectCreated::class],
+        ProjectUpdated::class      => [HandleProjectUpdated::class],
+        ProjectMemberAdded::class  => [HandleProjectMemberAdded::class],
+
+        // ── Tarea ─────────────────────────────────────────────────────────────
+        TaskCreated::class         => [HandleTaskCreated::class],
+        TaskAssigned::class        => [HandleTaskAssigned::class],
+        TaskStatusChanged::class   => [HandleTaskStatusChanged::class],
+        TaskCompleted::class       => [HandleTaskCompleted::class],
+
+        // ── Ticket ────────────────────────────────────────────────────────────
+        TicketCreated::class       => [HandleTicketCreated::class],
+        TicketAssigned::class      => [HandleTicketAssigned::class],
+
+        // ── Blocker / Milestone / Deliverable ─────────────────────────────────
+        BlockerCreated::class      => [HandleBlockerCreated::class],
+        BlockerResolved::class     => [HandleBlockerResolved::class],
+        MilestoneCompleted::class  => [HandleMilestoneCompleted::class],
         DeliverableApproved::class => [HandleDeliverableApproved::class],
+
+        // ── Comentarios ───────────────────────────────────────────────────────
+        CommentCreated::class      => [HandleCommentCreated::class],
     ];
 
     public function boot(): void

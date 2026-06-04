@@ -34,7 +34,14 @@ return Application::configure(basePath: dirname(__DIR__))
             return response()->json(['message' => $e->getMessage()], $e->getStatusCode());
         });
 
-        $exceptions->render(function (AuthenticationException $e) {
+        $exceptions->render(function (AuthenticationException $e, $request) {
+            // 💡 SI la petición va hacia Horizon, deja que Laravel/Horizon la manejen normalmente 
+            // para que la ventana emergente HTTP Básica o el login web funcionen.
+            if ($request->is('horizon*')) {
+                return null; // Al retornar null, Laravel ignora este renderizador y usa el comportamiento por defecto
+            }
+
+            // Para todo lo demás (tu API), sigue respondiendo el JSON de siempre
             return response()->json(['message' => 'No autenticado.'], 401);
         });
 

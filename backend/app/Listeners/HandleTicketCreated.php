@@ -1,15 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Listeners;
 
 use App\Events\TicketCreated;
 use App\Jobs\LogActivityJob;
 use App\Jobs\RecalculateProjectMetricsJob;
+use App\Services\Notifications\Domain\TicketCreatedNotificationService;
 
 class HandleTicketCreated
 {
+    public function __construct(
+        private readonly TicketCreatedNotificationService $notificationService
+    ) {}
+
     public function handle(TicketCreated $event): void
     {
+        $this->notificationService->notify($event->ticket, $event->actor);
+
         LogActivityJob::dispatch(
             userId: $event->actor->id,
             module: 'ticket',

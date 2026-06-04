@@ -39,12 +39,13 @@ class UserController extends Controller
 
         try {
             $items = User::search($request->string('search', ''))
-                ->query(fn($q) => $q
-                    ->with('roles:name')
-                    ->when($request->role, fn($q, $r) => $q->role($r))
+                ->query(
+                    fn($q) => $q
+                        ->with('roles:name')
+                        ->when($request->role, fn($q, $r) => $q->role($r))
                 )
                 ->paginate(20);
-                $items->getCollection()->transform(fn($u) => array_merge($u->toArray(), ['roles' => $u->getRoleNames()]));
+            $items->getCollection()->transform(fn($u) => array_merge($u->toArray(), ['roles' => $u->getRoleNames()]));
 
             return response()->json([
                 'status'  => true,

@@ -274,4 +274,21 @@ class User extends Authenticatable
     {
         return $query->role('client');
     }
+    // Asegúrate de agregar estas líneas dentro de la clase User:
+
+    /**
+     * Obtiene todos los tokens FCM registrados del usuario.
+     */
+    public function fcmTokens(): HasMany
+    {
+        return $this->hasMany(FcmToken::class);
+    }
+
+    /**
+     * Obtiene el historial de notificaciones internas del usuario.
+     */
+    public function customNotifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
+    }
 }

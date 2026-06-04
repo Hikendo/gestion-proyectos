@@ -10,9 +10,9 @@ import * as projectsService from '@/services/projects.service';
 import type { ProjectI } from '@/interfaces/ProjectI';
 import { formatDate } from '@/utils/util';
 
-const route   = useRoute();
-const router  = useRouter();
-const appStore  = useAppStore();
+const route = useRoute();
+const router = useRouter();
+const appStore = useAppStore();
 const authStore = useAuthStore();
 const { loader, snackbar } = storeToRefs(appStore);
 
@@ -21,39 +21,40 @@ const project = ref<ProjectI | null>(null);
 const projectId = Number(route.params.projectId);
 
 const featureTabs = [
-    { key: 'objectives',  label: 'Objetivos',     icon: 'mdi-flag-checkered',         route: 'objectives' },
-    { key: 'phases',      label: 'Fases',          icon: 'mdi-timeline-outline',       route: 'phases' },
-    { key: 'plans',       label: 'Planes',         icon: 'mdi-calendar-clock',         route: 'plans' },
-    { key: 'tasks',       label: 'Tareas',         icon: 'mdi-check-circle-outline',   route: 'tasks' },
-    { key: 'tickets',     label: 'Tickets',        icon: 'mdi-ticket-outline',         route: 'tickets' },
-    { key: 'risks',       label: 'Riesgos',        icon: 'mdi-alert-circle-outline',   route: 'risks' },
-    { key: 'blockers',    label: 'Bloqueadores',   icon: 'mdi-block-helper',           route: 'blockers' },
-    { key: 'deliverables',label: 'Entregables',    icon: 'mdi-package-variant-closed', route: 'deliverables' },
-    { key: 'milestones',  label: 'Hitos',          icon: 'mdi-map-marker-check',       route: 'milestones' },
-    { key: 'members',     label: 'Miembros',       icon: 'mdi-account-group-outline',  route: 'members' },
-    { key: 'metrics',     label: 'Métricas',       icon: 'mdi-chart-bar',              route: 'metrics' },
+  { key: 'objectives', label: 'Objetivos', icon: 'mdi-flag-checkered', route: 'objectives' },
+  { key: 'phases', label: 'Fases', icon: 'mdi-timeline-outline', route: 'phases' },
+  { key: 'plans', label: 'Planes', icon: 'mdi-calendar-clock', route: 'plans' },
+  { key: 'tasks', label: 'Tareas', icon: 'mdi-check-circle-outline', route: 'tasks' },
+  { key: 'tickets', label: 'Tickets', icon: 'mdi-ticket-outline', route: 'tickets' },
+  { key: 'risks', label: 'Riesgos', icon: 'mdi-alert-circle-outline', route: 'risks' },
+  { key: 'blockers', label: 'Bloqueadores', icon: 'mdi-block-helper', route: 'blockers' },
+  { key: 'deliverables', label: 'Entregables', icon: 'mdi-package-variant-closed', route: 'deliverables' },
+  { key: 'milestones', label: 'Hitos', icon: 'mdi-map-marker-check', route: 'milestones' },
+  { key: 'members', label: 'Miembros', icon: 'mdi-account-group-outline', route: 'members' },
+  { key: 'metrics', label: 'Métricas', icon: 'mdi-chart-bar', route: 'metrics' },
+  { key: 'reports', label: 'Reportes', icon: 'mdi-file-chart-outline', route: 'project-reports' },
 ];
 
 const statusColor: Record<string, string> = {
-    planning: 'blue-grey', active: 'success',
-    on_hold: 'warning',    completed: 'primary', cancelled: 'error',
+  planning: 'blue-grey', active: 'success',
+  on_hold: 'warning', completed: 'primary', cancelled: 'error',
 };
 
 onMounted(async () => {
-    loader.value = true;
-    const response = await projectsService.show(projectId);
-    if (response.status && response.items) {
-        project.value = response.items as ProjectI;
-        authStore.setCurrentProject(response.items as ProjectI);
-    } else {
-        snackbar.value = { show: true, text: 'Proyecto no encontrado', color: 'error' };
-        router.push({ name: 'projects' });
-    }
-    loader.value = false;
+  loader.value = true;
+  const response = await projectsService.show(projectId);
+  if (response.status && response.items) {
+    project.value = response.items as ProjectI;
+    authStore.setCurrentProject(response.items as ProjectI);
+  } else {
+    snackbar.value = { show: true, text: 'Proyecto no encontrado', color: 'error' };
+    router.push({ name: 'projects' });
+  }
+  loader.value = false;
 });
 
 function navigateToFeature(routeName: string) {
-    router.push({ name: routeName, params: { projectId } });
+  router.push({ name: routeName, params: { projectId } });
 }
 </script>
 
@@ -98,17 +99,9 @@ function navigateToFeature(routeName: string) {
           </VCardItem>
           <VCardText class="pt-0">
             <VRow>
-              <VCol
-                v-for="feat in featureTabs"
-                :key="feat.key"
-                cols="6" sm="4" md="3" lg="2"
-              >
-                <VCard
-                  variant="tonal"
-                  color="primary"
-                  class="cursor-pointer text-center pa-3"
-                  @click="navigateToFeature(feat.route)"
-                >
+              <VCol v-for="feat in featureTabs" :key="feat.key" cols="6" sm="4" md="3" lg="2">
+                <VCard variant="tonal" color="primary" class="cursor-pointer text-center pa-3"
+                  @click="navigateToFeature(feat.route)">
                   <VIcon :icon="feat.icon" size="28" class="mb-1" />
                   <div class="text-caption font-weight-medium">{{ feat.label }}</div>
                 </VCard>
@@ -130,13 +123,8 @@ function navigateToFeature(routeName: string) {
                   <VIcon icon="mdi-information-outline" class="me-2" />
                   Información del proyecto
                 </span>
-                <VBtn
-                  v-if="canAction('Proyecto.Update')"
-                  variant="flat"
-                  color="warning"
-                  prepend-icon="mdi-pencil"
-                  :to="{ name: 'project-edit', params: { projectId: projectId } }"
-                >
+                <VBtn v-if="canAction('Proyecto.Update')" variant="flat" color="warning" prepend-icon="mdi-pencil"
+                  :to="{ name: 'project-edit', params: { projectId: projectId } }">
                   Editar proyecto
                 </VBtn>
               </div>

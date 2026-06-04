@@ -1,16 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Listeners;
 
 use App\Events\TicketAssigned;
 use App\Jobs\LogActivityJob;
-use App\Notifications\TicketAssignedNotification;
+use App\Services\Notifications\Domain\TicketAssignedNotificationService;
 
 class HandleTicketAssigned
 {
+    public function __construct(
+        private readonly TicketAssignedNotificationService $notificationService
+    ) {}
+
     public function handle(TicketAssigned $event): void
     {
-        $event->assignee->notify(new TicketAssignedNotification($event->ticket));
+        $this->notificationService->notify($event->ticket, $event->assignee, $event->actor);
 
         LogActivityJob::dispatch(
             userId: $event->actor->id,

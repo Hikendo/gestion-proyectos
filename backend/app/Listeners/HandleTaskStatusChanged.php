@@ -1,27 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Listeners;
 
 use App\Events\TaskStatusChanged;
 use App\Jobs\LogActivityJob;
 use App\Jobs\RecalculateProjectMetricsJob;
 use App\Jobs\RecalculateUserMetricsJob;
-use App\Notifications\TaskStatusChangedNotification;
+use App\Services\Notifications\Domain\TaskStatusChangedNotificationService;
 
 class HandleTaskStatusChanged
 {
+    public function __construct(
+        private readonly TaskStatusChangedNotificationService $notificationService
+    ) {}
+
     public function handle(TaskStatusChanged $event): void
     {
-        // Notificar al creador si existe y es distinto al actor
-        $task = $event->task->loadMissing('creator');
-
-        if ($task->creator && $task->creator->id !== $event->actor->id) {
-            $task->creator->notify(new TaskStatusChangedNotification(
-                $event->task,
-                $event->previous,
-                $event->current
-            ));
-        }
+        $this->notificationService->notify(
+            $event->task,
+            $event->previous,
+            $event->current,
+            $event->actor
+        );
 
         LogActivityJob::dispatch(
             userId: $event->actor->id,
