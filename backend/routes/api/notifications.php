@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Route;
 // Cambia 'auth:sanctum' por el driver exacto que uses en auth.php si fuera necesario
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Gestión de Tokens FCM multidispositivo
-    Route::prefix('fcm')->group(function () {
+    // Gestión de Tokens FCM multidispositivo (con rate limiting para evitar abuso)
+    Route::prefix('fcm')->middleware('throttle:30,1')->group(function () {
         Route::get('tokens', [FcmTokenController::class, 'index']);
         Route::post('register-token', [FcmTokenController::class, 'register']);
         Route::post('remove-token', [FcmTokenController::class, 'remove']);

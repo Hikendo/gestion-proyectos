@@ -5,13 +5,14 @@
 namespace App\Models;
 
 use App\Enums\TaskStatus;
+use App\Traits\HasAttachments;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Scout\Searchable;
 
 class Task extends Model
 {
-    use HasFactory, Searchable;
+    use HasFactory, Searchable, HasAttachments;
 
     public function toSearchableArray(): array
     {
@@ -65,11 +66,6 @@ class Task extends Model
     public function comments()
     {
         return $this->hasMany(TaskComment::class);
-    }
-
-    public function attachments()
-    {
-        return $this->hasMany(TaskAttachment::class);
     }
 
     public function timeLogs()

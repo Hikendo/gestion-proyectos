@@ -9,6 +9,7 @@ import { canAction } from '@/helpers/canAction';
 import * as projectsService from '@/services/projects.service';
 import type { ProjectI } from '@/interfaces/ProjectI';
 import { formatDate } from '@/utils/util';
+import ProjectOverviewTab from '@/pages/project-detail/ProjectOverviewTab.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -40,16 +41,17 @@ const statusColor: Record<string, string> = {
   on_hold: 'warning', completed: 'primary', cancelled: 'error',
 };
 
-onMounted(async () => {
-  loader.value = true;
+async function loadProject() {
   const response = await projectsService.show(projectId);
   if (response.status && response.items) {
     project.value = response.items as ProjectI;
     authStore.setCurrentProject(response.items as ProjectI);
-  } else {
-    snackbar.value = { show: true, text: 'Proyecto no encontrado', color: 'error' };
-    router.push({ name: 'projects' });
   }
+}
+
+onMounted(async () => {
+  loader.value = true;
+  await loadProject();
   loader.value = false;
 });
 
@@ -159,7 +161,7 @@ function navigateToFeature(routeName: string) {
                 <div class="text-caption text-medium-emphasis">Fecha fin</div>
                 <div class="text-body-1">{{ formatDate(project.end_date!) ?? '—' }}</div>
               </VCol>
-              <VCol cols="12" md="3">
+              <VCol v-if="canAction('Proyecto.ViewBudget')" cols="12" md="3">
                 <div class="text-caption text-medium-emphasis">Presupuesto</div>
                 <div class="text-body-1">{{ project.budget ?? '—' }}</div>
               </VCol>
@@ -174,6 +176,14 @@ function navigateToFeature(routeName: string) {
             </VRow>
           </VCardText>
         </VCard>
+      </VCol>
+    </VRow>
+
+    <!-- Expediente digital del proyecto -->
+    <VRow class="mt-4">
+      <VCol cols="12">
+        <ProjectOverviewTab :project-id="projectId" :attachments="project.attachments ?? []"
+          :can-delete="canAction('Proyecto.Update')" @refresh="loadProject" />
       </VCol>
     </VRow>
   </div>

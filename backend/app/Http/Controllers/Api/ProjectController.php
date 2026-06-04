@@ -6,13 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Project\StoreProjectRequest;
 use App\Http\Requests\Project\UpdateProjectRequest;
 use App\Models\Project;
+use App\Services\AttachmentService;
 use App\Services\ProjectService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ProjectController extends Controller
 {
-    public function __construct(private ProjectService $service) {}
+    public function __construct(
+        private ProjectService $service,
+        private AttachmentService $attachmentService,
+    ) {}
 
     /**
      * GET /api/projects
@@ -22,10 +26,27 @@ class ProjectController extends Controller
         try {
             $user = $request->user();
 
-            $items = Project::search(trim($request->get('query')) ?? '')->orderBy('id', 'DESC')->paginate(10);
+            // Solo proyectos donde el usuario es owner o miembro
+            $baseQuery = Project::where(function ($q) use ($user) {
+                $q->where('owner_id', $user->id)
+                    ->orWhereHas('members', fn($mq) => $mq->where('user_id', $user->id));
+            });
 
+            $search = trim($request->get('query', ''));
 
-          
+            // Si no hay término de búsqueda, usamos Eloquent directamente porque
+            // el driver "collection" de Scout devuelve vacío con search('').
+            if ($search === '') {
+                $items = $baseQuery->orderBy('id', 'DESC')->paginate(10);
+            } else {
+                $items = Project::search($search)
+                    ->query(fn($q) => $q->where(function ($q) use ($user) {
+                        $q->where('owner_id', $user->id)
+                            ->orWhereHas('members', fn($mq) => $mq->where('user_id', $user->id));
+                    }))
+                    ->orderBy('id', 'DESC')
+                    ->paginate(10);
+            }
 
             return response()->json([
                 'status'  => true,
@@ -43,8 +64,20 @@ class ProjectController extends Controller
     public function store(StoreProjectRequest $request): JsonResponse
     {
         try {
-            $item = $this->service->create($request->validated(), $request->user());
-            $item->load('owner:id,name,email');
+            $data = $request->validated();
+            $files = $request->file('attachments', []);
+
+            // Extraer attachments para que ProjectService no los procese
+            unset($data['attachments']);
+
+            $item = $this->service->create($data, $request->user());
+
+            // Subir archivos adjuntos polimórficos con aislamiento por proyecto
+            if (!empty($files)) {
+                $this->attachmentService->uploadMany($item, $files, $request->user());
+            }
+
+            $item->load(['owner:id,name,email', 'attachments']);
 
             return response()->json([
                 'status'  => true,
@@ -74,6 +107,7 @@ class ProjectController extends Controller
                 'risks',
                 'blockers',
                 'metrics',
+                'attachments',
             ])->loadCount(['tasks', 'tickets']);
 
             return response()->json([
@@ -119,6 +153,37 @@ class ProjectController extends Controller
             return response()->json(['status' => true, 'items' => null, 'message' => 'Proyecto eliminado.']);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
+    }
+
+    /**
+     * POST /api/v1/projects/{project}/attachments
+     *
+     * Sube múltiples archivos adjuntos a un proyecto existente.
+     */
+    public function uploadAttachments(Request $request, Project $project): JsonResponse
+    {
+        $this->authorize('update', $project);
+
+        $request->validate([
+            'attachments'   => ['required', 'array'],
+            'attachments.*' => ['file', 'max:102400'],
+        ]);
+
+        try {
+            $files = $request->file('attachments');
+            $uploaded = $this->attachmentService->uploadMany($project, $files, $request->user());
+
+            return response()->json([
+                'status'  => true,
+                'data'    => $uploaded,
+                'message' => count($uploaded) . ' archivo(s) subido(s) correctamente.',
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status'  => false,
+                'message' => $th->getMessage(),
+            ], 500);
         }
     }
 }

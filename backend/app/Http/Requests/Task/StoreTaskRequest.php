@@ -29,6 +29,8 @@ class StoreTaskRequest extends FormRequest
             'status'          => ['nullable', 'in:pending,in_progress,review,done,blocked'],
             'due_date'        => ['nullable', 'date'],
             'estimated_hours' => ['nullable', 'numeric', 'min:0'],
+            'attachments'     => ['nullable', 'array'],
+            'attachments.*'   => ['file', 'mimes:pdf,jpeg,png,zip,docx,xlsx', 'max:10240'],
         ];
     }
 }

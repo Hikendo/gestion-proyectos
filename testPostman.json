@@ -17,7 +17,8 @@
     { "key": "phase_id", "value": "1" },
     { "key": "objective_id", "value": "1" },
     { "key": "comment_id", "value": "1" },
-    { "key": "timelog_id", "value": "1" }
+    { "key": "timelog_id", "value": "1" },
+    { "key": "notification_id", "value": "1" }
   ],
   "auth": {
     "type": "bearer",
@@ -972,6 +973,198 @@
             "method": "DELETE",
             "header": [{ "key": "Accept", "value": "application/json" }],
             "url": { "raw": "{{base_url}}/projects/{{project_id}}/tickets/{{ticket_id}}", "host": ["{{base_url}}"], "path": ["projects", "{{project_id}}", "tickets", "{{ticket_id}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "List Notifications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/notifications", "host": ["{{base_url}}"], "path": ["notifications"] }
+          }
+        },
+        {
+          "name": "Get Notification",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/notifications/{{notification_id}}", "host": ["{{base_url}}"], "path": ["notifications", "{{notification_id}}"] }
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notification_id\": {{notification_id}}\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/notifications/mark-read", "host": ["{{base_url}}"], "path": ["notifications", "mark-read"] }
+          }
+        },
+        {
+          "name": "Mark All Notifications as Read",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{base_url}}/notifications/mark-all-read", "host": ["{{base_url}}"], "path": ["notifications", "mark-all-read"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Attachments",
+      "item": [
+        {
+          "name": "Download Attachment",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/attachments/download/{uuid}",
+              "host": ["{{base_url}}"],
+              "path": ["attachments", "download", "{uuid}"]
+            }
+          }
+        },
+        {
+          "name": "Delete Attachment",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/attachments/{uuid}",
+              "host": ["{{base_url}}"],
+              "path": ["attachments", "{uuid}"]
+            }
+          }
+        },
+        {
+          "name": "Replace Attachment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "",
+                  "description": "Nuevo archivo para reemplazar"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/attachments/{uuid}/replace",
+              "host": ["{{base_url}}"],
+              "path": ["attachments", "{uuid}", "replace"]
+            }
+          }
+        },
+        {
+          "name": "Upload Attachments to Project",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "attachments[]",
+                  "type": "file",
+                  "src": "",
+                  "description": "Archivo adjunto"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/attachments",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", "attachments"]
+            }
+          }
+        },
+        {
+          "name": "Upload Attachments to Task",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "attachments[]",
+                  "type": "file",
+                  "src": "",
+                  "description": "Archivo adjunto"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/tasks/{{task_id}}/attachments",
+              "host": ["{{base_url}}"],
+              "path": ["tasks", "{{task_id}}", "attachments"]
+            }
+          }
+        },
+        {
+          "name": "Upload Attachments to Ticket",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "attachments[]",
+                  "type": "file",
+                  "src": "",
+                  "description": "Archivo adjunto"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/tickets/{{ticket_id}}/attachments",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", "tickets", "{{ticket_id}}", "attachments"]
+            }
+          }
+        },
+        {
+          "name": "Upload Attachments to Blocker",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "attachments[]",
+                  "type": "file",
+                  "src": "",
+                  "description": "Archivo adjunto"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/blockers/{{blocker_id}}/attachments",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", "blockers", "{{blocker_id}}", "attachments"]
+            }
           }
         }
       ]

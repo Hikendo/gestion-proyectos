@@ -28,6 +28,20 @@ class SendPushNotificationJob implements ShouldQueue
     public int $timeout = 60;
 
     /**
+     * Backoff exponencial para respetar cuotas de FCM y evitar sobrecarga de red.
+     * Secuencia: 10s → 30s → 60s
+     *
+     * @var array<int, int>
+     */
+    public array $backoff = [10, 30, 60];
+
+    /**
+     * Máximo de excepciones permitidas antes de marcar como fallido definitivo.
+     * 3 reintentos + intento inicial = 4 intentos totales.
+     */
+    public int $maxExceptions = 3;
+
+    /**
      * Constructor Property Promotion nativo de PHP 8.4
      */
     public function __construct(

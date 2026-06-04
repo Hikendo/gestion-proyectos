@@ -21,10 +21,12 @@ class StoreBlockerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title'       => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'severity'    => ['required', 'in:low,medium,high,critical'],
-            'task_id'     => ['nullable', 'exists:tasks,id'],
+            'title'          => ['required', 'string', 'max:255'],
+            'description'    => ['nullable', 'string'],
+            'severity'       => ['required', 'in:low,medium,high,critical'],
+            'task_id'        => ['nullable', 'exists:tasks,id'],
+            'attachments'    => ['nullable', 'array'],
+            'attachments.*'  => ['file', 'mimes:pdf,jpeg,png,zip,docx,xlsx', 'max:10240'],
         ];
     }
 }

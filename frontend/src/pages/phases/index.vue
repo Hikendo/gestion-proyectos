@@ -10,7 +10,7 @@ import type { PaginacionYQueryI } from '@/interfaces/PaginacionScoutI';
 import { formatDate } from '@/utils/util';
 import type { ProjectPhaseI } from '@/interfaces/ProjectPhaseI';
 
-const route  = useRoute();
+const route = useRoute();
 const router = useRouter();
 const appStore = useAppStore();
 const { loader, snackbar } = storeToRefs(appStore);
@@ -109,26 +109,26 @@ const getStatusText = (phase: ProjectPhaseI) => {
 };
 
 const handleGetData = async () => {
-    loader.value = true;
-    const response = await phasesService.index(projectId());
-    if (response.status && response.items) {
-        data.value = (response.items as any).data ?? (Array.isArray(response.items) ? response.items : []);
-        paginacionYquery.value.last_page = (response.items as any).last_page ?? 1;
-    }
-    loader.value = false;
+  loader.value = true;
+  const response = await phasesService.index(projectId());
+  if (response.status && response.items) {
+    data.value = (response.items as any).data ?? (Array.isArray(response.items) ? response.items : []);
+    paginacionYquery.value.last_page = (response.items as any).last_page ?? 1;
+  }
+  loader.value = false;
 };
 
 const itemDestroy = ref<ProjectPhaseI | null>(null);
 const handleDestroy = async () => {
-    if (!itemDestroy.value) return;
-    loader.value = true;
-    const response = await phasesService.destroy(projectId(), itemDestroy.value.id);
-    if (response.status) {
-        snackbar.value = { show: true, text: 'Fase eliminada', color: 'success' };
-        handleGetData();
-    }
-    loader.value = false;
-    isDialogVisible.value = false;
+  if (!itemDestroy.value) return;
+  loader.value = true;
+  const response = await phasesService.destroy(projectId(), itemDestroy.value.id);
+  if (response.status) {
+    snackbar.value = { show: true, text: 'Fase eliminada', color: 'success' };
+    handleGetData();
+  }
+  loader.value = false;
+  isDialogVisible.value = false;
 };
 
 // Navegar a la vista de tareas de la fase
@@ -161,61 +161,66 @@ onMounted(handleGetData);
       <tr v-for="item in data" :key="item.id">
         <td>
           <div class="d-flex align-center gap-2">
-            <VIcon
-              :icon="getStatusIcon(item)"
-              :color="getPhaseColor(item)"
-              size="small"
-            />
+            <VIcon :icon="getStatusIcon(item)" :color="getPhaseColor(item)" size="small" />
             <strong class="ml-2">{{ item.name }}</strong>
           </div>
         </td>
         <td>
           <div class="d-flex align-center gap-2">
-            <VProgressLinear
-              :model-value="item.progress || 0"
-              :color="getProgressColor(item)"
-              height="8"
-              rounded
-              class="flex-grow-1"
-            />
-            <span class="text-body-2 font-weight-medium ml-1" >
+            <VProgressLinear :model-value="item.progress || 0" :color="getProgressColor(item)" height="8" rounded
+              class="flex-grow-1" />
+            <span class="text-body-2 font-weight-medium ml-1">
               {{ item.progress || 0 }}%
             </span>
           </div>
         </td>
         <td>
-          <VChip
-            :color="getPhaseColor(item)"
-            size="small"
-            variant="flat"
-          >
+          <VChip :color="getPhaseColor(item)" size="small" variant="flat">
             {{ getStatusText(item) }}
           </VChip>
         </td>
         <td>{{ formatDate(item.start_date!) ?? '—' }}</td>
         <td>{{ formatDate(item.end_date!) ?? '—' }}</td>
         <td>
-          <VChip
-            size="small"
-            color="primary"
-            variant="tonal"
-            @click="goToPhaseTasks(item.id)"
-            class="cursor-pointer"
-          >
+          <VChip size="small" color="primary" variant="tonal" @click="goToPhaseTasks(item.id)" class="cursor-pointer">
             {{ item.tasks_count ?? 0 }} tareas
           </VChip>
         </td>
         <td>
           <div class="d-flex gap-1">
-            <VBtn icon size="small" variant="text">
-              <VIcon icon="mdi-pencil" color="warning" size="small"/>
+            <VBtn icon size="small" variant="text"
+              @click="router.push({ name: 'phases-view', params: { projectId: projectId(), id: item.id } })">
+              <VIcon icon="mdi-eye" color="primary" size="small" />
             </VBtn>
-            <VBtn icon size="small" variant="text">
-              <VIcon icon="mdi-delete" color="error" size="small"/>
+            <VBtn icon size="small" variant="text"
+              @click="router.push({ name: 'phases-id', params: { projectId: projectId(), id: item.id } })">
+              <VIcon icon="mdi-pencil" color="warning" size="small" />
+            </VBtn>
+            <VBtn icon size="small" variant="text" @click="itemDestroy = item; isDialogVisible = true">
+              <VIcon icon="mdi-delete" color="error" size="small" />
             </VBtn>
           </div>
         </td>
       </tr>
     </tbody>
   </VTable>
+
+  <!-- Diálogo de confirmación de eliminación -->
+  <VDialog v-model="isDialogVisible" persistent max-width="400">
+    <VCard>
+      <VCardTitle class="text-h6">Confirmar eliminación</VCardTitle>
+      <VCardText>
+        ¿Estás seguro de que deseas eliminar la fase <strong>{{ itemDestroy?.name }}</strong>?
+        Esta acción no se puede deshacer.
+      </VCardText>
+      <VCardActions class="justify-end gap-2 pb-4 px-4">
+        <VBtn variant="outlined" @click="isDialogVisible = false; itemDestroy = null">
+          Cancelar
+        </VBtn>
+        <VBtn color="error" variant="flat" :loading="loader" @click="handleDestroy">
+          Eliminar
+        </VBtn>
+      </VCardActions>
+    </VCard>
+  </VDialog>
 </template>

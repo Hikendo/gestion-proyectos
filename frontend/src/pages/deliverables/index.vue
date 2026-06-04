@@ -19,7 +19,7 @@ const projectId = () => Number(route.params.projectId);
 
 const viewMode = ref<'list' | 'kanban'>('list');
 const viewOptions = [
-  { title: '📋 Lista',  value: 'list' },
+  { title: '📋 Lista', value: 'list' },
   { title: '🎯 Kanban', value: 'kanban' },
 ];
 
@@ -66,8 +66,8 @@ async function toggleApproved(item: DeliverableI) {
 // ── Kanban ────────────────────────────────────────────────────────────────────
 
 const KANBAN_COLUMNS = [
-  { id: 'pending',  approved: false, title: 'Pendiente', color: 'warning', icon: 'mdi-clock-outline' },
-  { id: 'approved', approved: true,  title: 'Aprobado',  color: 'success', icon: 'mdi-check-decagram-outline' },
+  { id: 'pending', approved: false, title: 'Pendiente', color: 'warning', icon: 'mdi-clock-outline' },
+  { id: 'approved', approved: true, title: 'Aprobado', color: 'success', icon: 'mdi-check-decagram-outline' },
 ];
 
 const getByApproved = (approved: boolean) => data.value.filter(d => d.approved === approved);
@@ -136,17 +136,8 @@ onMounted(handleGetData);
             <div class="d-flex justify-space-between align-center flex-wrap gap-3">
               <h4 class="text-h4 text-wrap me-3">Listado de <strong>Entregables</strong></h4>
               <div class="d-flex align-center gap-3">
-                <VSelect
-                  v-model="viewMode"
-                  :items="viewOptions"
-                  item-title="title"
-                  item-value="value"
-                  density="compact"
-                  variant="solo"
-                  flat
-                  hide-details
-                  style="max-width: 130px;"
-                />
+                <VSelect v-model="viewMode" :items="viewOptions" item-title="title" item-value="value" density="compact"
+                  variant="solo" flat hide-details style="max-width: 130px;" />
                 <VBtn variant="flat" :to="{ name: 'deliverables-new', params: { projectId: projectId() } }"
                   v-if="canAction('Entregable.Store')">
                   Nuevo entregable
@@ -188,17 +179,15 @@ onMounted(handleGetData);
                   <td>{{ item.name }}</td>
                   <td>{{ formatDate(item.delivery_date!) ?? '—' }}</td>
                   <td>
-                    <VSwitch
-                      :model-value="item.approved"
-                      color="success"
-                      hide-details
-                      density="compact"
-                      :label="item.approved ? 'Aprobado' : 'Pendiente'"
-                      @update:model-value="toggleApproved(item)"
-                    />
+                    <VSwitch :model-value="item.approved" color="success" hide-details density="compact"
+                      :label="item.approved ? 'Aprobado' : 'Pendiente'" @update:model-value="toggleApproved(item)" />
                   </td>
                   <td>
                     <div class="d-flex gap-1">
+                      <VBtn icon size="small" variant="text"
+                        :to="{ name: 'deliverables-view', params: { projectId: projectId(), id: item.id } }">
+                        <VIcon icon="mdi-eye" color="primary" size="small" />
+                      </VBtn>
                       <VBtn icon size="small" variant="flat"
                         :to="{ name: 'deliverables-id', params: { projectId: projectId(), id: item.id } }"
                         v-if="canAction('Entregable.Update')">
@@ -220,21 +209,10 @@ onMounted(handleGetData);
     <!-- ── Vista Kanban ───────────────────────────────────────────────────── -->
     <VCol cols="12" v-if="viewMode === 'kanban'">
       <VRow style="flex-wrap: nowrap;" class="overflow-x-auto pb-4">
-        <VCol
-          v-for="col in KANBAN_COLUMNS"
-          :key="col.id"
-          style="min-width: 320px;"
-          @dragover.prevent
-          @dragenter.prevent="onDragEnter(col.id)"
-          @dragleave="onDragLeave($event, col.id)"
-          @drop="onDrop($event, col)"
-        >
-          <VCard
-            :color="col.color"
-            variant="tonal"
-            class="h-100"
-            :class="{ 'kanban-drop-target': dragOverColumn === col.id }"
-          >
+        <VCol v-for="col in KANBAN_COLUMNS" :key="col.id" style="min-width: 320px;" @dragover.prevent
+          @dragenter.prevent="onDragEnter(col.id)" @dragleave="onDragLeave($event, col.id)" @drop="onDrop($event, col)">
+          <VCard :color="col.color" variant="tonal" class="h-100"
+            :class="{ 'kanban-drop-target': dragOverColumn === col.id }">
             <VCardItem>
               <VCardTitle class="d-flex align-center gap-2">
                 <VIcon :icon="col.icon" :color="col.color" size="18" />
@@ -249,26 +227,18 @@ onMounted(handleGetData);
               <div class="d-flex flex-column gap-2">
 
                 <!-- Tarjeta de entregable -->
-                <VCard
-                  v-for="deliverable in getByApproved(col.approved)"
-                  :key="deliverable.id"
-                  variant="outlined"
+                <VCard v-for="deliverable in getByApproved(col.approved)" :key="deliverable.id" variant="outlined"
                   class="deliverable-card"
-                  :class="{ 'deliverable-dragging': draggedDeliverable?.id === deliverable.id }"
-                  draggable="true"
-                  @dragstart="onDragStart($event, deliverable)"
-                  @dragend="onDragEnd"
-                >
+                  :class="{ 'deliverable-dragging': draggedDeliverable?.id === deliverable.id }" draggable="true"
+                  @dragstart="onDragStart($event, deliverable)" @dragend="onDragEnd">
                   <VCardText class="pa-3">
 
                     <!-- Nombre + ícono -->
                     <div class="d-flex align-center gap-2 mb-2">
                       <VIcon size="14" :color="col.color">mdi-package-variant-closed</VIcon>
-                      <span
-                        class="text-body-2 font-weight-medium"
-                        style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
-                        :title="deliverable.name"
-                      >{{ deliverable.name }}</span>
+                      <span class="text-body-2 font-weight-medium"
+                        style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" :title="deliverable.name">{{
+                        deliverable.name }}</span>
                     </div>
 
                     <!-- Fecha de entrega -->
@@ -281,11 +251,9 @@ onMounted(handleGetData);
 
                     <!-- Acción editar -->
                     <div class="d-flex justify-end">
-                      <VBtn
-                        size="x-small" variant="text" :color="col.color"
+                      <VBtn size="x-small" variant="text" :color="col.color"
                         :to="{ name: 'deliverables-id', params: { projectId: deliverable.project_id, id: deliverable.id } }"
-                        v-if="canAction('Entregable.Update')"
-                      >
+                        v-if="canAction('Entregable.Update')">
                         <VIcon size="14">mdi-pencil</VIcon>
                       </VBtn>
                     </div>
@@ -294,11 +262,8 @@ onMounted(handleGetData);
                 </VCard>
 
                 <!-- Zona de drop vacía -->
-                <div
-                  v-if="getByApproved(col.approved).length === 0"
-                  class="empty-drop-zone"
-                  :class="{ 'empty-drop-zone--active': dragOverColumn === col.id }"
-                >
+                <div v-if="getByApproved(col.approved).length === 0" class="empty-drop-zone"
+                  :class="{ 'empty-drop-zone--active': dragOverColumn === col.id }">
                   <VIcon size="28" color="grey-lighten-1">mdi-tray-arrow-down</VIcon>
                   <span class="text-caption text-grey">Arrastra aquí</span>
                 </div>
@@ -329,9 +294,13 @@ onMounted(handleGetData);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.deliverable-card:active { cursor: grabbing; }
+.deliverable-card:active {
+  cursor: grabbing;
+}
 
-.deliverable-dragging { opacity: 0.4; }
+.deliverable-dragging {
+  opacity: 0.4;
+}
 
 .empty-drop-zone {
   display: flex;

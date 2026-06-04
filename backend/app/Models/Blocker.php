@@ -5,12 +5,13 @@
 namespace App\Models;
 
 use App\Enums\BlockerSeverity;
+use App\Traits\HasAttachments;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Blocker extends Model
 {
-    use HasFactory;
+    use HasFactory, HasAttachments;
 
     protected $fillable = [
         'project_id',
@@ -42,4 +43,3 @@ class Blocker extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 }
-

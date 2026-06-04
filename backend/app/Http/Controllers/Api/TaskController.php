@@ -8,6 +8,7 @@ use App\Http\Requests\Task\StoreTaskRequest;
 use App\Http\Requests\Task\UpdateTaskRequest;
 use App\Models\Project;
 use App\Models\Task;
+use App\Services\AttachmentService;
 use App\Services\ProjectService;
 use App\Services\TaskService;
 use App\Traits\BelongsToProject;
@@ -20,7 +21,8 @@ class TaskController extends Controller
 
     public function __construct(
         private TaskService $service,
-        private ProjectService $projectService
+        private ProjectService $projectService,
+        private AttachmentService $attachmentService,
     ) {}
 
     /**
@@ -31,16 +33,31 @@ class TaskController extends Controller
         $this->authorize('view', $project);
 
         try {
-            $items = Task::search($request->string('search', ''))
-                ->query(fn($q) => $q
-                    ->where('project_id', $project->id)
+            $search = $request->string('search', '')->trim()->toString();
+
+            // Si no hay término de búsqueda, usamos Eloquent directamente porque
+            // el driver "collection" de Scout devuelve vacío con search('').
+            if ($search === '') {
+                $items = Task::where('project_id', $project->id)
                     ->with(['assignee:id,name,email', 'phase:id,name'])
                     ->when($request->status,      fn($q, $s) => $q->where('status', $s))
                     ->when($request->assigned_to, fn($q, $u) => $q->where('assigned_to', $u))
                     ->when($request->priority,    fn($q, $p) => $q->where('priority', $p))
                     ->orderBy('due_date')
-                )
-                ->paginate(20);
+                    ->paginate(20);
+            } else {
+                $items = Task::search($search)
+                    ->query(
+                        fn($q) => $q
+                            ->where('project_id', $project->id)
+                            ->with(['assignee:id,name,email', 'phase:id,name'])
+                            ->when($request->status,      fn($q, $s) => $q->where('status', $s))
+                            ->when($request->assigned_to, fn($q, $u) => $q->where('assigned_to', $u))
+                            ->when($request->priority,    fn($q, $p) => $q->where('priority', $p))
+                            ->orderBy('due_date')
+                    )
+                    ->paginate(20);
+            }
 
             return response()->json([
                 'status'  => true,
@@ -60,11 +77,20 @@ class TaskController extends Controller
         $this->authorize('view', $project);
 
         try {
-            $item = $this->service->create($request->validated(), $project, $request->user());
+            $data = $request->validated();
+            $files = $request->file('attachments', []);
+
+            unset($data['attachments']);
+
+            $item = $this->service->create($data, $project, $request->user());
+
+            if (!empty($files)) {
+                $this->attachmentService->uploadMany($item, $files, $request->user());
+            }
 
             return response()->json([
                 'status'  => true,
-                'items'   => $item->load('assignee:id,name,email'),
+                'items'   => $item->load(['assignee:id,name,email', 'attachments']),
                 'message' => 'Tarea creada.',
             ], 201);
         } catch (\Throwable $th) {
@@ -88,6 +114,7 @@ class TaskController extends Controller
                 'comments.user:id,name,email',
                 'timeLogs.user:id,name,email',
                 'blockers',
+                'attachments',
             ]);
 
             return response()->json([
@@ -179,6 +206,38 @@ class TaskController extends Controller
             ]);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
+    }
+
+    /**
+     * POST /api/v1/tasks/{task}/attachments
+     *
+     * Sube múltiples archivos adjuntos a una tarea existente.
+     */
+    public function uploadAttachments(Request $request, Task $task): JsonResponse
+    {
+        $project = Project::findOrFail($task->project_id);
+        $this->authorize('update', $project);
+
+        $request->validate([
+            'attachments'   => ['required', 'array'],
+            'attachments.*' => ['file', 'max:102400'],
+        ]);
+
+        try {
+            $files = $request->file('attachments');
+            $uploaded = $this->attachmentService->uploadMany($task, $files, $request->user());
+
+            return response()->json([
+                'status'  => true,
+                'data'    => $uploaded,
+                'message' => count($uploaded) . ' archivo(s) subido(s) correctamente.',
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status'  => false,
+                'message' => $th->getMessage(),
+            ], 500);
         }
     }
 }

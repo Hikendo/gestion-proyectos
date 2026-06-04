@@ -1,6 +1,5 @@
 import { initializeApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage, Messaging } from 'firebase/messaging';
-import axios from 'axios';
 import { apiWithToken } from '@/services/http';
 
 const firebaseConfig = {
@@ -15,23 +14,37 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const messaging: Messaging = getMessaging(app);
 
-export async function requestNotificationPermission(): Promise<void> {
+export async function requestNotificationPermission(): Promise<'granted' | 'denied' | 'unsupported'> {
+  if (!('Notification' in window)) {
+    console.warn('Este navegador no soporta notificaciones push.');
+    return 'unsupported';
+  }
+
+  if (Notification.permission === 'denied') {
+    console.warn('El usuario ha bloqueado las notificaciones. Debe reactivarlas manualmente en la configuración del navegador.');
+    return 'denied';
+  }
+
   try {
     const permission = await Notification.requestPermission();
-    
+
     if (permission === 'granted') {
-      const token = await getToken(messaging, { 
-        vapidKey: 'BAPVoVnTQTp6rdXziUjTQrxt5oYZ7DKvxldXtjs9clVvwswJ_ZEiVYHhx6XHULirB7P_JNNhF1z3sI_tpxEmzmU' 
+      const token = await getToken(messaging, {
+        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY || 'BAPVoVnTQTp6rdXziUjTQrxt5oYZ7DKvxldXtjs9clVvwswJ_ZEiVYHhx6XHULirB7P_JNNhF1z3sI_tpxEmzmU',
       });
 
       if (token) {
         await saveTokenToBackend(token);
-      } else {
-        console.warn('No se pudo obtener el token de inscripción FCM.');
+        return 'granted';
       }
+
+      console.warn('No se pudo obtener el token de inscripción FCM.');
     }
+
+    return permission as 'granted' | 'denied';
   } catch (error) {
     console.error('Error al configurar las notificaciones push:', error);
+    return 'denied';
   }
 }
 
@@ -62,11 +75,21 @@ async function saveTokenToBackend(token: string): Promise<void> {
 }
 
 export function listenForegroundNotifications(): void {
-  onMessage(messaging, (payload) => {
+  onMessage(messaging, (payload: any) => {
     console.log('Mensaje recibido en primer plano: ', payload);
     if (payload.notification?.title && payload.notification?.body) {
-      // Aquí puedes mapearlo a un componente de notificación o store visual
-      alert(`${payload.notification.title}: ${payload.notification.body}`);
+      // Emitimos un evento global para que la capa de UI (store/componente Toast) lo capture
+      // sin bloquear la interfaz con alert()
+      window.dispatchEvent(
+        new CustomEvent('fcm:foreground-notification', {
+          detail: {
+            title: payload.notification.title,
+            body: payload.notification.body,
+            data: payload.data,
+            clickAction: payload.data?.click_action,
+          },
+        })
+      );
     }
   });
 }

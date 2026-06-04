@@ -1,8 +1,18 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import { useProjects } from '@/composables/useProjects';
 import ProjectForm from '@/components/projects/ProjectForm.vue';
 
 const { errores, form, handleStore } = useProjects();
+const pendingFiles = ref<File[]>([]);
+
+function onAttachmentsChanged(files: File[]): void {
+  pendingFiles.value = files;
+}
+
+async function onSubmit(): Promise<void> {
+  await handleStore(pendingFiles.value.length ? pendingFiles.value : undefined);
+}
 </script>
 
 <template>
@@ -24,8 +34,8 @@ const { errores, form, handleStore } = useProjects();
       </VCard>
     </VCol>
     <VCol cols="12">
-      <VForm @submit.prevent="handleStore">
-        <ProjectForm :form="form" :errores="errores" />
+      <VForm @submit.prevent="onSubmit">
+        <ProjectForm :form="form" :errores="errores" @update:attachments="onAttachmentsChanged" />
       </VForm>
     </VCol>
   </VRow>

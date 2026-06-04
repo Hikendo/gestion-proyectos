@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 export const apiWithToken = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+    baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
     headers: { Accept: 'application/json' },
 });
 

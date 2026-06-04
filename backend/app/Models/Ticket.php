@@ -4,13 +4,14 @@ namespace App\Models;
 
 use App\Enums\TicketStatus;
 use App\Enums\TicketPriority;
+use App\Traits\HasAttachments;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Scout\Searchable;
 
 class Ticket extends Model
 {
-    use HasFactory, Searchable;
+    use HasFactory, Searchable, HasAttachments;
 
     public function toSearchableArray(): array
     {

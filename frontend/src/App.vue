@@ -1,17 +1,47 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, onUnmounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
 import { useThemeStore } from '@/store/useThemeStore';
+import { useNotificationStore } from '@/store/useNotificationStore';
+import type { NotificationI } from '@/interfaces/NotificationI';
 
 const appStore = useAppStore();
+const notificationStore = useNotificationStore();
 const { loader, snackbar } = storeToRefs(appStore);
 
 // Apply CSS variables and sync Vuetify theme on first render
 const themeStore = useThemeStore();
+
+function handleForegroundNotification(event: CustomEvent) {
+    const { title, body, data: fcmData } = event.detail || {};
+    // Construir una NotificationI temporal
+    const newNotification: NotificationI = {
+        id: Date.now(), // id temporal; se refrescará al recargar del backend
+        user_id: 0,
+        title: title || 'Notificación',
+        body: body || '',
+        type: fcmData?.type || 'general',
+        data: fcmData || {},
+        status: 'delivered',
+        sent_at: new Date().toISOString(),
+        read_at: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+    };
+    notificationStore.addNotificationFromFcm(newNotification);
+}
+
 onMounted(() => {
     themeStore.init();
+    // Escuchar notificaciones FCM en primer plano
+    window.addEventListener('fcm:foreground-notification', handleForegroundNotification as EventListener);
+    // Cargar contador de no leídas al iniciar
+    notificationStore.refreshUnreadCount();
+});
 
+onUnmounted(() => {
+    window.removeEventListener('fcm:foreground-notification', handleForegroundNotification as EventListener);
 });
 </script>
 

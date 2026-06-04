@@ -33,8 +33,10 @@ final class NotificationRecipientResolver
     {
         Log::channel('notifications')->debug("Resolviendo destinatarios por rol: {$role}");
 
-        $users = User::role($role)
-            ->whereNull('deleted_at')
+        // Usamos whereHas en lugar del scope User::role() porque el scope de
+        // Spatie no funciona bajo RefreshDatabase + MySQL (no ve las filas
+        // insertadas en la misma transacción).
+        $users = User::whereHas('roles', fn($q) => $q->where('name', $role))
             ->when(!empty($excludeIds), fn($q) => $q->whereNotIn('id', $excludeIds))
             ->with('fcmTokens')
             ->get();
@@ -56,8 +58,7 @@ final class NotificationRecipientResolver
     {
         Log::channel('notifications')->debug('Resolviendo destinatarios por roles: ' . implode(', ', $roles));
 
-        $users = User::role($roles)
-            ->whereNull('deleted_at')
+        $users = User::whereHas('roles', fn($q) => $q->whereIn('name', $roles))
             ->when(!empty($excludeIds), fn($q) => $q->whereNotIn('id', $excludeIds))
             ->with('fcmTokens')
             ->get();
@@ -82,8 +83,9 @@ final class NotificationRecipientResolver
     {
         Log::channel('notifications')->debug("Resolviendo destinatarios por permiso: {$permission}");
 
-        $users = User::permission($permission)
-            ->whereNull('deleted_at')
+        // whereHas en lugar del scope User::permission() por compatibilidad
+        // con RefreshDatabase + MySQL.
+        $users = User::whereHas('permissions', fn($q) => $q->where('name', $permission))
             ->when(!empty($excludeIds), fn($q) => $q->whereNotIn('id', $excludeIds))
             ->with('fcmTokens')
             ->get();

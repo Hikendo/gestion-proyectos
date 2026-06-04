@@ -49,9 +49,13 @@ export const show = async (projectId: number) => {
 
 // ─── Store ────────────────────────────────────────────────────────────────────
 
-export const store = async (payload: ProjectPayload) => {
+export const store = async (payload: ProjectPayload | FormData) => {
   try {
-    const { data } = await apiWithToken.post<ProjectResponseI>("/projects", payload);
+    const config = payload instanceof FormData
+      ? { headers: { 'Content-Type': 'multipart/form-data' } }
+      : {};
+
+    const { data } = await apiWithToken.post<ProjectResponseI>("/projects", payload, config);
     return {
       status: true,
       message: data.message,
@@ -72,14 +76,24 @@ export const store = async (payload: ProjectPayload) => {
 
 // ─── Update ───────────────────────────────────────────────────────────────────
 
-export const update = async (projectId: number, payload: ProjectPayload) => {
+export const update = async (projectId: number, payload: ProjectPayload | FormData) => {
   try {
-    const { data } = await apiWithToken.put<ProjectResponseI>(`/projects/${projectId}`, payload);
-    return {
-      status: true,
-      message: data.message,
-      items: data.items,
-    };
+    const config = payload instanceof FormData
+      ? { headers: { 'Content-Type': 'multipart/form-data' } }
+      : {};
+
+    // Laravel usa POST con _method=PUT para FormData
+    const method = payload instanceof FormData ? 'post' : 'put';
+    const url = `/projects/${projectId}`;
+
+    if (payload instanceof FormData) {
+      payload.append('_method', 'PUT');
+      const { data } = await apiWithToken.post<ProjectResponseI>(url, payload, config);
+      return { status: true, message: data.message, items: data.items };
+    }
+
+    const { data } = await apiWithToken.put<ProjectResponseI>(url, payload);
+    return { status: true, message: data.message, items: data.items };
   } catch (error) {
     const err = error as AxiosError;
     if (err?.response?.status === 422) {

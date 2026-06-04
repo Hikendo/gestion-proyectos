@@ -226,6 +226,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'reports.view',
         ]);
 
-        $this->command->info('Roles y permisos creados correctamente.');
+        if ($this->command) {
+            $this->command->info('Roles y permisos creados correctamente.');
+        }
     }
 }

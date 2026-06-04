@@ -13,6 +13,7 @@ export type {
 } from '@/interfaces/enums';
 
 export type { ActivityLogI } from '@/interfaces/ActivityLogI';
+export type { AttachmentI } from '@/interfaces/AttachmentI';
 export type { BlockerI } from '@/interfaces/BlockerI';
 export type { DeliverableI } from '@/interfaces/DeliverableI';
 export type { MilestoneI } from '@/interfaces/MilestoneI';
@@ -29,6 +30,7 @@ export type { TaskCommentI } from '@/interfaces/TaskCommentI';
 export type { TaskTimeLogI } from '@/interfaces/TaskTimeLogI';
 export type { TicketI } from '@/interfaces/TicketI';
 export type { UserI } from '@/interfaces/UserI';
+export type { NotificationI, NotificationsPaginatedResponse } from '@/interfaces/NotificationI';
 export type { UserMetricI } from '@/interfaces/UserMetricI';
 export type { ResponseBaseI } from '@/interfaces/ResponseBaseI';
 export type { PaginacionScoutI, PaginacionScoutParamsI, PaginacionYQueryI } from '@/interfaces/PaginacionScoutI';

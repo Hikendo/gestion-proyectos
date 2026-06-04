@@ -8,6 +8,7 @@ use App\Http\Requests\Ticket\StoreTicketRequest;
 use App\Http\Requests\Ticket\UpdateTicketRequest;
 use App\Models\Project;
 use App\Models\Ticket;
+use App\Services\AttachmentService;
 use App\Services\ProjectService;
 use App\Services\TicketService;
 use App\Traits\BelongsToProject;
@@ -20,7 +21,8 @@ class TicketController extends Controller
 
     public function __construct(
         private TicketService $service,
-        private ProjectService $projectService
+        private ProjectService $projectService,
+        private AttachmentService $attachmentService,
     ) {}
 
     /**
@@ -31,15 +33,29 @@ class TicketController extends Controller
         $this->authorize('view', $project);
 
         try {
-            $items = Ticket::search($request->string('search', ''))
-                ->query(fn($q) => $q
-                    ->where('project_id', $project->id)
+            $search = $request->string('search', '')->trim()->toString();
+
+            // Si no hay término de búsqueda, usamos Eloquent directamente porque
+            // el driver "collection" de Scout devuelve vacío con search('').
+            if ($search === '') {
+                $items = Ticket::where('project_id', $project->id)
                     ->with(['creator:id,name,email', 'assignee:id,name,email'])
                     ->when($request->status,   fn($q, $s) => $q->where('status', $s))
                     ->when($request->priority, fn($q, $p) => $q->where('priority', $p))
                     ->latest()
-                )
-                ->paginate(20);
+                    ->paginate(20);
+            } else {
+                $items = Ticket::search($search)
+                    ->query(
+                        fn($q) => $q
+                            ->where('project_id', $project->id)
+                            ->with(['creator:id,name,email', 'assignee:id,name,email'])
+                            ->when($request->status,   fn($q, $s) => $q->where('status', $s))
+                            ->when($request->priority, fn($q, $p) => $q->where('priority', $p))
+                            ->latest()
+                    )
+                    ->paginate(20);
+            }
 
             return response()->json([
                 'status'  => true,
@@ -59,11 +75,20 @@ class TicketController extends Controller
         $this->authorize('view', $project);
 
         try {
-            $item = $this->service->create($request->validated(), $project, $request->user());
+            $data = $request->validated();
+            $files = $request->file('attachments', []);
+
+            unset($data['attachments']);
+
+            $item = $this->service->create($data, $project, $request->user());
+
+            if (!empty($files)) {
+                $this->attachmentService->uploadMany($item, $files, $request->user());
+            }
 
             return response()->json([
                 'status'  => true,
-                'items'   => $item->load('creator:id,name,email'),
+                'items'   => $item->load(['creator:id,name,email', 'attachments']),
                 'message' => 'Ticket creado.',
             ], 201);
         } catch (\Throwable $th) {
@@ -83,6 +108,7 @@ class TicketController extends Controller
             $ticket->load([
                 'creator:id,name,email',
                 'assignee:id,name,email',
+                'attachments',
             ]);
 
             return response()->json([
@@ -141,6 +167,36 @@ class TicketController extends Controller
             return response()->json(['status' => true, 'items' => null, 'message' => 'Ticket eliminado.']);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
+    }
+
+    /**
+     * POST /api/v1/projects/{project}/tickets/{ticket}/attachments
+     */
+    public function uploadAttachments(Request $request, Project $project, Ticket $ticket): JsonResponse
+    {
+        $this->assertBelongsToProject($ticket, $project->id);
+        $this->authorize('update', $ticket);
+
+        $request->validate([
+            'attachments'   => ['required', 'array'],
+            'attachments.*' => ['file', 'max:102400'],
+        ]);
+
+        try {
+            $files = $request->file('attachments');
+            $uploaded = $this->attachmentService->uploadMany($ticket, $files, $request->user());
+
+            return response()->json([
+                'status'  => true,
+                'data'    => $uploaded,
+                'message' => count($uploaded) . ' archivo(s) subido(s) correctamente.',
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status'  => false,
+                'message' => $th->getMessage(),
+            ], 500);
         }
     }
 }

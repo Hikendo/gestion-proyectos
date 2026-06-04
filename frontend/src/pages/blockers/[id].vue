@@ -6,8 +6,10 @@ import { useAppStore } from '@/store/useAppStore';
 import * as blockersService from '@/services/project-blockers.service';
 import { useBlockers } from '@/composables/useBlockers';
 import BlockerForm from '@/components/blockers/BlockerForm.vue';
+import DocumentManager from '@/components/common/DocumentManager.vue';
+import { canAction } from '@/helpers/canAction';
 
-const route  = useRoute();
+const route = useRoute();
 const router = useRouter();
 const appStore = useAppStore();
 const { loader, snackbar } = storeToRefs(appStore);
@@ -15,31 +17,31 @@ const { loader, snackbar } = storeToRefs(appStore);
 const { errores, form, handleUpdate } = useBlockers();
 
 const confirmVisible = ref(false);
-const pendingAction   = ref<(() => Promise<void>) | null>(null);
+const pendingAction = ref<(() => Promise<void>) | null>(null);
 
 function requestSave(action: () => Promise<void>) {
-    pendingAction.value = action;
-    confirmVisible.value = true;
+  pendingAction.value = action;
+  confirmVisible.value = true;
 }
 
 async function confirmAction() {
-    confirmVisible.value = false;
-    if (pendingAction.value) await pendingAction.value();
-    pendingAction.value = null;
+  confirmVisible.value = false;
+  if (pendingAction.value) await pendingAction.value();
+  pendingAction.value = null;
 }
 
 onMounted(async () => {
-    loader.value = true;
-    const projectId = Number(route.params.projectId);
-    const id = Number(route.params.id);
-    const response = await blockersService.show(projectId, id);
-    if (response.status && response.items) {
-        form.value = response.items;
-    } else {
-        snackbar.value = { show: true, text: 'Bloqueador no encontrado', color: 'error' };
-        router.push({ name: 'blockers', params: { projectId } });
-    }
-    loader.value = false;
+  loader.value = true;
+  const projectId = Number(route.params.projectId);
+  const id = Number(route.params.id);
+  const response = await blockersService.show(projectId, id);
+  if (response.status && response.items) {
+    form.value = response.items;
+  } else {
+    snackbar.value = { show: true, text: 'Bloqueador no encontrado', color: 'error' };
+    router.push({ name: 'blockers', params: { projectId } });
+  }
+  loader.value = false;
 });
 </script>
 
@@ -60,6 +62,10 @@ onMounted(async () => {
       <VForm @submit.prevent="requestSave(handleUpdate)">
         <BlockerForm :form="form" :errores="errores" :project-id="Number(route.params.projectId)" />
       </VForm>
+    </VCol>
+    <VCol cols="12">
+      <DocumentManager parent-type="blockers" :parent-id="form.id" :attachments="form.attachments ?? []"
+        :can-manage="canAction('Bloqueador.Update')" @refresh="onMounted(() => { })" />
     </VCol>
 
     <VDialog v-model="confirmVisible" persistent max-width="400">

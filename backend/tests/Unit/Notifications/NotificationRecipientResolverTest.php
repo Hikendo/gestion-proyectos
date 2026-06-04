@@ -10,7 +10,9 @@ use App\Models\Task;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Services\Notifications\NotificationRecipientResolver;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 /**
@@ -26,8 +28,13 @@ class NotificationRecipientResolverTest extends TestCase
     {
         parent::setUp();
 
-        // Roles y permisos mínimos para que Spatie no falle
-        $this->artisan('db:seed', ['--class' => 'RolesAndPermissionsSeeder']);
+        // Ejecutar el seeder directamente (mismo proceso/transacción) para
+        // evitar que artisan corra en una conexión separada y los roles no
+        // sean visibles en MySQL + RefreshDatabase.
+        $seeder = app(RolesAndPermissionsSeeder::class);
+        $seeder->run();
+
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         $this->resolver = app(NotificationRecipientResolver::class);
     }
@@ -38,27 +45,27 @@ class NotificationRecipientResolverTest extends TestCase
 
     public function test_resolve_by_role_returns_users_with_that_role(): void
     {
-        $admin1 = $this->createUser('admin');
-        $admin2 = $this->createUser('admin');
-        $dev    = $this->createUser('developer');
+        $dev1 = $this->createUser('developer');
+        $dev2 = $this->createUser('developer');
+        $qa   = $this->createUser('qa');
 
-        $result = $this->resolver->resolveByRole('admin');
+        $result = $this->resolver->resolveByRole('developer');
 
         $this->assertCount(2, $result);
-        $this->assertTrue($result->contains('id', $admin1->id));
-        $this->assertTrue($result->contains('id', $admin2->id));
-        $this->assertFalse($result->contains('id', $dev->id));
+        $this->assertTrue($result->contains('id', $dev1->id));
+        $this->assertTrue($result->contains('id', $dev2->id));
+        $this->assertFalse($result->contains('id', $qa->id));
     }
 
     public function test_resolve_by_role_excludes_given_ids(): void
     {
-        $admin1 = $this->createUser('admin');
-        $admin2 = $this->createUser('admin');
+        $dev1 = $this->createUser('developer');
+        $dev2 = $this->createUser('developer');
 
-        $result = $this->resolver->resolveByRole('admin', excludeIds: [$admin1->id]);
+        $result = $this->resolver->resolveByRole('developer', excludeIds: [$dev1->id]);
 
         $this->assertCount(1, $result);
-        $this->assertTrue($result->contains('id', $admin2->id));
+        $this->assertTrue($result->contains('id', $dev2->id));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -67,15 +74,15 @@ class NotificationRecipientResolverTest extends TestCase
 
     public function test_resolve_by_roles_returns_union_of_roles(): void
     {
-        $admin   = $this->createUser('admin');
-        $manager = $this->createUser('manager');
-        $dev     = $this->createUser('developer');
+        $pm  = $this->createUser('project-manager');
+        $dev = $this->createUser('developer');
+        $qa  = $this->createUser('qa');
 
-        $result = $this->resolver->resolveByRoles(['admin', 'manager']);
+        $result = $this->resolver->resolveByRoles(['project-manager', 'developer']);
 
-        $this->assertTrue($result->contains('id', $admin->id));
-        $this->assertTrue($result->contains('id', $manager->id));
-        $this->assertFalse($result->contains('id', $dev->id));
+        $this->assertTrue($result->contains('id', $pm->id));
+        $this->assertTrue($result->contains('id', $dev->id));
+        $this->assertFalse($result->contains('id', $qa->id));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -85,14 +92,15 @@ class NotificationRecipientResolverTest extends TestCase
     public function test_resolve_project_members_includes_owner_and_members(): void
     {
         /** @var User $owner */
-        $owner  = $this->createUser('manager');
+        $owner  = $this->createUser('project-manager');
         $member = $this->createUser('developer');
 
         /** @var Project $project */
         $project = Project::factory()->create(['owner_id' => $owner->id]);
-        ProjectMember::factory()->create([
+        ProjectMember::create([
             'project_id' => $project->id,
             'user_id'    => $member->id,
+            'role'       => 'developer',
         ]);
 
         $result = $this->resolver->resolveProjectMembers($project);
@@ -104,14 +112,15 @@ class NotificationRecipientResolverTest extends TestCase
     public function test_resolve_project_members_excludes_given_ids(): void
     {
         /** @var User $owner */
-        $owner  = $this->createUser('manager');
+        $owner  = $this->createUser('project-manager');
         $member = $this->createUser('developer');
 
         /** @var Project $project */
         $project = Project::factory()->create(['owner_id' => $owner->id]);
-        ProjectMember::factory()->create([
+        ProjectMember::create([
             'project_id' => $project->id,
             'user_id'    => $member->id,
+            'role'       => 'developer',
         ]);
 
         $result = $this->resolver->resolveProjectMembers($project, excludeIds: [$owner->id]);

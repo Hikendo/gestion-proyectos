@@ -73,9 +73,10 @@ export const show = async (projectId: number, taskId: number) => {
 
 // ─── Store ────────────────────────────────────────────────────────────────────
 
-export const store = async (projectId: number, payload: TaskPayload) => {
+export const store = async (projectId: number, payload: TaskPayload | FormData) => {
   try {
-    const { data } = await apiWithToken.post<TaskResponseI>(`/projects/${projectId}/tasks`, payload);
+    const config = payload instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {};
+    const { data } = await apiWithToken.post<TaskResponseI>(`/projects/${projectId}/tasks`, payload, config);
     return {
       status: true,
       message: data.message,
@@ -96,8 +97,14 @@ export const store = async (projectId: number, payload: TaskPayload) => {
 
 // ─── Update ───────────────────────────────────────────────────────────────────
 
-export const update = async (projectId: number, taskId: number, payload: TaskPayload) => {
+export const update = async (projectId: number, taskId: number, payload: TaskPayload | FormData) => {
   try {
+    if (payload instanceof FormData) {
+      payload.append('_method', 'PUT');
+      const config = { headers: { 'Content-Type': 'multipart/form-data' } };
+      const { data } = await apiWithToken.post<TaskResponseI>(`/projects/${projectId}/tasks/${taskId}`, payload, config);
+      return { status: true, message: data.message, items: data.items };
+    }
     const { data } = await apiWithToken.put<TaskResponseI>(`/projects/${projectId}/tasks/${taskId}`, payload);
     return {
       status: true,

@@ -19,4 +19,7 @@ Route::middleware('auth:sanctum')->prefix('projects/{project}')->group(function 
 
     Route::delete('tickets/{ticket}', [TicketController::class, 'destroy'])
         ->name('projects.tickets.destroy');
+
+    Route::post('tickets/{ticket}/attachments', [TicketController::class, 'uploadAttachments'])
+        ->name('projects.tickets.attachments.upload');
 });

@@ -72,4 +72,4 @@ export { useUserCreate } from './useUserCreate';
 export { useUserUpdate } from './useUserUpdate';
 export { useUserDelete } from './useUserDelete';
 export { useUserList } from './useUserList';
-export { useRolesList } from './useRolesList';
+export { useRoles as useRolesList } from './useRolesList';

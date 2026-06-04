@@ -3,6 +3,7 @@ import {
   SoftDeletesModelI,
 } from "@/interfaces/ModelBaseI";
 
+import { AttachmentI } from "@/interfaces/AttachmentI";
 import { ProjectStatus } from "@/interfaces/enums";
 
 import { BlockerI } from "@/interfaces/BlockerI";
@@ -56,6 +57,8 @@ export interface ProjectI extends SoftDeletesModelI {
   tickets_count?: number;
   risks_count?: number;
   blockers_count?: number;
+
+  attachments?: AttachmentI[];
 }
 
 export interface ProjectErroresFormI {

@@ -116,23 +116,11 @@ onMounted(handleGetData);
               <h4 class="text-h4 text-wrap me-3">Listado de <strong>Tareas</strong></h4>
               <div class="d-flex gap-3 align-center">
                 <!-- Selector de vista con VSelect - VERSIÓN CORREGIDA -->
-  <VSelect
-    v-model="viewMode"
-    :items="viewOptions"
-    item-title="title"
-    item-value="value"
-    density="compact"
-    variant="solo"
-    flat
-    hide-details
-    class="view-selector"
-    style="max-width: 130px;"
-  />
+                <VSelect v-model="viewMode" :items="viewOptions" item-title="title" item-value="value" density="compact"
+                  variant="solo" flat hide-details class="view-selector" style="max-width: 130px;" />
 
-                <VBtn variant="flat"
-                  :to="{ name: 'tasks-new', params: { projectId: projectId() } }"
-                  v-if="canAction('Tarea.Store')"
-                  prepend-icon="mdi-plus">
+                <VBtn variant="flat" :to="{ name: 'tasks-new', params: { projectId: projectId() } }"
+                  v-if="canAction('Tarea.Store')" prepend-icon="mdi-plus">
                   Nueva Tarea
                 </VBtn>
               </div>
@@ -149,8 +137,8 @@ onMounted(handleGetData);
           <VRow class="d-flex align-center gap-4 mt-2">
             <VCol>
               <form @submit.prevent="() => { paginacionYquery.page = 1; handleGetData(); }">
-                <VTextField label="Buscador" prepend-inner-icon="mdi-magnify" type="search"
-                  clearable v-model="paginacionYquery.query" />
+                <VTextField label="Buscador" prepend-inner-icon="mdi-magnify" type="search" clearable
+                  v-model="paginacionYquery.query" />
               </form>
             </VCol>
           </VRow>
@@ -172,11 +160,8 @@ onMounted(handleGetData);
               <tr v-for="item in data" :key="item.id">
                 <td>
                   <div class="d-flex align-center gap-2">
-                    <VIcon
-                      :icon="item.progress === 100 ? 'mdi-check-circle' : 'mdi-circle-outline'"
-                      :color="getTaskColor(item)"
-                      size="small"
-                    />
+                    <VIcon :icon="item.progress === 100 ? 'mdi-check-circle' : 'mdi-circle-outline'"
+                      :color="getTaskColor(item)" size="small" />
                     <strong>{{ item.title }}</strong>
                   </div>
                 </td>
@@ -192,13 +177,8 @@ onMounted(handleGetData);
                 </td>
                 <td>
                   <div class="d-flex align-center gap-2">
-                    <VProgressLinear
-                      :model-value="item.progress || 0"
-                      :color="getTaskColor(item)"
-                      height="6"
-                      rounded
-                      class="flex-grow-1"
-                    />
+                    <VProgressLinear :model-value="item.progress || 0" :color="getTaskColor(item)" height="6" rounded
+                      class="flex-grow-1" />
                     <span class="text-caption font-weight-medium">
                       {{ item.progress || 0 }}%
                     </span>
@@ -208,20 +188,24 @@ onMounted(handleGetData);
                   <div class="d-flex align-center gap-1">
                     <VIcon :color="getTaskColor(item)" size="small">
                       {{ new Date(item.due_date!) < new Date() && item.progress !== 100 ? 'mdi-alert' : 'mdi-calendar' }}
-                    </VIcon>
-                    {{ formatDate(item.due_date!) ?? '—' }}
+                        </VIcon>
+                        {{ formatDate(item.due_date!) ?? '—' }}
                   </div>
                 </td>
                 <td>
                   <div class="d-flex gap-1">
                     <VBtn icon size="small" variant="text"
+                      :to="{ name: 'tasks-view', params: { projectId: projectId(), id: item.id } }">
+                      <VIcon icon="mdi-eye" color="primary" size="small" />
+                    </VBtn>
+                    <VBtn icon size="small" variant="text"
                       :to="{ name: 'tasks-id', params: { projectId: projectId(), id: item.id } }"
                       v-if="canAction('Tarea.Update')">
-                      <VIcon icon="mdi-pencil" color="warning" size="small"/>
+                      <VIcon icon="mdi-pencil" color="warning" size="small" />
                     </VBtn>
                     <VBtn icon size="small" variant="text" v-if="canAction('Tarea.Destroy')"
                       @click="() => { itemDestroy = item; isDialogVisible = true; }">
-                      <VIcon icon="mdi-delete" color="error" size="small"/>
+                      <VIcon icon="mdi-delete" color="error" size="small" />
                     </VBtn>
                   </div>
                 </td>
@@ -243,16 +227,9 @@ onMounted(handleGetData);
     </VCol>
 
     <!-- Paginación (solo para vista lista) -->
-    <VPagination
-      v-if="viewMode === 'list'"
-      class="mt-4 mr-3"
-      color="primary"
-      v-model="paginacionYquery.page"
-      :total-visible="7"
-      :length="paginacionYquery.last_page"
-      style="margin-left: auto;"
-      @update:model-value="handleGetData"
-    />
+    <VPagination v-if="viewMode === 'list'" class="mt-4 mr-3" color="primary" v-model="paginacionYquery.page"
+      :total-visible="7" :length="paginacionYquery.last_page" style="margin-left: auto;"
+      @update:model-value="handleGetData" />
 
     <!-- Diálogo de eliminación -->
     <VDialog v-model="isDialogVisible" persistent class="v-dialog-sm">

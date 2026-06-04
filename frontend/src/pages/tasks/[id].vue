@@ -5,9 +5,12 @@ import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
 import * as tasksService from '@/services/project-tasks.service';
 import { useTasks } from '@/composables/useTasks';
+import { toDateInput } from '@/utils/util';
 import TaskForm from '@/components/tasks/TaskForm.vue';
+import DocumentManager from '@/components/common/DocumentManager.vue';
+import { canAction } from '@/helpers/canAction';
 
-const route  = useRoute();
+const route = useRoute();
 const router = useRouter();
 const appStore = useAppStore();
 const { loader, snackbar } = storeToRefs(appStore);
@@ -15,31 +18,33 @@ const { loader, snackbar } = storeToRefs(appStore);
 const { errores, form, handleUpdate } = useTasks();
 
 const confirmVisible = ref(false);
-const pendingAction   = ref<(() => Promise<void>) | null>(null);
+const pendingAction = ref<(() => Promise<void>) | null>(null);
 
 function requestSave(action: () => Promise<void>) {
-    pendingAction.value = action;
-    confirmVisible.value = true;
+  pendingAction.value = action;
+  confirmVisible.value = true;
 }
 
 async function confirmAction() {
-    confirmVisible.value = false;
-    if (pendingAction.value) await pendingAction.value();
-    pendingAction.value = null;
+  confirmVisible.value = false;
+  if (pendingAction.value) await pendingAction.value();
+  pendingAction.value = null;
 }
 
 onMounted(async () => {
-    loader.value = true;
-    const projectId = Number(route.params.projectId);
-    const id = Number(route.params.id);
-    const response = await tasksService.show(projectId, id);
-    if (response.status && response.items) {
-        form.value = response.items;
-    } else {
-        snackbar.value = { show: true, text: 'Tarea no encontrado', color: 'error' };
-        router.push({ name: 'tasks', params: { projectId } });
-    }
-    loader.value = false;
+  loader.value = true;
+  const projectId = Number(route.params.projectId);
+  const id = Number(route.params.id);
+  const response = await tasksService.show(projectId, id);
+  if (response.status && response.items) {
+    const item = response.items;
+    item.due_date = toDateInput(item.due_date);
+    form.value = item;
+  } else {
+    snackbar.value = { show: true, text: 'Tarea no encontrado', color: 'error' };
+    router.push({ name: 'tasks', params: { projectId } });
+  }
+  loader.value = false;
 });
 </script>
 
@@ -60,6 +65,10 @@ onMounted(async () => {
       <VForm @submit.prevent="requestSave(handleUpdate)">
         <TaskForm :form="form" :errores="errores" />
       </VForm>
+    </VCol>
+    <VCol cols="12">
+      <DocumentManager parent-type="tasks" :parent-id="form.id" :attachments="form.attachments ?? []"
+        :can-manage="canAction('Tarea.Update')" @refresh="onMounted(() => { })" />
     </VCol>
 
     <VDialog v-model="confirmVisible" persistent max-width="400">

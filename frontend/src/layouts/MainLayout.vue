@@ -6,6 +6,8 @@ import { useAppStore } from '@/store/useAppStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import * as authService from '@/services/auth.service';
 import ThemeSelector from '@/components/ThemeSelector.vue';
+import NotificationBell from '@/components/common/NotificationBell.vue';
+import NotificationTray from '@/components/common/NotificationTray.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -29,6 +31,7 @@ function toggleDrawer() {
 const baseMenu = [
   { title: 'Dashboard', icon: 'mdi-view-dashboard', name: 'dashboard' },
   { title: 'Proyectos', icon: 'mdi-folder-multiple', name: 'projects' },
+  { title: 'Notificaciones', icon: 'mdi-bell-outline', name: 'notifications' },
 ];
 
 // ── Menú contextual del proyecto activo ──────────────────────────────────────
@@ -85,6 +88,8 @@ async function handleLogout() {
   <VAppBar flat border="b">
     <VAppBarNavIcon @click="toggleDrawer" />
     <VAppBarTitle>Gestión de Proyectos</VAppBarTitle>
+    <VSpacer />
+    <NotificationBell />
   </VAppBar>
 
   <!-- ── Sidebar ────────────────────────────────────────────────── -->
@@ -142,12 +147,8 @@ async function handleLogout() {
       <VList density="compact" nav class="pb-2">
         <VListItem prepend-icon="mdi-account-outline" title="Mi perfil" :active="isActive('profile')"
           @click="navigate('profile')" active-color="primary" />
-        <VListItem
-          prepend-icon="mdi-palette-outline"
-          title="Apariencia"
-          @click="themeDialogOpen = true"
-          active-color="primary"
-        />
+        <VListItem prepend-icon="mdi-palette-outline" title="Apariencia" @click="themeDialogOpen = true"
+          active-color="primary" />
         <VListItem prepend-icon="mdi-logout" title="Cerrar sesión" @click="handleLogout" base-color="error" />
       </VList>
     </template>
@@ -179,5 +180,8 @@ async function handleLogout() {
       <RouterView />
     </VContainer>
   </VMain>
+
+  <!-- Bandeja de notificaciones (teleport al body) -->
+  <NotificationTray />
 
 </template>

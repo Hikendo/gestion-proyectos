@@ -35,7 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('comments', [TaskCommentController::class, 'index'])
             ->name('tasks.comments.index');
         Route::get('comments/{comment}', [TaskCommentController::class, 'show'])
-        ->name('tasks.comments.show');
+            ->name('tasks.comments.show');
 
         Route::post('comments', [TaskCommentController::class, 'store'])
             ->name('tasks.comments.store');
@@ -49,6 +49,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('time-logs', [TaskTimeLogController::class, 'store'])
             ->name('tasks.timelogs.store');
         Route::get('time-logs/{timeLog}', [TaskTimeLogController::class, 'show'])
-        ->name('tasks.timelogs.show');
+            ->name('tasks.timelogs.show');
+
+        Route::post('attachments', [TaskController::class, 'uploadAttachments'])
+            ->name('tasks.attachments.upload');
     });
 });

@@ -18,4 +18,7 @@ Route::middleware('auth:sanctum')->prefix('projects/{project}')->group(function 
         ->name('projects.blockers.resolve');
     Route::get('blockers/{blocker}', [BlockerController::class, 'show'])
         ->name('projects.blockers.show');
+
+    Route::post('blockers/{blocker}/attachments', [BlockerController::class, 'uploadAttachments'])
+        ->name('projects.blockers.attachments.upload');
 });

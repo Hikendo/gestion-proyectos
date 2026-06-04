@@ -13,5 +13,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
 
     Route::get('projects/{project}/metrics', [ProjectMetricsController::class, 'show'])->name('projects.metrics');
+    Route::post('projects/{project}/attachments', [ProjectController::class, 'uploadAttachments'])->name('projects.attachments.upload');
 });
-

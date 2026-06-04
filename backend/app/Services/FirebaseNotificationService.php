@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Models\FcmToken;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
@@ -115,43 +116,50 @@ class FirebaseNotificationService
 
     /**
      * Obtiene el Access Token JWT de Google OAuth2 para firmar la petición HTTP v1.
+     *
+     * Cachea el token por 55 minutos (el JWT expira en 60 min) para evitar
+     * múltiples peticiones OAuth por cada notificación enviada.
      */
     private function getGoogleAccessToken(): string
     {
-        // Implementación directa del flujo JWT sin depender de librerías masivas de Google SDK de forma rígida
-        $header = json_encode(['alg' => 'RS256', 'typ' => 'JWT']);
-        $now = time();
-        $payload = json_encode([
-            'iss' => $this->serviceAccount['client_email'],
-            'scope' => 'https://www.googleapis.com/auth/firebase.messaging',
-            'aud' => $this->serviceAccount['token_uri'],
-            'exp' => $now + 3600,
-            'iat' => $now,
-        ]);
+        $cacheKey = 'fcm:google_access_token';
 
-        $base64UrlHeader = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($header));
-        $base64UrlPayload = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($payload));
+        return Cache::remember($cacheKey, now()->addMinutes(55), function (): string {
+            $header = json_encode(['alg' => 'RS256', 'typ' => 'JWT']);
+            $now = time();
+            $payload = json_encode([
+                'iss' => $this->serviceAccount['client_email'],
+                'scope' => 'https://www.googleapis.com/auth/firebase.messaging',
+                'aud' => $this->serviceAccount['token_uri'],
+                'exp' => $now + 3600,
+                'iat' => $now,
+            ]);
 
-        $signature = '';
-        $success = openssl_sign(
-            $base64UrlHeader . "." . $base64UrlPayload,
-            $signature,
-            $this->serviceAccount['private_key'],
-            OPENSSL_ALGO_SHA256
-        );
+            $base64UrlHeader = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($header));
+            $base64UrlPayload = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($payload));
 
-        if (!$success) {
-            throw new RuntimeException('Error interno al firmar el token JWT de Google Cloud.');
-        }
+            $signature = '';
+            $success = openssl_sign(
+                $base64UrlHeader . "." . $base64UrlPayload,
+                $signature,
+                $this->serviceAccount['private_key'],
+                OPENSSL_ALGO_SHA256
+            );
 
-        $base64UrlSignature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
-        $jwt = $base64UrlHeader . "." . $base64UrlPayload . "." . $base64UrlSignature;
+            if (!$success) {
+                throw new RuntimeException('Error interno al firmar el token JWT de Google Cloud.');
+            }
 
-        $response = Http::asForm()->post($this->serviceAccount['token_uri'], [
-            'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-            'assertion' => $jwt,
-        ]);
+            $base64UrlSignature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
+            $jwt = $base64UrlHeader . "." . $base64UrlPayload . "." . $base64UrlSignature;
 
-        return $response->json()['access_token'] ?? throw new RuntimeException('No se pudo obtener el Token de Acceso desde Google API.');
+            $response = Http::asForm()->post($this->serviceAccount['token_uri'], [
+                'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                'assertion' => $jwt,
+            ]);
+
+            return $response->json()['access_token']
+                ?? throw new RuntimeException('No se pudo obtener el Token de Acceso desde Google API.');
+        });
     }
 }

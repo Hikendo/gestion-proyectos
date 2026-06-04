@@ -10,9 +10,8 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Filtra una colección de usuarios dejando únicamente aquellos que:
- *  1. NO están soft-deleted
- *  2. Superan el check de policy sobre el recurso asociado a la notificación
+ * Filtra una colección de usuarios dejando únicamente aquellos que
+ * superan el check de policy sobre el recurso asociado a la notificación.
  *
  * Uso:
  *   $authorized = (new PolicyAwareRecipientFilter())
@@ -42,14 +41,6 @@ final class PolicyAwareRecipientFilter
         );
 
         $authorized = $users->filter(function (User $user) use ($ability, $resource, $resourceClass, $resourceId): bool {
-            // Usuarios soft-deleted no reciben notificaciones
-            if ($user->trashed()) {
-                Log::channel('notifications')->info(
-                    "Usuario ID {$user->id} omitido: soft-deleted."
-                );
-                return false;
-            }
-
             $can = Gate::forUser($user)->check($ability, $resource);
 
             if (!$can) {

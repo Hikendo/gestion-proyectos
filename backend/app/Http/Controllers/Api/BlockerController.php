@@ -7,6 +7,7 @@ use App\Http\Requests\Blocker\StoreBlockerRequest;
 use App\Http\Requests\Blocker\UpdateBlockerRequest;
 use App\Models\Blocker;
 use App\Models\Project;
+use App\Services\AttachmentService;
 use App\Traits\BelongsToProject;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,10 @@ use Illuminate\Http\Request;
 class BlockerController extends Controller
 {
     use BelongsToProject;
+
+    public function __construct(
+        private AttachmentService $attachmentService,
+    ) {}
 
     /**
      * GET /api/projects/{project}/blockers
@@ -50,11 +55,20 @@ class BlockerController extends Controller
         $this->authorize('view', $project);
 
         try {
-            $item = $project->blockers()->create($request->validated());
+            $data = $request->validated();
+            $files = $request->file('attachments', []);
+
+            unset($data['attachments']);
+
+            $item = $project->blockers()->create($data);
+
+            if (!empty($files)) {
+                $this->attachmentService->uploadMany($item, $files, $request->user());
+            }
 
             return response()->json([
                 'status'  => true,
-                'items'   => $item,
+                'items'   => $item->load(['attachments']),
                 'message' => 'Blocker creado.',
             ], 201);
         } catch (\Throwable $th) {
@@ -72,7 +86,7 @@ class BlockerController extends Controller
 
         return response()->json([
             'status'  => true,
-            'items'   => $blocker->load('task:id,title', 'createdBy:id,name'),
+            'items'   => $blocker->load(['task:id,title', 'createdBy:id,name', 'attachments']),
             'message' => 'Blocker encontrado.',
         ]);
     }
@@ -124,6 +138,36 @@ class BlockerController extends Controller
             ]);
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
+    }
+
+    /**
+     * POST /api/v1/projects/{project}/blockers/{blocker}/attachments
+     */
+    public function uploadAttachments(Request $request, Project $project, Blocker $blocker): JsonResponse
+    {
+        $this->assertBelongsToProject($blocker, $project->id);
+        $this->authorize('update', $project);
+
+        $request->validate([
+            'attachments'   => ['required', 'array'],
+            'attachments.*' => ['file', 'max:102400'],
+        ]);
+
+        try {
+            $files = $request->file('attachments');
+            $uploaded = $this->attachmentService->uploadMany($blocker, $files, $request->user());
+
+            return response()->json([
+                'status'  => true,
+                'data'    => $uploaded,
+                'message' => count($uploaded) . ' archivo(s) subido(s) correctamente.',
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status'  => false,
+                'message' => $th->getMessage(),
+            ], 500);
         }
     }
 }

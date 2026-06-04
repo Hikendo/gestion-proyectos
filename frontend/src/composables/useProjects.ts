@@ -22,8 +22,12 @@ export function useProjects() {
     const form = ref<ProjectI>(emptyForm());
     const errores = ref<ProjectErroresFormI>(emptyErrors());
 
-    async function handleStore() {
-        const response = await projectsService.store(form.value);
+    async function handleStore(files?: File[]) {
+        const payload = files?.length
+            ? projectsService.buildFormData({ ...form.value }, files)
+            : { ...form.value };
+
+        const response = await projectsService.store(payload);
         if (response.status) {
             snackbar.value = { show: true, text: 'Proyecto creado', color: 'success' };
             router.push({ name: 'projects' });
@@ -33,8 +37,12 @@ export function useProjects() {
         }
     }
 
-    async function handleUpdate() {
-        const response = await projectsService.update(form.value.id, form.value);
+    async function handleUpdate(files?: File[]) {
+        const payload = files?.length
+            ? projectsService.buildFormData({ ...form.value }, files)
+            : { ...form.value };
+
+        const response = await projectsService.update(form.value.id, payload);
         if (response.status) {
             snackbar.value = { show: true, text: 'Proyecto actualizado', color: 'success' };
         } else {

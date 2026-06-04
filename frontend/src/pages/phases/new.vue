@@ -1,45 +1,22 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { storeToRefs } from 'pinia';
-import { useAppStore } from '@/store/useAppStore';
-import * as phasesService from '@/services/project-phases.service';
+import { useProjectPhasesService } from '@/composables';
+import PhaseForm from '@/components/project-phases/PhaseForm.vue';
+import type { ProjectPhaseI } from '@/interfaces/ProjectPhaseI';
 
-const route  = useRoute();
+type PhaseFormFields = Pick<ProjectPhaseI, 'name' | 'start_date' | 'end_date' | 'progress'>;
+
+const route = useRoute();
 const router = useRouter();
-const appStore = useAppStore();
-const { loader, snackbar } = storeToRefs(appStore);
+const { loading, validationErrors, call } = useProjectPhasesService();
+
 const projectId = () => Number(route.params.projectId);
 
-const form   = ref({ name: '', order: 1, description: null as string | null, start_date: null as string | null, end_date: null as string | null });
-const errors = ref<any>({});
-
-async function handleStore() {
-    errors.value = {};
-    loader.value = true;
-    const response = await phasesService.store(projectId(), form.value as any);
-    if (response.status) {
-        snackbar.value = { show: true, text: 'Fase creada', color: 'success' };
-        router.push({ name: 'phases', params: { projectId: projectId() } });
-    } else {
-        if ('errors' in response && response.errors) errors.value = response.errors;
-        snackbar.value = { show: true, text: response.message, color: 'error' };
-    }
-    loader.value = false;
-}
-
-const confirmVisible = ref(false);
-const pendingAction   = ref<(() => Promise<void>) | null>(null);
-
-function requestSave(action: () => Promise<void>) {
-    pendingAction.value = action;
-    confirmVisible.value = true;
-}
-
-async function confirmAction() {
-    confirmVisible.value = false;
-    if (pendingAction.value) await pendingAction.value();
-    pendingAction.value = null;
+async function handleSubmit(form: PhaseFormFields) {
+  const result = await call('store', projectId(), form);
+  if (result?.status) {
+    router.push({ name: 'phases', params: { projectId: projectId() } });
+  }
 }
 </script>
 
@@ -51,36 +28,14 @@ async function confirmAction() {
           <VCardTitle>
             <div class="d-flex justify-space-between flex-wrap">
               <h4 class="text-h4">Agregar <strong>Fase</strong></h4>
-              <VBtn variant="outlined" :to="{ name: 'phases', params: { projectId: route.params.projectId } }" prepend-icon="mdi-arrow-left">Volver</VBtn>
+              <VBtn variant="outlined" :to="{ name: 'phases', params: { projectId: route.params.projectId } }"
+                prepend-icon="mdi-arrow-left">Volver</VBtn>
             </div>
           </VCardTitle>
         </VCardItem>
       </VCard>
     </VCol>
-    <VCol cols="12" md="8">
-      <VCard>
-        <VCardText>
-          <VForm @submit.prevent="requestSave(handleStore)">
-            <VTextField v-model="form.name" label="Nombre de la fase" variant="outlined" :error-messages="errors.name" class="mb-3" />
-            <VTextField v-model.number="form.order" label="Orden" type="number" variant="outlined" :error-messages="errors.order" class="mb-3" />
-            <VTextarea v-model="form.description" label="Descripción" variant="outlined" rows="3" class="mb-3" />
-            <VTextField v-model="form.start_date" label="Fecha inicio" type="date" variant="outlined" class="mb-3" />
-            <VTextField v-model="form.end_date" label="Fecha fin" type="date" variant="outlined" class="mb-4" />
-            <VBtn type="submit" color="primary" block :loading="loader">Guardar fase</VBtn>
-          </VForm>
-        </VCardText>
-      </VCard>
-    </VCol>
-  
-    <VDialog v-model="confirmVisible" persistent max-width="400">
-      <VCard>
-        <VCardTitle class="text-h6">Confirmar acción</VCardTitle>
-        <VCardText>¿Deseas guardar los cambios?</VCardText>
-        <VCardActions class="justify-end gap-2 pb-4 px-4">
-          <VBtn variant="outlined" @click="confirmVisible.value = false">Cancelar</VBtn>
-          <VBtn color="primary" variant="flat" @click="confirmAction">Confirmar</VBtn>
-        </VCardActions>
-      </VCard>
-    </VDialog>
   </VRow>
+
+  <PhaseForm submit-label="Guardar fase" :errors="validationErrors" :loading="loading" @submit="handleSubmit" />
 </template>

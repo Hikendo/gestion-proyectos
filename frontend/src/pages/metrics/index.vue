@@ -4,179 +4,180 @@ import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import { canAction } from '@/helpers/canAction';
 import * as projectsService from '@/services/projects.service';
 import type { ProjectMetricsResponseI } from '@/services/projects.service';
 
 import {
-    Chart as ChartJS,
-    Title, Tooltip, Legend,
-    ArcElement, BarElement,
-    CategoryScale, LinearScale,
-    LineElement, PointElement,
-    Filler,
+  Chart as ChartJS,
+  Title, Tooltip, Legend,
+  ArcElement, BarElement,
+  CategoryScale, LinearScale,
+  LineElement, PointElement,
+  Filler,
 } from 'chart.js';
 import { Doughnut, Bar } from 'vue-chartjs';
 
 ChartJS.register(
-    Title, Tooltip, Legend,
-    ArcElement, BarElement,
-    CategoryScale, LinearScale,
-    LineElement, PointElement,
-    Filler,
+  Title, Tooltip, Legend,
+  ArcElement, BarElement,
+  CategoryScale, LinearScale,
+  LineElement, PointElement,
+  Filler,
 );
 
-const route     = useRoute();
-const appStore  = useAppStore();
+const route = useRoute();
+const appStore = useAppStore();
 const authStore = useAuthStore();
-const { loader }                              = storeToRefs(appStore);
-const { isSuperAdmin, isProjectManager }      = storeToRefs(authStore);
-const projectId                               = () => Number(route.params.projectId);
+const { loader } = storeToRefs(appStore);
+const { isSuperAdmin, isProjectManager } = storeToRefs(authStore);
+const projectId = () => Number(route.params.projectId);
 
-const metrics   = ref<ProjectMetricsResponseI | null>(null);
-const hasError  = ref(false);
+const metrics = ref<ProjectMetricsResponseI | null>(null);
+const hasError = ref(false);
 
 const canSeeManagerSection = computed(() => isSuperAdmin.value || isProjectManager.value);
 
 onMounted(async () => {
-    loader.value = true;
-    const response = await projectsService.getMetrics(projectId());
-    if (response.status && response.items) {
-        metrics.value = response.items;
-    } else {
-        hasError.value = true;
-    }
-    loader.value = false;
+  loader.value = true;
+  const response = await projectsService.getMetrics(projectId());
+  if (response.status && response.items) {
+    metrics.value = response.items;
+  } else {
+    hasError.value = true;
+  }
+  loader.value = false;
 });
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const statusColor = (s?: string) => ({
-    planning: 'info', active: 'success', on_hold: 'warning',
-    completed: 'success', cancelled: 'error',
+  planning: 'info', active: 'success', on_hold: 'warning',
+  completed: 'success', cancelled: 'error',
 }[s ?? ''] ?? 'default');
 
 const statusLabel = (s?: string) => ({
-    planning: 'Planificación', active: 'Activo', on_hold: 'En espera',
-    completed: 'Completado', cancelled: 'Cancelado',
+  planning: 'Planificación', active: 'Activo', on_hold: 'En espera',
+  completed: 'Completado', cancelled: 'Cancelado',
 }[s ?? ''] ?? s ?? '—');
 
 const completionRate = computed(() => metrics.value?.project.progress ?? 0);
 
 const pct = (partial: number, total: number) =>
-    total === 0 ? 0 : Math.round((partial / total) * 100);
+  total === 0 ? 0 : Math.round((partial / total) * 100);
 
 // ── Doughnut: tareas completadas vs pendientes ────────────────────────────────
 const doughnutTasksData = computed(() => {
-    const t = metrics.value?.tasks;
-    return {
-        labels: ['Completadas', 'En progreso', 'En revisión', 'Pendientes', 'Bloqueadas'],
-        datasets: [{
-            data: [
-                t?.completed    ?? 0,
-                t?.in_progress  ?? 0,
-                (t?.by_status?.find(s => s.status === 'review')?.count ?? 0),
-                t?.pending      ?? 0,
-                t?.blocked      ?? 0,
-            ],
-            backgroundColor: ['#4CAF50','#5C6BC0','#29B6F6','#90A4AE','#EF5350'],
-            hoverBackgroundColor: ['#388E3C','#3949AB','#039BE5','#607D8B','#C62828'],
-            borderWidth: 0,
-        }],
-    };
+  const t = metrics.value?.tasks;
+  return {
+    labels: ['Completadas', 'En progreso', 'En revisión', 'Pendientes', 'Bloqueadas'],
+    datasets: [{
+      data: [
+        t?.completed ?? 0,
+        t?.in_progress ?? 0,
+        (t?.by_status?.find(s => s.status === 'review')?.count ?? 0),
+        t?.pending ?? 0,
+        t?.blocked ?? 0,
+      ],
+      backgroundColor: ['#4CAF50', '#5C6BC0', '#29B6F6', '#90A4AE', '#EF5350'],
+      hoverBackgroundColor: ['#388E3C', '#3949AB', '#039BE5', '#607D8B', '#C62828'],
+      borderWidth: 0,
+    }],
+  };
 });
 
 // ── Doughnut: riesgos ─────────────────────────────────────────────────────────
 const doughnutRisksData = computed(() => ({
-    labels: ['Activos', 'Resueltos / Mitigados'],
-    datasets: [{
-        data: [metrics.value?.risks.active ?? 0, metrics.value?.risks.resolved ?? 0],
-        backgroundColor: ['#EF5350','#4CAF50'],
-        borderWidth: 0,
-    }],
+  labels: ['Activos', 'Resueltos / Mitigados'],
+  datasets: [{
+    data: [metrics.value?.risks.active ?? 0, metrics.value?.risks.resolved ?? 0],
+    backgroundColor: ['#EF5350', '#4CAF50'],
+    borderWidth: 0,
+  }],
 }));
 
 // ── Doughnut: objetivos ───────────────────────────────────────────────────────
 const doughnutObjectivesData = computed(() => ({
-    labels: ['Cumplidos', 'Pendientes'],
-    datasets: [{
-        data: [metrics.value?.objectives.completed ?? 0, metrics.value?.objectives.pending ?? 0],
-        backgroundColor: ['#26A69A','#E0E0E0'],
-        borderWidth: 0,
-    }],
+  labels: ['Cumplidos', 'Pendientes'],
+  datasets: [{
+    data: [metrics.value?.objectives.completed ?? 0, metrics.value?.objectives.pending ?? 0],
+    backgroundColor: ['#26A69A', '#E0E0E0'],
+    borderWidth: 0,
+  }],
 }));
 
 // ── Doughnut: tickets ─────────────────────────────────────────────────────────
 const doughnutTicketsData = computed(() => {
-    const t = metrics.value?.tickets;
-    return {
-        labels: ['Abiertos', 'En progreso', 'Resueltos', 'Cerrados'],
-        datasets: [{
-            data: [t?.open ?? 0, t?.in_progress ?? 0, t?.resolved ?? 0, t?.closed ?? 0],
-            backgroundColor: ['#FFA726','#5C6BC0','#26A69A','#90A4AE'],
-            borderWidth: 0,
-        }],
-    };
+  const t = metrics.value?.tickets;
+  return {
+    labels: ['Abiertos', 'En progreso', 'Resueltos', 'Cerrados'],
+    datasets: [{
+      data: [t?.open ?? 0, t?.in_progress ?? 0, t?.resolved ?? 0, t?.closed ?? 0],
+      backgroundColor: ['#FFA726', '#5C6BC0', '#26A69A', '#90A4AE'],
+      borderWidth: 0,
+    }],
+  };
 });
 
 // ── Bar: tareas por miembro ───────────────────────────────────────────────────
 const barMembersData = computed(() => {
-    const members = metrics.value?.tasks.by_member ?? [];
-    return {
-        labels: members.map(m => m.name),
-        datasets: [
-            { label: 'Total', data: members.map(m => m.total), backgroundColor: '#5C6BC0', borderRadius: 4 },
-            { label: 'Completadas', data: members.map(m => m.completed), backgroundColor: '#4CAF50', borderRadius: 4 },
-            { label: 'Bloqueadas', data: members.map(m => m.blocked), backgroundColor: '#EF5350', borderRadius: 4 },
-        ],
-    };
+  const members = metrics.value?.tasks.by_member ?? [];
+  return {
+    labels: members.map(m => m.name),
+    datasets: [
+      { label: 'Total', data: members.map(m => m.total), backgroundColor: '#5C6BC0', borderRadius: 4 },
+      { label: 'Completadas', data: members.map(m => m.completed), backgroundColor: '#4CAF50', borderRadius: 4 },
+      { label: 'Bloqueadas', data: members.map(m => m.blocked), backgroundColor: '#EF5350', borderRadius: 4 },
+    ],
+  };
 });
 
 // ── Bar: bloqueadores por severidad ──────────────────────────────────────────
 const barBlockersData = computed(() => {
-    const bs = metrics.value?.blockers.by_severity ?? [];
-    return {
-        labels: bs.map(s => s.label),
-        datasets: [{
-            label: 'Bloqueadores',
-            data: bs.map(s => s.count),
-            backgroundColor: ['#EF5350','#FFA726','#FFEE58'],
-            borderRadius: 4,
-        }],
-    };
+  const bs = metrics.value?.blockers.by_severity ?? [];
+  return {
+    labels: bs.map(s => s.label),
+    datasets: [{
+      label: 'Bloqueadores',
+      data: bs.map(s => s.count),
+      backgroundColor: ['#EF5350', '#FFA726', '#FFEE58'],
+      borderRadius: 4,
+    }],
+  };
 });
 
 // ── Bar: riesgos por impacto ──────────────────────────────────────────────────
 const barRisksImpactData = computed(() => {
-    const ri = metrics.value?.risks.by_impact ?? [];
-    return {
-        labels: ri.map(i => i.label),
-        datasets: [{
-            label: 'Riesgos',
-            data: ri.map(i => i.count),
-            backgroundColor: ['#EF5350','#FFA726','#FFEE58','#66BB6A'],
-            borderRadius: 4,
-        }],
-    };
+  const ri = metrics.value?.risks.by_impact ?? [];
+  return {
+    labels: ri.map(i => i.label),
+    datasets: [{
+      label: 'Riesgos',
+      data: ri.map(i => i.count),
+      backgroundColor: ['#EF5350', '#FFA726', '#FFEE58', '#66BB6A'],
+      borderRadius: 4,
+    }],
+  };
 });
 
 const doughnutOptions = {
-    responsive: true, maintainAspectRatio: false, cutout: '68%',
-    plugins: { legend: { position: 'bottom' as const } },
+  responsive: true, maintainAspectRatio: false, cutout: '68%',
+  plugins: { legend: { position: 'bottom' as const } },
 };
 const barOptionsMulti = {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { position: 'bottom' as const } },
-    scales: {
-        y: { beginAtZero: true, ticks: { stepSize: 1 } },
-        x: { grid: { display: false } },
-    },
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { position: 'bottom' as const } },
+  scales: {
+    y: { beginAtZero: true, ticks: { stepSize: 1 } },
+    x: { grid: { display: false } },
+  },
 };
 const barOptionsSingle = {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: {
-        y: { beginAtZero: true, ticks: { stepSize: 1 } },
-        x: { grid: { display: false } },
-    },
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    y: { beginAtZero: true, ticks: { stepSize: 1 } },
+    x: { grid: { display: false } },
+  },
 };
 </script>
 
@@ -201,8 +202,7 @@ const barOptionsSingle = {
             </VChip>
           </VCardSubtitle>
           <template #append>
-            <VBtn variant="outlined" size="small"
-              :to="{ name: 'project-detail', params: { projectId: projectId() } }"
+            <VBtn variant="outlined" size="small" :to="{ name: 'project-detail', params: { projectId: projectId() } }"
               prepend-icon="mdi-arrow-left">
               Proyecto
             </VBtn>
@@ -265,12 +265,9 @@ const barOptionsSingle = {
               <span class="text-caption text-medium-emphasis">Completitud</span>
               <span class="text-body-2 font-weight-bold">{{ completionRate }}%</span>
             </div>
-            <VProgressLinear
-              :model-value="completionRate"
+            <VProgressLinear :model-value="completionRate"
               :color="completionRate >= 75 ? 'success' : completionRate >= 40 ? 'warning' : 'error'"
-              bg-color="surface-variant"
-              height="12" rounded striped
-            />
+              bg-color="surface-variant" height="12" rounded striped />
             <div class="d-flex justify-space-between mt-1">
               <span class="text-caption text-medium-emphasis">0%</span>
               <span class="text-caption text-medium-emphasis">100%</span>
@@ -289,7 +286,8 @@ const barOptionsSingle = {
           </VCardItem>
           <VCardText style="height: 260px; position: relative;">
             <Doughnut :data="doughnutTasksData" :options="doughnutOptions" />
-            <div style="position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;">
+            <div
+              style="position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;">
               <div class="text-h5 font-weight-bold">{{ metrics.tasks.total }}</div>
               <div class="text-caption text-medium-emphasis">total</div>
             </div>
@@ -371,7 +369,8 @@ const barOptionsSingle = {
                           <VChip size="x-small" color="success" variant="tonal">{{ m.completed }}</VChip>
                         </td>
                         <td class="text-center">
-                          <VChip size="x-small" :color="m.blocked > 0 ? 'error' : 'default'" variant="tonal">{{ m.blocked }}</VChip>
+                          <VChip size="x-small" :color="m.blocked > 0 ? 'error' : 'default'" variant="tonal">{{
+                            m.blocked }}</VChip>
                         </td>
                       </tr>
                       <tr v-if="metrics.tasks.by_member.length === 0">
@@ -398,7 +397,8 @@ const barOptionsSingle = {
             </VCardItem>
             <VCardText style="height:260px; position:relative;">
               <Doughnut :data="doughnutTicketsData" :options="doughnutOptions" />
-              <div style="position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;">
+              <div
+                style="position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;">
                 <div class="text-h5 font-weight-bold">{{ metrics.tickets.total }}</div>
                 <div class="text-caption text-medium-emphasis">tickets</div>
               </div>
@@ -418,7 +418,8 @@ const barOptionsSingle = {
               <VRow>
                 <VCol cols="12" sm="5" style="height:200px; position:relative;">
                   <Doughnut :data="doughnutRisksData" :options="doughnutOptions" />
-                  <div style="position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;">
+                  <div
+                    style="position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;">
                     <div class="text-h5 font-weight-bold">{{ metrics.risks.total }}</div>
                     <div class="text-caption text-medium-emphasis">riesgos</div>
                   </div>
@@ -442,11 +443,12 @@ const barOptionsSingle = {
                     <VDivider class="my-1" />
                     <div class="text-caption text-medium-emphasis mb-1">Por impacto</div>
                     <div v-for="ri in metrics.risks.by_impact" :key="ri.impact"
-                         class="d-flex align-center justify-space-between">
+                      class="d-flex align-center justify-space-between">
                       <span class="text-body-2">{{ ri.label }}</span>
                       <VChip size="x-small" variant="tonal">{{ ri.count }}</VChip>
                     </div>
-                    <span v-if="metrics.risks.by_impact.length === 0" class="text-caption text-medium-emphasis">Sin riesgos registrados</span>
+                    <span v-if="metrics.risks.by_impact.length === 0" class="text-caption text-medium-emphasis">Sin
+                      riesgos registrados</span>
                   </div>
                 </VCol>
               </VRow>
@@ -520,8 +522,10 @@ const barOptionsSingle = {
             </VCardItem>
             <VCardText style="height:260px; position:relative;">
               <Doughnut :data="doughnutObjectivesData" :options="doughnutOptions" />
-              <div style="position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;">
-                <div class="text-h5 font-weight-bold">{{ pct(metrics.objectives.completed, metrics.objectives.total) }}%</div>
+              <div
+                style="position:absolute;top:46%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;">
+                <div class="text-h5 font-weight-bold">{{ pct(metrics.objectives.completed, metrics.objectives.total) }}%
+                </div>
                 <div class="text-caption text-medium-emphasis">cumplidos</div>
               </div>
             </VCardText>
@@ -542,15 +546,11 @@ const barOptionsSingle = {
                   <span class="font-weight-medium">{{ ot.type }}</span>
                   <span class="text-medium-emphasis">{{ ot.completed }}/{{ ot.total }}</span>
                 </div>
-                <VProgressLinear
-                  :model-value="pct(ot.completed, ot.total)"
-                  :color="pct(ot.completed, ot.total) === 100 ? 'success' : 'primary'"
-                  bg-color="surface-variant"
-                  height="8" rounded
-                />
+                <VProgressLinear :model-value="pct(ot.completed, ot.total)"
+                  :color="pct(ot.completed, ot.total) === 100 ? 'success' : 'primary'" bg-color="surface-variant"
+                  height="8" rounded />
               </div>
-              <div v-if="metrics.objectives.by_type.length === 0"
-                   class="text-caption text-medium-emphasis">
+              <div v-if="metrics.objectives.by_type.length === 0" class="text-caption text-medium-emphasis">
                 Sin objetivos registrados.
               </div>
             </VCardText>
@@ -567,23 +567,21 @@ const barOptionsSingle = {
               <VRow>
                 <VCol cols="6" class="text-center">
                   <div class="text-h4 font-weight-bold text-primary">
-                    {{ metrics.milestones.completed }}<span class="text-body-1 text-medium-emphasis">/{{ metrics.milestones.total }}</span>
+                    {{ metrics.milestones.completed }}<span class="text-body-1 text-medium-emphasis">/{{
+                      metrics.milestones.total }}</span>
                   </div>
                   <div class="text-caption text-medium-emphasis mt-1">HITOS COMPLETADOS</div>
-                  <VProgressLinear
-                    :model-value="pct(metrics.milestones.completed, metrics.milestones.total)"
-                    color="primary" bg-color="surface-variant" height="6" rounded class="mt-2"
-                  />
+                  <VProgressLinear :model-value="pct(metrics.milestones.completed, metrics.milestones.total)"
+                    color="primary" bg-color="surface-variant" height="6" rounded class="mt-2" />
                 </VCol>
                 <VCol cols="6" class="text-center">
                   <div class="text-h4 font-weight-bold text-info">
-                    {{ metrics.deliverables.approved }}<span class="text-body-1 text-medium-emphasis">/{{ metrics.deliverables.total }}</span>
+                    {{ metrics.deliverables.approved }}<span class="text-body-1 text-medium-emphasis">/{{
+                      metrics.deliverables.total }}</span>
                   </div>
                   <div class="text-caption text-medium-emphasis mt-1">ENTREGABLES APROBADOS</div>
-                  <VProgressLinear
-                    :model-value="pct(metrics.deliverables.approved, metrics.deliverables.total)"
-                    color="info" bg-color="surface-variant" height="6" rounded class="mt-2"
-                  />
+                  <VProgressLinear :model-value="pct(metrics.deliverables.approved, metrics.deliverables.total)"
+                    color="info" bg-color="surface-variant" height="6" rounded class="mt-2" />
                 </VCol>
               </VRow>
             </VCardText>

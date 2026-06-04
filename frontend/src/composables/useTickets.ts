@@ -3,6 +3,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
 import * as ticketsService from '@/services/tickets.service';
+import { buildFormData } from '@/composables/useAttachments';
 import type { TicketI, TicketErroresFormI } from '@/interfaces/TicketI';
 
 const emptyForm = (): TicketI => ({
@@ -24,8 +25,12 @@ export function useTickets() {
 
     const projectId = () => Number(route.params.projectId);
 
-    async function handleStore() {
-        const response = await ticketsService.store(projectId(), form.value);
+    async function handleStore(files?: File[]) {
+        const payload = files?.length
+            ? buildFormData({ ...form.value }, files)
+            : { ...form.value };
+
+        const response = await ticketsService.store(projectId(), payload);
         if (response.status) {
             snackbar.value = { show: true, text: 'Ticket creado', color: 'success' };
             router.push({ name: 'tickets', params: { projectId: projectId() } });
@@ -35,8 +40,12 @@ export function useTickets() {
         }
     }
 
-    async function handleUpdate() {
-        const response = await ticketsService.update(projectId(), form.value.id, form.value);
+    async function handleUpdate(files?: File[]) {
+        const payload = files?.length
+            ? buildFormData({ ...form.value }, files)
+            : { ...form.value };
+
+        const response = await ticketsService.update(projectId(), form.value.id, payload);
         if (response.status) {
             snackbar.value = { show: true, text: 'Ticket actualizado', color: 'success' };
             router.push({ name: 'tickets', params: { projectId: projectId() } });

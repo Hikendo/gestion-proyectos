@@ -196,6 +196,10 @@ onMounted(handleGetData);
                   </td>
                   <td>
                     <div class="d-flex gap-1">
+                      <VBtn icon size="small" variant="text"
+                        :to="{ name: 'milestones-view', params: { projectId: projectId(), id: item.id } }">
+                        <VIcon icon="mdi-eye" color="primary" size="small" />
+                      </VBtn>
                       <VBtn icon size="small" variant="flat"
                         :to="{ name: 'milestones-id', params: { projectId: projectId(), id: item.id } }"
                         v-if="canAction('Hito.Update')">

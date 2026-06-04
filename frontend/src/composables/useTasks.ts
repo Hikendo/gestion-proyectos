@@ -3,6 +3,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
 import * as tasksService from '@/services/project-tasks.service';
+import { buildFormData } from '@/composables/useAttachments';
 import type { TaskI, TaskErroresFormI } from '@/interfaces/TaskI';
 
 const emptyForm = (): TaskI => ({
@@ -26,8 +27,12 @@ export function useTasks() {
 
     const projectId = () => Number(route.params.projectId);
 
-    async function handleStore() {
-        const response = await tasksService.store(projectId(), form.value);
+    async function handleStore(files?: File[]) {
+        const payload = files?.length
+            ? buildFormData({ ...form.value }, files)
+            : { ...form.value };
+
+        const response = await tasksService.store(projectId(), payload);
         if (response.status) {
             snackbar.value = { show: true, text: 'Tarea creada', color: 'success' };
             router.push({ name: 'tasks', params: { projectId: projectId() } });
@@ -37,8 +42,12 @@ export function useTasks() {
         }
     }
 
-    async function handleUpdate() {
-        const response = await tasksService.update(projectId(), form.value.id, form.value);
+    async function handleUpdate(files?: File[]) {
+        const payload = files?.length
+            ? buildFormData({ ...form.value }, files)
+            : { ...form.value };
+
+        const response = await tasksService.update(projectId(), form.value.id, payload);
         if (response.status) {
             snackbar.value = { show: true, text: 'Tarea actualizada', color: 'success' };
             router.push({ name: 'tasks', params: { projectId: projectId() } });

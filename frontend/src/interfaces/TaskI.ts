@@ -8,11 +8,11 @@ import {
   TaskStatus,
 } from "@/interfaces/enums";
 
+import { AttachmentI } from "@/interfaces/AttachmentI";
 import { BlockerI } from "@/interfaces/BlockerI";
 import { ProjectI } from "@/interfaces/ProjectI";
 import { ProjectPhaseI } from "@/interfaces/ProjectPhaseI";
 
-import { TaskAttachmentI } from "@/interfaces/TaskAttachmentI";
 import { TaskCommentI } from "@/interfaces/TaskCommentI";
 import { TaskTimeLogI } from "@/interfaces/TaskTimeLogI";
 
@@ -45,7 +45,7 @@ export interface TaskI extends ModelBaseI {
   creator?: UserI;
 
   comments?: TaskCommentI[];
-  attachments?: TaskAttachmentI[];
+  attachments?: AttachmentI[];
 
   timeLogs?: TaskTimeLogI[];
 

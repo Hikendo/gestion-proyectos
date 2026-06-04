@@ -52,9 +52,10 @@ export const show = async (projectId: number, ticketId: number) => {
 
 // ─── Store ────────────────────────────────────────────────────────────────────
 
-export const store = async (projectId: number, payload: TicketPayload) => {
+export const store = async (projectId: number, payload: TicketPayload | FormData) => {
   try {
-    const { data } = await apiWithToken.post<TicketResponseI>(`/projects/${projectId}/tickets`, payload);
+    const config = payload instanceof FormData ? { headers: { 'Content-Type': 'multipart/form-data' } } : {};
+    const { data } = await apiWithToken.post<TicketResponseI>(`/projects/${projectId}/tickets`, payload, config);
     return {
       status: true,
       message: data.message,
@@ -75,8 +76,14 @@ export const store = async (projectId: number, payload: TicketPayload) => {
 
 // ─── Update ───────────────────────────────────────────────────────────────────
 
-export const update = async (projectId: number, ticketId: number, payload: TicketPayload) => {
+export const update = async (projectId: number, ticketId: number, payload: TicketPayload | FormData) => {
   try {
+    if (payload instanceof FormData) {
+      payload.append('_method', 'PUT');
+      const config = { headers: { 'Content-Type': 'multipart/form-data' } };
+      const { data } = await apiWithToken.post<TicketResponseI>(`/projects/${projectId}/tickets/${ticketId}`, payload, config);
+      return { status: true, message: data.message, items: data.items };
+    }
     const { data } = await apiWithToken.put<TicketResponseI>(`/projects/${projectId}/tickets/${ticketId}`, payload);
     return {
       status: true,

@@ -8,7 +8,7 @@ import { useEnsureCurrentProject } from '@/composables/useEnsureCurrentProject';
 import * as blockersService from '@/services/project-blockers.service';
 import type { BlockerI } from '@/interfaces/BlockerI';
 
-const route    = useRoute();
+const route = useRoute();
 const appStore = useAppStore();
 const { loader, snackbar } = storeToRefs(appStore);
 
@@ -25,46 +25,46 @@ const viewMode = ref<'list' | 'kanban'>('list');
 const data = ref<BlockerI[]>([]);
 
 const handleGetData = async () => {
-    loader.value = true;
-    const response = await blockersService.index(projectId());
-    if (response.status && response.items) {
-        data.value = Array.isArray(response.items)
-            ? response.items
-            : (response.items as any).data ?? [];
-    }
-    loader.value = false;
+  loader.value = true;
+  const response = await blockersService.index(projectId());
+  if (response.status && response.items) {
+    data.value = Array.isArray(response.items)
+      ? response.items
+      : (response.items as any).data ?? [];
+  }
+  loader.value = false;
 };
 
 // ── Toggle resuelto ───────────────────────────────────────────────────────────
 
 async function toggleResolved(item: BlockerI) {
-    const newVal = !item.resolved;
-    let response;
-    if (newVal) {
-        response = await blockersService.resolve(item.project_id, item.id);
-    } else {
-        response = await blockersService.update(item.project_id, item.id, {
-            ...item,
-            resolved: false,
-        });
-    }
-    if (response.status) {
-        item.resolved = newVal;
-        snackbar.value = {
-            show: true,
-            text: newVal ? 'Bloqueador resuelto' : 'Bloqueador reabierto',
-            color: newVal ? 'success' : 'warning',
-        };
-    } else {
-        snackbar.value = { show: true, text: 'Error al actualizar', color: 'error' };
-    }
+  const newVal = !item.resolved;
+  let response;
+  if (newVal) {
+    response = await blockersService.resolve(item.project_id, item.id);
+  } else {
+    response = await blockersService.update(item.project_id, item.id, {
+      ...item,
+      resolved: false,
+    });
+  }
+  if (response.status) {
+    item.resolved = newVal;
+    snackbar.value = {
+      show: true,
+      text: newVal ? 'Bloqueador resuelto' : 'Bloqueador reabierto',
+      color: newVal ? 'success' : 'warning',
+    };
+  } else {
+    snackbar.value = { show: true, text: 'Error al actualizar', color: 'error' };
+  }
 }
 
 // ── Kanban ────────────────────────────────────────────────────────────────────
 
 const KANBAN_COLUMNS = [
-    { id: 'pending',  resolved: false, title: 'Pendiente', color: 'error',   icon: 'mdi-block-helper' },
-    { id: 'resolved', resolved: true,  title: 'Resuelto',  color: 'success', icon: 'mdi-check-decagram-outline' },
+  { id: 'pending', resolved: false, title: 'Pendiente', color: 'error', icon: 'mdi-block-helper' },
+  { id: 'resolved', resolved: true, title: 'Resuelto', color: 'success', icon: 'mdi-check-decagram-outline' },
 ];
 
 const getByResolved = (resolved: boolean) => data.value.filter(b => b.resolved === resolved);
@@ -73,59 +73,59 @@ const draggedBlocker = ref<BlockerI | null>(null);
 const dragOverColumn = ref<string | null>(null);
 
 function onDragStart(e: DragEvent, blocker: BlockerI) {
-    draggedBlocker.value = blocker;
-    e.dataTransfer?.setData('text/plain', String(blocker.id));
-    if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
+  draggedBlocker.value = blocker;
+  e.dataTransfer?.setData('text/plain', String(blocker.id));
+  if (e.dataTransfer) e.dataTransfer.effectAllowed = 'move';
 }
 
 function onDragEnd() {
-    draggedBlocker.value = null;
-    dragOverColumn.value = null;
+  draggedBlocker.value = null;
+  dragOverColumn.value = null;
 }
 
 function onDragEnter(colId: string) { dragOverColumn.value = colId; }
 
 function onDragLeave(e: DragEvent, colId: string) {
-    const rel = e.relatedTarget as HTMLElement | null;
-    if (!(e.currentTarget as HTMLElement).contains(rel)) {
-        if (dragOverColumn.value === colId) dragOverColumn.value = null;
-    }
+  const rel = e.relatedTarget as HTMLElement | null;
+  if (!(e.currentTarget as HTMLElement).contains(rel)) {
+    if (dragOverColumn.value === colId) dragOverColumn.value = null;
+  }
 }
 
 async function onDrop(e: DragEvent, col: typeof KANBAN_COLUMNS[0]) {
-    e.preventDefault();
-    dragOverColumn.value = null;
-    if (!draggedBlocker.value || draggedBlocker.value.resolved === col.resolved) {
-        draggedBlocker.value = null;
-        return;
-    }
-    const blocker = draggedBlocker.value;
+  e.preventDefault();
+  dragOverColumn.value = null;
+  if (!draggedBlocker.value || draggedBlocker.value.resolved === col.resolved) {
     draggedBlocker.value = null;
+    return;
+  }
+  const blocker = draggedBlocker.value;
+  draggedBlocker.value = null;
 
-    let response;
-    if (col.resolved) {
-        response = await blockersService.resolve(blocker.project_id, blocker.id);
-    } else {
-        response = await blockersService.update(blocker.project_id, blocker.id, {
-            ...blocker,
-            resolved: false,
-        });
-    }
-    if (response.status) {
-        snackbar.value = { show: true, text: 'Estado actualizado', color: 'success' };
-        handleGetData();
-    } else {
-        snackbar.value = { show: true, text: 'Error al actualizar', color: 'error' };
-    }
+  let response;
+  if (col.resolved) {
+    response = await blockersService.resolve(blocker.project_id, blocker.id);
+  } else {
+    response = await blockersService.update(blocker.project_id, blocker.id, {
+      ...blocker,
+      resolved: false,
+    });
+  }
+  if (response.status) {
+    snackbar.value = { show: true, text: 'Estado actualizado', color: 'success' };
+    handleGetData();
+  } else {
+    snackbar.value = { show: true, text: 'Error al actualizar', color: 'error' };
+  }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const SEVERITY_COLORS: Record<string, string> = {
-    low: 'success', medium: 'info', high: 'warning', critical: 'error',
+  low: 'success', medium: 'info', high: 'warning', critical: 'error',
 };
 const SEVERITY_LABELS: Record<string, string> = {
-    low: 'Baja', medium: 'Media', high: 'Alta', critical: 'Crítica',
+  low: 'Baja', medium: 'Media', high: 'Alta', critical: 'Crítica',
 };
 
 onMounted(handleGetData);
@@ -146,18 +146,8 @@ const viewOptions = [
             <div class="d-flex justify-space-between align-center flex-wrap gap-3">
               <h4 class="text-h4 text-wrap">Listado de <strong>Bloqueadores</strong></h4>
               <div class="d-flex align-center gap-3">
-                <VSelect
-    v-model="viewMode"
-    :items="viewOptions"
-    item-title="title"
-    item-value="value"
-    density="compact"
-    variant="solo"
-    flat
-    hide-details
-    class="view-selector"
-    style="max-width: 130px;"
-  />
+                <VSelect v-model="viewMode" :items="viewOptions" item-title="title" item-value="value" density="compact"
+                  variant="solo" flat hide-details class="view-selector" style="max-width: 130px;" />
                 <VBtn variant="flat" prepend-icon="mdi-plus"
                   :to="{ name: 'blockers-new', params: { projectId: projectId() } }"
                   v-if="canAction('Bloqueador.Store')">
@@ -200,21 +190,21 @@ const viewOptions = [
                   </VChip>
                 </td>
                 <td>
-                  <VSwitch
-                    :model-value="item.resolved"
-                    color="success"
-                    hide-details
-                    density="compact"
-                    :label="item.resolved ? 'Resuelto' : 'Pendiente'"
-                    @update:model-value="toggleResolved(item)"
-                  />
+                  <VSwitch :model-value="item.resolved" color="success" hide-details density="compact"
+                    :label="item.resolved ? 'Resuelto' : 'Pendiente'" @update:model-value="toggleResolved(item)" />
                 </td>
                 <td>
-                  <VBtn icon size="small" variant="text"
-                    :to="{ name: 'blockers-id', params: { projectId: projectId(), id: item.id } }"
-                    v-if="canAction('Bloqueador.Update')">
-                    <VIcon icon="mdi-pencil" color="warning" size="small" />
-                  </VBtn>
+                  <div class="d-flex gap-1">
+                    <VBtn icon size="small" variant="text"
+                      :to="{ name: 'blockers-view', params: { projectId: projectId(), id: item.id } }">
+                      <VIcon icon="mdi-eye" color="primary" size="small" />
+                    </VBtn>
+                    <VBtn icon size="small" variant="text"
+                      :to="{ name: 'blockers-id', params: { projectId: projectId(), id: item.id } }"
+                      v-if="canAction('Bloqueador.Update')">
+                      <VIcon icon="mdi-pencil" color="warning" size="small" />
+                    </VBtn>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -228,21 +218,10 @@ const viewOptions = [
     <!-- ── Vista Kanban ───────────────────────────────────────────────────── -->
     <VCol cols="12" v-if="viewMode === 'kanban'">
       <VRow style="flex-wrap: nowrap;" class="overflow-x-auto pb-4">
-        <VCol
-          v-for="col in KANBAN_COLUMNS"
-          :key="col.id"
-          style="min-width: 320px;"
-          @dragover.prevent
-          @dragenter.prevent="onDragEnter(col.id)"
-          @dragleave="onDragLeave($event, col.id)"
-          @drop="onDrop($event, col)"
-        >
-          <VCard
-            :color="col.color"
-            variant="tonal"
-            class="h-100"
-            :class="{ 'kanban-drop-target': dragOverColumn === col.id }"
-          >
+        <VCol v-for="col in KANBAN_COLUMNS" :key="col.id" style="min-width: 320px;" @dragover.prevent
+          @dragenter.prevent="onDragEnter(col.id)" @dragleave="onDragLeave($event, col.id)" @drop="onDrop($event, col)">
+          <VCard :color="col.color" variant="tonal" class="h-100"
+            :class="{ 'kanban-drop-target': dragOverColumn === col.id }">
             <VCardItem>
               <VCardTitle class="d-flex align-center gap-2">
                 <VIcon :icon="col.icon" :color="col.color" size="18" />
@@ -257,29 +236,21 @@ const viewOptions = [
               <div class="d-flex flex-column gap-2">
 
                 <!-- Tarjeta de bloqueador -->
-                <VCard
-                  v-for="blocker in getByResolved(col.resolved)"
-                  :key="blocker.id"
-                  variant="outlined"
-                  class="blocker-card"
-                  :class="{ 'blocker-dragging': draggedBlocker?.id === blocker.id }"
-                  draggable="true"
-                  @dragstart="onDragStart($event, blocker)"
-                  @dragend="onDragEnd"
-                >
+                <VCard v-for="blocker in getByResolved(col.resolved)" :key="blocker.id" variant="outlined"
+                  class="blocker-card" :class="{ 'blocker-dragging': draggedBlocker?.id === blocker.id }"
+                  draggable="true" @dragstart="onDragStart($event, blocker)" @dragend="onDragEnd">
                   <VCardText class="pa-3">
 
                     <!-- Título + severidad -->
                     <div class="d-flex justify-space-between align-start gap-2 mb-2">
                       <div class="d-flex align-center gap-1" style="min-width: 0;">
                         <VIcon size="14" :color="col.color">mdi-block-helper</VIcon>
-                        <span
-                          class="text-body-2 font-weight-medium"
-                          style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
-                          :title="blocker.title"
-                        >{{ blocker.title }}</span>
+                        <span class="text-body-2 font-weight-medium"
+                          style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" :title="blocker.title">{{
+                          blocker.title }}</span>
                       </div>
-                      <VChip :color="SEVERITY_COLORS[blocker.severity]" size="x-small" variant="flat" class="flex-shrink-0">
+                      <VChip :color="SEVERITY_COLORS[blocker.severity]" size="x-small" variant="flat"
+                        class="flex-shrink-0">
                         {{ SEVERITY_LABELS[blocker.severity] }}
                       </VChip>
                     </div>
@@ -292,11 +263,9 @@ const viewOptions = [
 
                     <!-- Acción editar -->
                     <div class="d-flex justify-end">
-                      <VBtn
-                        size="x-small" variant="text" :color="col.color"
+                      <VBtn size="x-small" variant="text" :color="col.color"
                         :to="{ name: 'blockers-id', params: { projectId: blocker.project_id, id: blocker.id } }"
-                        v-if="canAction('Bloqueador.Update')"
-                      >
+                        v-if="canAction('Bloqueador.Update')">
                         <VIcon size="14">mdi-pencil</VIcon>
                       </VBtn>
                     </div>
@@ -305,11 +274,8 @@ const viewOptions = [
                 </VCard>
 
                 <!-- Zona de drop vacía -->
-                <div
-                  v-if="getByResolved(col.resolved).length === 0"
-                  class="empty-drop-zone"
-                  :class="{ 'empty-drop-zone--active': dragOverColumn === col.id }"
-                >
+                <div v-if="getByResolved(col.resolved).length === 0" class="empty-drop-zone"
+                  :class="{ 'empty-drop-zone--active': dragOverColumn === col.id }">
                   <VIcon size="28" color="grey-lighten-1">mdi-tray-arrow-down</VIcon>
                   <span class="text-caption text-grey">Arrastra aquí</span>
                 </div>
@@ -337,12 +303,16 @@ const viewOptions = [
 
 .blocker-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.blocker-card:active { cursor: grabbing; }
+.blocker-card:active {
+  cursor: grabbing;
+}
 
-.blocker-dragging { opacity: 0.4; }
+.blocker-dragging {
+  opacity: 0.4;
+}
 
 .empty-drop-zone {
   display: flex;
@@ -351,7 +321,7 @@ const viewOptions = [
   justify-content: center;
   gap: 6px;
   min-height: 72px;
-  border: 2px dashed rgba(0,0,0,0.12);
+  border: 2px dashed rgba(0, 0, 0, 0.12);
   border-radius: 8px;
   padding: 16px;
   transition: border-color 0.2s ease, background-color 0.2s ease;
@@ -359,6 +329,6 @@ const viewOptions = [
 
 .empty-drop-zone--active {
   border-color: currentColor;
-  background-color: rgba(0,0,0,0.04);
+  background-color: rgba(0, 0, 0, 0.04);
 }
 </style>

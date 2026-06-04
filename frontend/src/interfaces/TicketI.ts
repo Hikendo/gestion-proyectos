@@ -1,3 +1,4 @@
+import { AttachmentI } from "@/interfaces/AttachmentI";
 import { ModelBaseI } from "@/interfaces/ModelBaseI";
 
 import {
@@ -24,6 +25,8 @@ export interface TicketI extends ModelBaseI {
 
   creator?: UserI;
   assignee?: UserI;
+
+  attachments?: AttachmentI[];
 }
 
 export interface TicketErroresFormI {

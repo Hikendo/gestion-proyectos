@@ -14,10 +14,12 @@ class StoreTicketRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'subject'     => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'priority'    => ['nullable', 'in:low,medium,high,critical'],
-            'assigned_to' => ['nullable', 'exists:users,id'],
+            'subject'        => ['required', 'string', 'max:255'],
+            'description'    => ['nullable', 'string'],
+            'priority'       => ['nullable', 'in:low,medium,high,critical'],
+            'assigned_to'    => ['nullable', 'exists:users,id'],
+            'attachments'    => ['nullable', 'array'],
+            'attachments.*'  => ['file', 'mimes:pdf,jpeg,png,zip,docx,xlsx', 'max:10240'],
         ];
     }
 }

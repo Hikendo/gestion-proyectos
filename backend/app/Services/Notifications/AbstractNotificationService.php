@@ -65,50 +65,54 @@ abstract class AbstractNotificationService
             "[{$this->notificationType()}] Despachando a {$recipients->count()} destinatario(s)."
         );
 
-        // Bulk insert para evitar N+1 en la escritura a BD
-        $now    = now();
-        $rows   = $recipients->map(fn(User $user) => [
-            'user_id'    => $user->id,
-            'title'      => $title,
-            'body'       => $body,
-            'type'       => $this->notificationType(),
-            'data'       => json_encode($data),
-            'status'     => 'pending',
-            'created_at' => $now,
-            'updated_at' => $now,
-        ])->toArray();
+        // Bulk insert por chunks para evitar race conditions entre workers concurrentes.
+        // Dentro de cada chunk, recuperamos los IDs exactos pertenecientes a ese lote.
+        $now = now();
 
-        // Insertar todos los registros de una sola vez
-        Notification::insert($rows);
+        $chunks = $recipients->chunk(50);
+        foreach ($chunks as $chunk) {
+            $rows = $chunk->map(fn(User $user) => [
+                'user_id'    => $user->id,
+                'title'      => $title,
+                'body'       => $body,
+                'type'       => $this->notificationType(),
+                'data'       => json_encode($data),
+                'status'     => 'pending',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ])->toArray();
 
-        // Recuperar los IDs recién insertados para asociar el Job
-        $insertedNotifications = Notification::where('status', 'pending')
-            ->where('type', $this->notificationType())
-            ->where('created_at', $now)
-            ->whereIn('user_id', $recipients->pluck('id'))
-            ->get()
-            ->keyBy('user_id');
+            Notification::insert($rows);
 
-        foreach ($recipients as $user) {
-            $notification = $insertedNotifications->get($user->id);
+            // Recuperamos usando created_at >= now() y los user_ids exactos del chunk actual
+            $userIds = $chunk->pluck('id')->toArray();
+            $inserted = Notification::where('type', $this->notificationType())
+                ->where('created_at', '>=', $now)
+                ->whereIn('user_id', $userIds)
+                ->get()
+                ->keyBy('user_id');
 
-            if (!$notification) {
-                Log::channel('notifications')->warning(
-                    "[{$this->notificationType()}] No se encontró la notificación persistida para user_id {$user->id}."
+            foreach ($chunk as $user) {
+                $notification = $inserted->get($user->id);
+
+                if (!$notification) {
+                    Log::channel('notifications')->warning(
+                        "[{$this->notificationType()}] No se encontró la notificación persistida para user_id {$user->id}."
+                    );
+                    continue;
+                }
+
+                SendPushNotificationJob::dispatch(
+                    notification: $notification,
+                    clickAction: $clickAction,
+                    icon: $icon,
+                    image: $image,
                 );
-                continue;
+
+                Log::channel('notifications')->debug(
+                    "[{$this->notificationType()}] Job despachado para user_id {$user->id}, notification_id {$notification->id}."
+                );
             }
-
-            SendPushNotificationJob::dispatch(
-                notification: $notification,
-                clickAction: $clickAction,
-                icon: $icon,
-                image: $image,
-            );
-
-            Log::channel('notifications')->debug(
-                "[{$this->notificationType()}] Job despachado para user_id {$user->id}, notification_id {$notification->id}."
-            );
         }
     }
 

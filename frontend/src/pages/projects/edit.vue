@@ -9,6 +9,7 @@ import { useProjects } from '@/composables/useProjects';
 import ProjectForm from '@/components/projects/ProjectForm.vue';
 import * as projectsService from '@/services/projects.service';
 import type { ProjectI } from '@/interfaces/ProjectI';
+import { toDateInput } from '@/utils/util';
 
 const route = useRoute();
 const router = useRouter();
@@ -23,17 +24,20 @@ useEnsureCurrentProject();
 const projectId = Number(route.params.projectId);
 
 onMounted(async () => {
-    loader.value = true;
-    const response = await projectsService.show(projectId);
-    if (response.status && response.items) {
-        form.value = response.items as ProjectI;
-        // También actualizamos el store con el dato fresco
-        authStore.setCurrentProject(response.items as ProjectI);
-    } else {
-        snackbar.value = { show: true, text: 'Proyecto no encontrado', color: 'error' };
-        router.push({ name: 'projects' });
-    }
-    loader.value = false;
+  loader.value = true;
+  const response = await projectsService.show(projectId);
+  if (response.status && response.items) {
+    const item = response.items as ProjectI;
+    item.start_date = toDateInput(item.start_date);
+    item.end_date = toDateInput(item.end_date);
+    form.value = item;
+    // También actualizamos el store con el dato fresco
+    authStore.setCurrentProject(response.items as ProjectI);
+  } else {
+    snackbar.value = { show: true, text: 'Proyecto no encontrado', color: 'error' };
+    router.push({ name: 'projects' });
+  }
+  loader.value = false;
 });
 </script>
 

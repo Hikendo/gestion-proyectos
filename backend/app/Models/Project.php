@@ -5,6 +5,7 @@
 namespace App\Models;
 
 use App\Enums\ProjectStatus;
+use App\Traits\HasAttachments;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -12,17 +13,11 @@ use Laravel\Scout\Searchable;
 
 class Project extends Model
 {
-    use HasFactory, SoftDeletes, Searchable;
+    use HasFactory, SoftDeletes, Searchable, HasAttachments;
 
-    public function toSearchableArray(): array
-    {
-        return [
-            'name'        => $this->name,
-            'code'        => $this->code,
-            'description' => $this->description,
-        ];
-    }
-
+    /**
+     * @var array<int, string>
+     */
     protected $fillable = [
         'name',
         'code',
@@ -33,7 +28,17 @@ class Project extends Model
         'budget',
         'progress',
         'owner_id',
+        'uuid',
     ];
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'name'        => $this->name,
+            'code'        => $this->code,
+            'description' => $this->description,
+        ];
+    }
 
     protected $casts = [
         'start_date' => 'date',

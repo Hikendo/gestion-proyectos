@@ -6,19 +6,28 @@ import TaskForm from '@/components/tasks/TaskForm.vue';
 
 const route = useRoute();
 const { errores, form, handleStore } = useTasks();
+const pendingFiles = ref<File[]>([]);
 
 const confirmVisible = ref(false);
-const pendingAction   = ref<(() => Promise<void>) | null>(null);
+const pendingAction = ref<(() => Promise<void>) | null>(null);
+
+function onAttachmentsChanged(files: File[]): void {
+  pendingFiles.value = files;
+}
 
 function requestSave(action: () => Promise<void>) {
-    pendingAction.value = action;
-    confirmVisible.value = true;
+  pendingAction.value = action;
+  confirmVisible.value = true;
 }
 
 async function confirmAction() {
-    confirmVisible.value = false;
-    if (pendingAction.value) await pendingAction.value();
-    pendingAction.value = null;
+  confirmVisible.value = false;
+  if (pendingAction.value) await pendingAction.value();
+  pendingAction.value = null;
+}
+
+async function onSubmit(): Promise<void> {
+  await handleStore(pendingFiles.value.length ? pendingFiles.value : undefined);
 }
 </script>
 
@@ -32,8 +41,7 @@ async function confirmAction() {
               <h4 class="text-h4 text-wrap">
                 Agregar <strong>Tarea</strong>
               </h4>
-              <VBtn variant="outlined"
-                :to="{ name: 'tasks', params: { projectId: route.params.projectId } }">
+              <VBtn variant="outlined" :to="{ name: 'tasks', params: { projectId: route.params.projectId } }">
                 Volver
               </VBtn>
             </div>
@@ -42,11 +50,11 @@ async function confirmAction() {
       </VCard>
     </VCol>
     <VCol cols="12">
-      <VForm @submit.prevent="requestSave(handleStore)">
-        <TaskForm :form="form" :errores="errores" />
+      <VForm @submit.prevent="requestSave(onSubmit)">
+        <TaskForm :form="form" :errores="errores" @update:attachments="onAttachmentsChanged" />
       </VForm>
     </VCol>
-  
+
     <VDialog v-model="confirmVisible" persistent max-width="400">
       <VCard>
         <VCardTitle class="text-h6">Confirmar acción</VCardTitle>

@@ -1,3 +1,4 @@
+import { AttachmentI } from "@/interfaces/AttachmentI";
 import { BlockerSeverity } from "@/interfaces/enums";
 import { ModelBaseI } from "@/interfaces/ModelBaseI";
 import { ProjectI } from "@/interfaces/ProjectI";
@@ -16,6 +17,8 @@ export interface BlockerI extends ModelBaseI {
 
   project?: ProjectI;
   task?: TaskI;
+
+  attachments?: AttachmentI[];
 }
 
 export interface BlockerErroresFormI {
