@@ -36,9 +36,11 @@ export function useAttachments() {
     if (mimeType.includes('pdf')) return 'mdi-file-pdf-box';
     if (mimeType.includes('image')) return 'mdi-file-image-outline';
     if (mimeType.includes('zip') || mimeType.includes('rar')) return 'mdi-folder-zip-outline';
-    if (mimeType.includes('word') || mimeType.includes('document')) return 'mdi-file-word-outline';
+    // Excel/PowerPoint deben evaluarse antes que Word porque los mimes Office Open XML
+    // contienen "document" en "officedocument" y causarían falsos positivos con Word
     if (mimeType.includes('excel') || mimeType.includes('sheet')) return 'mdi-file-excel-outline';
     if (mimeType.includes('powerpoint') || mimeType.includes('presentation')) return 'mdi-file-powerpoint-outline';
+    if (mimeType.includes('word') || mimeType.includes('document')) return 'mdi-file-word-outline';
 
     return 'mdi-file-document-outline';
   }
