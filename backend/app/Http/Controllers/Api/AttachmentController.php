@@ -90,7 +90,13 @@ class AttachmentController extends Controller
             ], Response::HTTP_GONE);
         }
 
-        Gate::authorize('delete', $parent);
+        // Usar la policy específica de manageAttachments si existe,
+        // o fallback a delete del padre.
+        if (method_exists(Gate::getPolicyFor($parent::class), 'manageAttachments')) {
+            Gate::authorize('manageAttachments', $parent);
+        } else {
+            Gate::authorize('delete', $parent);
+        }
 
         $this->attachmentService->delete($attachment);
 

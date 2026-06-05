@@ -66,4 +66,15 @@ class ProjectPolicy
             && ($project->owner_id === $user->id
                 || $user->hasProjectRole($project, 'manager'));
     }
+
+    /**
+     * Gestión de adjuntos de proyecto.
+     * Solo PM/owner pueden subir/eliminar adjuntos.
+     */
+    public function manageAttachments(User $user, Project $project): bool
+    {
+        return $user->canForProject($project, 'project.manage-attachments')
+            && ($project->owner_id === $user->id
+                || $user->hasProjectRole($project, 'manager'));
+    }
 }

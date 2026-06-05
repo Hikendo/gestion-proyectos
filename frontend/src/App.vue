@@ -32,16 +32,28 @@ function handleForegroundNotification(event: CustomEvent) {
     notificationStore.addNotificationFromFcm(newNotification);
 }
 
+let refreshInterval: ReturnType<typeof setInterval> | null = null;
+
 onMounted(() => {
     themeStore.init();
     // Escuchar notificaciones FCM en primer plano
     window.addEventListener('fcm:foreground-notification', handleForegroundNotification as EventListener);
     // Cargar contador de no leídas al iniciar
     notificationStore.refreshUnreadCount();
+    // Cargar lista de notificaciones para la bandeja
+    notificationStore.fetchNotifications();
+    // Refrescar notificaciones cada 30 segundos
+    refreshInterval = setInterval(() => {
+        notificationStore.refreshUnreadCount();
+        notificationStore.fetchNotifications();
+    }, 30000);
 });
 
 onUnmounted(() => {
     window.removeEventListener('fcm:foreground-notification', handleForegroundNotification as EventListener);
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+    }
 });
 </script>
 

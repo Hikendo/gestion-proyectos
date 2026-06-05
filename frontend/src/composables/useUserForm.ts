@@ -7,6 +7,7 @@ export interface UserFormState {
     password: string;
     password_confirmation: string;
     role: string;
+    permissions: string[];
 }
 
 const initialFormState: UserFormState = {
@@ -15,6 +16,7 @@ const initialFormState: UserFormState = {
     password: '',
     password_confirmation: '',
     role: '',
+    permissions: [],
 };
 
 const initialErrorsState: UserErroresFormI = {
@@ -23,6 +25,7 @@ const initialErrorsState: UserErroresFormI = {
     password: [],
     password_confirmation: [],
     role: [],
+    permissions: [],
 };
 
 export function useUserForm() {

@@ -26,6 +26,7 @@ export interface UserErroresFormI {
   password_confirmation?: string[]; // Required en Laravel en create
 
   role?: string[]; // Required dependiendo lógica Laravel
+  permissions?: string[];
 }
 
 export interface UserAxiosErrorI {

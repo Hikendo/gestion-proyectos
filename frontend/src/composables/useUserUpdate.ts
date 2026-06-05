@@ -2,11 +2,36 @@ import { ref } from 'vue';
 import { useUsersService } from './index';
 import { useUserForm } from './useUserForm';
 
+import { apiWithToken } from '@/services/http';
+
 export function useUserUpdate() {
     const usersService = useUsersService();
     const { form, errors, clearLocalErrors, setBackendErrors, setLocalError } = useUserForm();
     const isLoading = ref(false);
     const successMessage = ref('');
+
+    // Lista de todos los permisos disponibles cargados del backend
+    const availablePermissions = ref<{ id: number; name: string }[]>([]);
+
+    async function fetchPermissions(): Promise<void> {
+        try {
+            const { data } = await apiWithToken.get<{ status: boolean; items: { id: number; name: string }[] }>('/permissions');
+            if (data.status && Array.isArray(data.items)) {
+                availablePermissions.value = data.items;
+            }
+        } catch {
+            // Silencioso si falla; el super-admin igual puede guardar
+        }
+    }
+
+    function togglePermission(permName: string): void {
+        const idx = form.permissions.indexOf(permName);
+        if (idx === -1) {
+            form.permissions.push(permName);
+        } else {
+            form.permissions.splice(idx, 1);
+        }
+    }
 
     function validatePasswordIfProvided(): boolean {
         if (!form.password) {
@@ -41,6 +66,7 @@ export function useUserUpdate() {
             name: form.name.trim(),
             email: form.email.trim(),
             role: form.role || null,
+            permissions: form.permissions,
             password: form.password || undefined,
         });
 
@@ -66,6 +92,7 @@ export function useUserUpdate() {
             form.name = response.items?.name || '';
             form.email = response.items?.email || '';
             form.role = response.items?.roles?.[0] || '';
+            form.permissions = response.items?.permissions || [];
             form.password = '';
             form.password_confirmation = '';
             return true;
@@ -80,7 +107,10 @@ export function useUserUpdate() {
         isLoading,
         successMessage,
         usersService,
+        availablePermissions,
         handleUpdate,
         loadUser,
+        fetchPermissions,
+        togglePermission,
     };
 }

@@ -38,13 +38,19 @@ class UserController extends Controller
         $this->authorize('viewAny', User::class);
 
         try {
-            $items = User::search($request->string('search', ''))
-                ->query(
-                    fn($q) => $q
-                        ->with('roles:name')
-                        ->when($request->role, fn($q, $r) => $q->role($r))
-                )
-                ->paginate(20);
+            $search = $request->string('query', '');
+
+            $query = User::query()
+                ->with('roles:name')
+                ->when($request->role, fn($q, $r) => $q->role($r));
+
+            if ($search && $search->isNotEmpty()) {
+                $term = '%' . $search->value() . '%';
+                $query->where(fn($q) => $q->where('name', 'like', $term)
+                    ->orWhere('email', 'like', $term));
+            }
+
+            $items = $query->orderBy('name')->paginate(20);
             $items->getCollection()->transform(fn($u) => array_merge($u->toArray(), ['roles' => $u->getRoleNames()]));
 
             return response()->json([
@@ -98,7 +104,13 @@ class UserController extends Controller
 
             return response()->json([
                 'status'  => true,
-                'items'   => array_merge($user->toArray(), ['roles' => $user->getRoleNames()]),
+                'items'   => array_merge(
+                    $user->toArray(),
+                    [
+                        'roles'       => $user->getRoleNames(),
+                        'permissions' => $user->getAllPermissions()->pluck('name'),
+                    ]
+                ),
                 'message' => 'Usuario encontrado.',
             ]);
         } catch (\Throwable $th) {
@@ -135,9 +147,23 @@ class UserController extends Controller
                 }
             }
 
+            // Sincronizar permisos directos (solo super-admin)
+            if ($isAdmin && array_key_exists('permissions', $data)) {
+                $permissions = $data['permissions'] ?? [];
+                $user->syncPermissions($permissions);
+            }
+
+            $user->refresh();
+
             return response()->json([
                 'status'  => true,
-                'items'   => array_merge($user->fresh()->toArray(), ['roles' => $user->fresh()->getRoleNames()]),
+                'items'   => array_merge(
+                    $user->toArray(),
+                    [
+                        'roles'       => $user->getRoleNames(),
+                        'permissions' => $user->getAllPermissions()->pluck('name'),
+                    ]
+                ),
                 'message' => 'Usuario actualizado.',
             ]);
         } catch (\Throwable $th) {

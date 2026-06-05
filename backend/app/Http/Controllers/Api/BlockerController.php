@@ -143,6 +143,8 @@ class BlockerController extends Controller
 
     /**
      * POST /api/v1/projects/{project}/blockers/{blocker}/attachments
+     *
+     * Solo PM/owner pueden gestionar adjuntos de blockers.
      */
     public function uploadAttachments(Request $request, Project $project, Blocker $blocker): JsonResponse
     {

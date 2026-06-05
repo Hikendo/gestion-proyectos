@@ -33,11 +33,11 @@ class TicketController extends Controller
         $this->authorize('view', $project);
 
         try {
-            $search = $request->string('search', '')->trim()->toString();
+            $query = $request->string('query', '')->trim()->toString();
 
             // Si no hay término de búsqueda, usamos Eloquent directamente porque
             // el driver "collection" de Scout devuelve vacío con search('').
-            if ($search === '') {
+            if ($query === '') {
                 $items = Ticket::where('project_id', $project->id)
                     ->with(['creator:id,name,email', 'assignee:id,name,email'])
                     ->when($request->status,   fn($q, $s) => $q->where('status', $s))
@@ -45,7 +45,7 @@ class TicketController extends Controller
                     ->latest()
                     ->paginate(20);
             } else {
-                $items = Ticket::search($search)
+                $items = Ticket::search($query)
                     ->query(
                         fn($q) => $q
                             ->where('project_id', $project->id)
@@ -172,11 +172,13 @@ class TicketController extends Controller
 
     /**
      * POST /api/v1/projects/{project}/tickets/{ticket}/attachments
+     *
+     * Solo PM/owner pueden gestionar adjuntos de tickets.
      */
     public function uploadAttachments(Request $request, Project $project, Ticket $ticket): JsonResponse
     {
         $this->assertBelongsToProject($ticket, $project->id);
-        $this->authorize('update', $ticket);
+        $this->authorize('manageAttachments', $ticket);
 
         $request->validate([
             'attachments'   => ['required', 'array'],

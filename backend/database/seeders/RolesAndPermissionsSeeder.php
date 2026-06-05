@@ -15,80 +15,88 @@ class RolesAndPermissionsSeeder extends Seeder
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // ----------------------------------------------------------------
-        // PERMISOS
+        // PERMISOS GRANULARES
         // ----------------------------------------------------------------
+        // Se separan permisos genéricos (p.ej. task.edit) en acciones
+        // atómicas para evitar que un rol tenga poder no deseado sobre
+        // contenido sensible o flujos críticos.
 
         $permissions = [
 
-            // Proyectos
+            // ── Proyectos ──────────────────────────────────────────────
             'project.view',
             'project.create',
-            'project.edit',
+            'project.edit',              // editar metadatos (nombre, fechas, presupuesto)
             'project.delete',
             'project.assign-members',
+            'project.manage-attachments', // subir/eliminar adjuntos del proyecto
 
-            // Fases
+            // ── Fases ──────────────────────────────────────────────────
             'phase.view',
             'phase.create',
             'phase.edit',
             'phase.delete',
 
-            // Tareas
+            // ── Tareas ─────────────────────────────────────────────────
             'task.view',
             'task.create',
-            'task.edit',
+            'task.edit-content',         // editar título, descripción, criterios de aceptación
+            'task.edit-own',             // editar SOLO tareas propias (asignadas a mí)
             'task.delete',
-            'task.assign',           // asignar tarea a un usuario
-            'task.update-status',    // mover estado (in progress, done, etc)
-            'task.log-time',         // registrar tiempo trabajado
+            'task.assign',
+            'task.update-status',        // mover estado (in progress, done, etc.)
+            'task.log-time',
+            'task.manage-attachments',   // subir/eliminar adjuntos de tareas
 
-            // Tickets
+            // ── Tickets ────────────────────────────────────────────────
             'ticket.view',
             'ticket.create',
-            'ticket.edit',
+            'ticket.edit-own',           // editar SOLO tickets propios (creados por mí)
+            'ticket.edit-any',           // editar CUALQUIER ticket del proyecto
             'ticket.delete',
             'ticket.assign',
+            'ticket.manage-attachments',
 
-            // Riesgos
+            // ── Riesgos ────────────────────────────────────────────────
             'risk.view',
             'risk.create',
             'risk.edit',
             'risk.delete',
 
-            // Blockers
+            // ── Blockers ───────────────────────────────────────────────
             'blocker.view',
             'blocker.create',
             'blocker.edit',
             'blocker.resolve',
 
-            // Milestones
+            // ── Milestones ─────────────────────────────────────────────
             'milestone.view',
             'milestone.create',
             'milestone.edit',
             'milestone.delete',
 
-            // Entregables
+            // ── Entregables ────────────────────────────────────────────
             'deliverable.view',
             'deliverable.create',
             'deliverable.edit',
             'deliverable.approve',
 
-            // Objetivos
+            // ── Objetivos ──────────────────────────────────────────────
             'objective.view',
             'objective.create',
             'objective.edit',
 
-            // Métricas y reportes
+            // ── Métricas y reportes ────────────────────────────────────
             'metrics.view',
             'reports.view',
 
-            // Usuarios
+            // ── Usuarios ───────────────────────────────────────────────
             'user.view',
             'user.create',
             'user.edit',
             'user.delete',
 
-            // Dashboard
+            // ── Dashboard ──────────────────────────────────────────────
             'dashboard.view',
         ];
 
@@ -116,21 +124,26 @@ class RolesAndPermissionsSeeder extends Seeder
             'project.create',
             'project.edit',
             'project.assign-members',
+            'project.manage-attachments',
             'phase.view',
             'phase.create',
             'phase.edit',
             'phase.delete',
             'task.view',
             'task.create',
-            'task.edit',
+            'task.edit-content',
+            'task.delete',
             'task.assign',
             'task.update-status',
+            'task.manage-attachments',
             'ticket.view',
-            'ticket.edit',
+            'ticket.edit-any',
             'ticket.assign',
+            'ticket.manage-attachments',
             'risk.view',
             'risk.create',
             'risk.edit',
+            'risk.delete',
             'blocker.view',
             'blocker.create',
             'blocker.edit',
@@ -138,6 +151,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'milestone.view',
             'milestone.create',
             'milestone.edit',
+            'milestone.delete',
             'deliverable.view',
             'deliverable.create',
             'deliverable.edit',
@@ -152,6 +166,9 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // ── DEVELOPER ───────────────────────────────────────────────────
         // Recibe tareas, registra tiempo, reporta blockers, abre tickets.
+        // NO tiene task.edit-content (no puede alterar descripción/criterios).
+        // NO tiene task.manage-attachments (no puede borrar adjuntos del PM).
+        // task.edit-own se valida en Policy (solo tareas asignadas a él).
         $developer = Role::firstOrCreate(['name' => 'developer']);
         $developer->syncPermissions([
             'dashboard.view',
@@ -159,11 +176,12 @@ class RolesAndPermissionsSeeder extends Seeder
             'phase.view',
             'task.view',
             'task.create',
-            'task.edit',           // ← agregar
+            'task.edit-own',           // solo su tarea, solo si no está Done
             'task.update-status',
             'task.log-time',
             'ticket.view',
             'ticket.create',
+            'ticket.edit-own',         // solo tickets que él creó
             'risk.view',
             'blocker.view',
             'blocker.create',
@@ -175,6 +193,8 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // ── QA ──────────────────────────────────────────────────────────
         // Valida entregables, reporta bugs via tickets, mueve estados de tarea.
+        // NO tiene task.edit-content (no puede alterar criterios de aceptación).
+        // NO tiene task.manage-attachments.
         $qa = Role::firstOrCreate(['name' => 'qa']);
         $qa->syncPermissions([
             'dashboard.view',
@@ -182,11 +202,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'phase.view',
             'task.view',
             'task.create',
-            'task.edit',
+            'task.edit-own',           // solo tareas asignadas a QA
             'task.update-status',
             'ticket.view',
             'ticket.create',
-            'ticket.edit',
+            'ticket.edit-own',         // solo tickets que creó
             'risk.view',
             'blocker.view',
             'blocker.create',
@@ -198,6 +218,8 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // ── SUPPORT ─────────────────────────────────────────────────────
         // Gestiona tickets de soporte, los asigna internamente.
+        // NO tiene ticket.edit-any (no puede modificar estimaciones técnicas
+        // ni prioridades del PM). Solo edita sus propios tickets.
         $support = Role::firstOrCreate(['name' => 'support']);
         $support->syncPermissions([
             'dashboard.view',
@@ -205,7 +227,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'task.view',
             'ticket.view',
             'ticket.create',
-            'ticket.edit',
+            'ticket.edit-own',         // solo tickets que creó
             'ticket.assign',
             'blocker.view',
             'user.view',
@@ -213,12 +235,16 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // ── CLIENT ──────────────────────────────────────────────────────
         // Ve el progreso, abre tickets, ve entregables y milestones.
+        // NO tiene ticket.edit-any (no puede alterar tickets en progreso/resueltos).
+        // ticket.edit-own se valida en Policy (solo tickets que creó, y solo si
+        // el ticket está en estado Open — no puede modificar tickets ya en progreso).
         $client = Role::firstOrCreate(['name' => 'client']);
         $client->syncPermissions([
             'dashboard.view',
             'project.view',
             'ticket.view',
             'ticket.create',
+            'ticket.edit-own',         // solo tickets propios, solo si Open
             'milestone.view',
             'deliverable.view',
             'objective.view',

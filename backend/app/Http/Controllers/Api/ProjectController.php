@@ -160,10 +160,11 @@ class ProjectController extends Controller
      * POST /api/v1/projects/{project}/attachments
      *
      * Sube múltiples archivos adjuntos a un proyecto existente.
+     * Solo PM/owner pueden gestionar adjuntos del proyecto.
      */
     public function uploadAttachments(Request $request, Project $project): JsonResponse
     {
-        $this->authorize('update', $project);
+        $this->authorize('manageAttachments', $project);
 
         $request->validate([
             'attachments'   => ['required', 'array'],

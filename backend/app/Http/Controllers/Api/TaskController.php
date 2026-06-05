@@ -33,11 +33,11 @@ class TaskController extends Controller
         $this->authorize('view', $project);
 
         try {
-            $search = $request->string('search', '')->trim()->toString();
+            $query = $request->string('query', '')->trim()->toString();
 
             // Si no hay término de búsqueda, usamos Eloquent directamente porque
             // el driver "collection" de Scout devuelve vacío con search('').
-            if ($search === '') {
+            if ($query === '') {
                 $items = Task::where('project_id', $project->id)
                     ->with(['assignee:id,name,email', 'phase:id,name'])
                     ->when($request->status,      fn($q, $s) => $q->where('status', $s))
@@ -46,7 +46,7 @@ class TaskController extends Controller
                     ->orderBy('due_date')
                     ->paginate(20);
             } else {
-                $items = Task::search($search)
+                $items = Task::search($query)
                     ->query(
                         fn($q) => $q
                             ->where('project_id', $project->id)
@@ -213,11 +213,11 @@ class TaskController extends Controller
      * POST /api/v1/tasks/{task}/attachments
      *
      * Sube múltiples archivos adjuntos a una tarea existente.
+     * Solo PM/owner pueden gestionar adjuntos de tareas.
      */
     public function uploadAttachments(Request $request, Task $task): JsonResponse
     {
-        $project = Project::findOrFail($task->project_id);
-        $this->authorize('update', $project);
+        $this->authorize('manageAttachments', $task);
 
         $request->validate([
             'attachments'   => ['required', 'array'],

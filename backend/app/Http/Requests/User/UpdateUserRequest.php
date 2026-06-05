@@ -23,6 +23,8 @@ class UpdateUserRequest extends FormRequest
 
         if ($this->user()->hasRole('super-admin')) {
             $rules['role'] = ['sometimes', 'nullable', 'string', 'in:super-admin,project-manager'];
+            $rules['permissions'] = ['sometimes', 'array'];
+            $rules['permissions.*'] = ['string', 'exists:permissions,name'];
         }
 
         return $rules;

@@ -81,6 +81,20 @@ echo " Limpiando y optimizando cachés..."
 echo "================================================"
 php artisan optimize:clear
 
+# ─────────────────────────────────────────────────────────────
+# MODO DE EJECUCIÓN
+# ─────────────────────────────────────────────────────────────
+# Si se pasa un comando personalizado (ej: "php artisan horizon"),
+# se ejecuta ese comando en lugar de PHP-FPM.
+# Esto permite que el contenedor horizon use la misma imagen
+# pero ejecute un proceso diferente.
+if [ $# -gt 0 ]; then
+    echo "================================================"
+    echo " Ejecutando comando personalizado: $@"
+    echo "================================================"
+    exec "$@"
+fi
+
 echo "================================================"
 echo " Iniciando PHP-FPM..."
 echo "================================================"
