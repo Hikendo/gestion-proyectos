@@ -46,54 +46,58 @@ const priorities: { title: string; value: TaskPriority }[] = [
 <template>
   <VCard class="mb-4">
     <VCardItem>
-      <h5 class="text-h5 text-wrap">Datos de la tarea</h5>
+      <VCardTitle class="text-h6">Datos de la tarea</VCardTitle>
     </VCardItem>
 
     <VCardText class="px-8 pb-8">
       <VRow>
         <VCol cols="12">
-          <VTextField v-model="form.title" :error-messages="errores.title" name="title" label="Título"
-            placeholder="Título de la tarea" />
+          <VTextField v-model="form.title" :error-messages="errores.title" name="title" label="Título" variant="outlined" density="comfortable"
+            placeholder="Título de la tarea" variant="outlined" density="comfortable" />
         </VCol>
 
         <VCol cols="12">
           <VTextarea v-model="form.description" :error-messages="errores.description" name="description"
-            label="Descripción" placeholder="Descripción de la tarea" rows="3" />
+            label="Descripción" placeholder="Descripción de la tarea" rows="3" variant="outlined"
+            density="comfortable" />
         </VCol>
 
         <VCol cols="12" md="4">
           <VSelect v-model="form.status" :error-messages="errores.status" name="status" :items="statuses"
-            item-title="title" item-value="value" label="Estado" eager />
+            item-title="title" item-value="value" label="Estado" variant="outlined" density="comfortable" eager />
         </VCol>
 
         <VCol cols="12" md="4">
           <VSelect v-model="form.priority" :error-messages="errores.priority" name="priority" :items="priorities"
-            item-title="title" item-value="value" label="Prioridad" eager />
+            item-title="title" item-value="value" label="Prioridad" variant="outlined" density="comfortable" eager />
         </VCol>
 
         <VCol cols="12" md="4">
           <VTextField v-model="form.due_date" :error-messages="errores.due_date" name="due_date" type="date"
-            label="Fecha límite" />
+            label="Fecha límite" variant="outlined" density="comfortable" />
         </VCol>
 
         <VCol cols="12" md="4">
           <VTextField v-model="form.estimated_hours" :error-messages="errores.estimated_hours" name="estimated_hours"
-            type="number" label="Horas estimadas" placeholder="0" />
+            type="number" label="Horas estimadas" placeholder="0" min="0" step="0.5" variant="outlined"
+            density="comfortable" />
         </VCol>
 
         <VCol cols="12" md="4">
           <VTextField v-model="form.progress" :error-messages="errores.progress" name="progress" type="number"
-            label="Progreso (%)" placeholder="0" />
+            label="Progreso (%)" placeholder="0" min="0" max="100" variant="outlined" density="comfortable" />
         </VCol>
 
         <VCol cols="12" md="4">
           <VSelect v-model="form.phase_id" :error-messages="errores.phase_id" :items="phases" item-title="name"
-            item-value="id" name="phase_id" label="Fase" placeholder="Selecciona una fase" clearable eager />
+            item-value="id" name="phase_id" label="Fase" placeholder="Selecciona una fase" variant="outlined"
+            density="comfortable" clearable eager />
         </VCol>
 
         <VCol cols="12" md="4">
           <VSelect v-model="form.assigned_to" :error-messages="errores.assigned_to" :items="users" item-title="name"
-            item-value="id" name="assigned_to" label="Asignado a" placeholder="Selecciona un usuario" clearable eager>
+            item-value="id" name="assigned_to" label="Asignado a" placeholder="Selecciona un usuario" variant="outlined"
+            density="comfortable" clearable eager>
             <template #item="{ item, props: ip }">
               <VListItem v-bind="ip">
                 <template #prepend>
@@ -111,7 +115,7 @@ const priorities: { title: string; value: TaskPriority }[] = [
 
         <VCol cols="12" class="d-flex gap-4">
           <VSpacer />
-          <VBtn type="submit">Guardar</VBtn>
+          <VBtn type="submit" color="primary" variant="flat" size="large">Guardar</VBtn>
         </VCol>
       </VRow>
     </VCardText>

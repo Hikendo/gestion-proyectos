@@ -30,9 +30,9 @@ function handleDelete(attachment: AttachmentI): void {
                 :subtitle="formatSize(attachment.size)" class="attachment-item">
                 <template #append>
                     <div class="d-flex ga-1">
-                        <VBtn icon="mdi-download" size="small" variant="text" color="primary"
+                        <VBtn icon="ri-download-line" size="small" variant="text" color="primary"
                             @click.stop="handleDownload(attachment)" />
-                        <VBtn v-if="props.canDelete" icon="mdi-delete-outline" size="small" variant="text" color="error"
+                        <VBtn v-if="props.canDelete" icon="ri-delete-bin-line" size="small" variant="text" color="error"
                             @click.stop="handleDelete(attachment)" />
                     </div>
                 </template>

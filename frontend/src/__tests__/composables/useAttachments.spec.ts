@@ -25,46 +25,46 @@ describe('useAttachments', () => {
     const { getFileIcon } = useAttachments();
 
     it('devuelve icono PDF para mime application/pdf', () => {
-      expect(getFileIcon('application/pdf')).toBe('mdi-file-pdf-box');
+      expect(getFileIcon('application/pdf')).toBe('ri-file-pdf-line');
     });
 
     it('devuelve icono imagen para mime image/png', () => {
-      expect(getFileIcon('image/png')).toBe('mdi-file-image-outline');
+      expect(getFileIcon('image/png')).toBe('ri-image-line');
     });
 
     it('devuelve icono imagen para mime image/jpeg', () => {
-      expect(getFileIcon('image/jpeg')).toBe('mdi-file-image-outline');
+      expect(getFileIcon('image/jpeg')).toBe('ri-image-line');
     });
 
     it('devuelve icono ZIP para mime application/zip', () => {
-      expect(getFileIcon('application/zip')).toBe('mdi-folder-zip-outline');
+      expect(getFileIcon('application/zip')).toBe('ri-folder-line-zip-outline');
     });
 
     it('devuelve icono ZIP para mime application/x-rar-compressed', () => {
-      expect(getFileIcon('application/x-rar-compressed')).toBe('mdi-folder-zip-outline');
+      expect(getFileIcon('application/x-rar-compressed')).toBe('ri-folder-line-zip-outline');
     });
 
     it('devuelve icono Word para mime con word', () => {
-      expect(getFileIcon('application/msword')).toBe('mdi-file-word-outline');
-      expect(getFileIcon('application/vnd.openxmlformats-officedocument.wordprocessingml.document')).toBe('mdi-file-word-outline');
+      expect(getFileIcon('application/msword')).toBe('ri-file-word-line');
+      expect(getFileIcon('application/vnd.openxmlformats-officedocument.wordprocessingml.document')).toBe('ri-file-word-line');
     });
 
     it('devuelve icono Excel para mime con excel o sheet', () => {
-      expect(getFileIcon('application/vnd.ms-excel')).toBe('mdi-file-excel-outline');
-      expect(getFileIcon('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')).toBe('mdi-file-excel-outline');
+      expect(getFileIcon('application/vnd.ms-excel')).toBe('ri-file-excel-line');
+      expect(getFileIcon('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')).toBe('ri-file-excel-line');
     });
 
     it('devuelve icono PowerPoint para mime con powerpoint o presentation', () => {
-      expect(getFileIcon('application/vnd.ms-powerpoint')).toBe('mdi-file-powerpoint-outline');
-      expect(getFileIcon('application/vnd.openxmlformats-officedocument.presentationml.presentation')).toBe('mdi-file-powerpoint-outline');
+      expect(getFileIcon('application/vnd.ms-powerpoint')).toBe('ri-file-ppt-line');
+      expect(getFileIcon('application/vnd.openxmlformats-officedocument.presentationml.presentation')).toBe('ri-file-ppt-line');
     });
 
     it('devuelve icono genérico para mime null', () => {
-      expect(getFileIcon(null)).toBe('mdi-file-document-outline');
+      expect(getFileIcon(null)).toBe('ri-file-text-line');
     });
 
     it('devuelve icono genérico para mime desconocido', () => {
-      expect(getFileIcon('text/plain')).toBe('mdi-file-document-outline');
+      expect(getFileIcon('text/plain')).toBe('ri-file-text-line');
     });
   });
 

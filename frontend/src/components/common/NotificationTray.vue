@@ -80,7 +80,7 @@ if (typeof window !== 'undefined') {
                     <!-- Header -->
                     <VCardItem class="tray-header">
                         <VCardTitle class="d-flex align-center gap-2">
-                            <VIcon icon="mdi-bell-outline" />
+                            <VIcon icon="ri-notification-3-line" />
                             Notificaciones
                             <VChip v-if="unreadNotifications.length > 0" color="error" size="small" class="ml-1">
                                 {{ unreadNotifications.length }}
@@ -106,7 +106,7 @@ if (typeof window !== 'undefined') {
                         <!-- Vacío -->
                         <div v-else-if="displayedNotifications.length === 0"
                             class="d-flex flex-column align-center justify-center pa-6 text-medium-emphasis">
-                            <VIcon icon="mdi-bell-off-outline" size="32" class="mb-2" />
+                            <VIcon icon="ri-notification-off-line" size="32" class="mb-2" />
                             <span class="text-body-2">No tienes notificaciones</span>
                         </div>
 
@@ -119,11 +119,11 @@ if (typeof window !== 'undefined') {
                                 <template #prepend>
                                     <VBadge v-if="notification.read_at === null" color="error" dot bordered>
                                         <VIcon
-                                            :icon="notification.type === 'scheduled_event' ? 'mdi-clock-outline' : 'mdi-bell-outline'"
+                                            :icon="notification.type === 'scheduled_event' ? 'ri-time-line' : 'ri-notification-3-line'"
                                             size="20" />
                                     </VBadge>
                                     <VIcon v-else
-                                        :icon="notification.type === 'scheduled_event' ? 'mdi-clock-outline' : 'mdi-bell-outline'"
+                                        :icon="notification.type === 'scheduled_event' ? 'ri-time-line' : 'ri-notification-3-line'"
                                         size="20" class="text-medium-emphasis" />
                                 </template>
 

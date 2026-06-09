@@ -53,11 +53,11 @@ onMounted(handleGetData);
               <h4 class="text-h4 text-wrap me-3"><strong>Miembros del proyecto</strong></h4>
               <div class="d-flex gap-2">
                 <VBtn variant="outlined" size="small"
-                  :to="{ name: 'project-detail', params: { projectId: projectId() } }" prepend-icon="mdi-arrow-left">
+                  :to="{ name: 'project-detail', params: { projectId: projectId() } }" prepend-icon="ri-arrow-left-line">
                   Proyecto
                 </VBtn>
                 <VBtn variant="flat" :to="{ name: 'members-new', params: { projectId: projectId() } }"
-                  v-if="canAction('Miembro.Store')" prepend-icon="mdi-plus">
+                  v-if="canAction('Miembro.Store')" prepend-icon="ri-add-line">
                   Nuevo
                 </VBtn>
               </div>
@@ -86,16 +86,16 @@ onMounted(handleGetData);
                   <div class="d-flex gap-1">
                     <VBtn icon size="small" variant="text"
                       :to="{ name: 'members-view', params: { projectId: projectId(), id: item.id } }">
-                      <VIcon icon="mdi-eye" color="primary" size="small" />
+                      <VIcon icon="ri-eye-line" color="primary" size="small" />
                     </VBtn>
                     <VBtn icon size="small" variant="flat"
                       :to="{ name: 'members-id', params: { projectId: projectId(), id: item.id } }"
                       v-if="canAction('Miembro.Update')">
-                      <VIcon icon="mdi-pencil" color="warning" />
+                      <VIcon icon="ri-pencil-line" color="warning" />
                     </VBtn>
                     <VBtn icon size="small" variant="flat"
                       @click="() => { itemDestroy.value = item; isDialogVisible = true; }">
-                      <VIcon icon="mdi-delete" color="error" />
+                      <VIcon icon="ri-delete-bin-fill" color="error" />
                     </VBtn>
                   </div>
                 </td>

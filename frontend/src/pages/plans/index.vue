@@ -60,11 +60,11 @@ onMounted(handleGetData);
               <div class="d-flex gap-2">
                 <VBtn variant="outlined" size="small"
                   :to="{ name: 'project-detail', params: { projectId: projectId() } }"
-                  prepend-icon="mdi-arrow-left">
+                  prepend-icon="ri-arrow-left-line">
                   Proyecto
                 </VBtn>
                 <VBtn v-if="!editing && canAction('Plan.Store')"
-                  variant="flat" size="small" prepend-icon="mdi-pencil"
+                  variant="flat" size="small" prepend-icon="ri-pencil-line"
                   @click="editing = true">
                   Editar plan
                 </VBtn>

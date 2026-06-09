@@ -47,34 +47,35 @@ const priorities: { title: string; value: TicketPriority }[] = [
 <template>
   <VCard class="mb-4">
     <VCardItem>
-      <h5 class="text-h5 text-wrap">Datos del ticket</h5>
+      <VCardTitle class="text-h6">Datos del ticket</VCardTitle>
     </VCardItem>
 
     <VCardText class="px-8 pb-8">
       <VRow>
         <VCol cols="12">
-          <VTextField v-model="form.subject" :error-messages="errores.subject" name="subject" label="Asunto"
-            placeholder="Asunto del ticket" />
+          <VTextField v-model="form.subject" :error-messages="errores.subject" name="subject" label="Asunto" variant="outlined" density="comfortable"
+            placeholder="Asunto del ticket" variant="outlined" density="comfortable" />
         </VCol>
 
         <VCol cols="12">
           <VTextarea v-model="form.description" :error-messages="errores.description" name="description"
-            label="Descripción" placeholder="Descripción detallada" rows="4" />
+            label="Descripción" placeholder="Descripción detallada" rows="4" variant="outlined" density="comfortable" />
         </VCol>
 
         <VCol cols="12" md="4">
           <VSelect v-model="form.status" :error-messages="errores.status" name="status" :items="statuses"
-            item-title="title" item-value="value" label="Estado" eager />
+            item-title="title" item-value="value" label="Estado" variant="outlined" density="comfortable" eager />
         </VCol>
 
         <VCol cols="12" md="4">
           <VSelect v-model="form.priority" :error-messages="errores.priority" name="priority" :items="priorities"
-            item-title="title" item-value="value" label="Prioridad" eager />
+            item-title="title" item-value="value" label="Prioridad" variant="outlined" density="comfortable" eager />
         </VCol>
 
         <VCol cols="12" md="4">
           <VSelect v-model="form.assigned_to" :error-messages="errores.assigned_to" :items="users" item-title="name"
-            item-value="id" name="assigned_to" label="Asignado a" placeholder="Selecciona un usuario" clearable eager>
+            item-value="id" name="assigned_to" label="Asignado a" placeholder="Selecciona un usuario" variant="outlined"
+            density="comfortable" clearable eager>
             <template #item="{ item, props: ip }">
               <VListItem v-bind="ip">
                 <template #prepend>
@@ -91,14 +92,14 @@ const priorities: { title: string; value: TicketPriority }[] = [
         </VCol>
 
         <VCol cols="12">
-          <VFileInput label="Archivos adjuntos (PDF, imágenes, ZIP, DOCX)" multiple
-            accept=".pdf,.jpeg,.jpg,.png,.zip,.docx,.xlsx" :max-file-size="10240" prepend-icon="mdi-paperclip"
-            @change="onFilesChanged" />
+          <VFileInput label="Archivos adjuntos (PDF, imágenes, ZIP, DOCX)" variant="outlined" density="comfortable" multiple
+            accept=".pdf,.jpeg,.jpg,.png,.zip,.docx,.xlsx" :max-file-size="10240" prepend-icon="ri-attachment-2"
+            variant="outlined" density="comfortable" @change="onFilesChanged" />
         </VCol>
 
         <VCol cols="12" class="d-flex gap-4">
           <VSpacer />
-          <VBtn type="submit">Guardar</VBtn>
+          <VBtn type="submit" color="primary" variant="flat" size="large">Guardar</VBtn>
         </VCol>
       </VRow>
     </VCardText>

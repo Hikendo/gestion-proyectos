@@ -29,9 +29,9 @@ function toggleDrawer() {
 
 // ── Menú base (siempre visible) ──────────────────────────────────────────────
 const baseMenu = [
-  { title: 'Dashboard', icon: 'mdi-view-dashboard', name: 'dashboard' },
-  { title: 'Proyectos', icon: 'mdi-folder-multiple', name: 'projects' },
-  { title: 'Notificaciones', icon: 'mdi-bell-outline', name: 'notifications' },
+  { title: 'Dashboard', icon: 'ri-dashboard-line', name: 'dashboard' },
+  { title: 'Proyectos', icon: 'ri-folders-line', name: 'projects' },
+  { title: 'Notificaciones', icon: 'ri-notification-3-line', name: 'notifications' },
 ];
 
 // ── Menú contextual del proyecto activo ──────────────────────────────────────
@@ -39,18 +39,18 @@ const projectMenu = computed(() => {
   if (!currentProject.value) return [];
   const pid = currentProject.value.id;
   return [
-    { title: 'Vista general', icon: 'mdi-information-outline', name: 'project-detail', params: { projectId: pid } },
-    { title: 'Objetivos', icon: 'mdi-flag-checkered', name: 'objectives', params: { projectId: pid } },
-    { title: 'Fases', icon: 'mdi-timeline-outline', name: 'phases', params: { projectId: pid } },
-    { title: 'Planes', icon: 'mdi-calendar-clock', name: 'plans', params: { projectId: pid } },
-    { title: 'Tareas', icon: 'mdi-check-circle-outline', name: 'tasks', params: { projectId: pid } },
-    { title: 'Tickets', icon: 'mdi-ticket-outline', name: 'tickets', params: { projectId: pid } },
-    { title: 'Riesgos', icon: 'mdi-alert-circle-outline', name: 'risks', params: { projectId: pid } },
-    { title: 'Bloqueadores', icon: 'mdi-block-helper', name: 'blockers', params: { projectId: pid } },
-    { title: 'Entregables', icon: 'mdi-package-variant-closed', name: 'deliverables', params: { projectId: pid } },
-    { title: 'Hitos', icon: 'mdi-map-marker-check', name: 'milestones', params: { projectId: pid } },
-    { title: 'Miembros', icon: 'mdi-account-group-outline', name: 'members', params: { projectId: pid } },
-    { title: 'Métricas', icon: 'mdi-chart-bar', name: 'metrics', params: { projectId: pid } },
+    { title: 'Vista general', icon: 'ri-information-line', name: 'project-detail', params: { projectId: pid } },
+    { title: 'Objetivos', icon: 'ri-flag-line', name: 'objectives', params: { projectId: pid } },
+    { title: 'Fases', icon: 'ri-timeline-view', name: 'phases', params: { projectId: pid } },
+    { title: 'Planes', icon: 'ri-calendar-schedule-line', name: 'plans', params: { projectId: pid } },
+    { title: 'Tareas', icon: 'ri-checkbox-circle-line', name: 'tasks', params: { projectId: pid } },
+    { title: 'Tickets', icon: 'ri-coupon-line', name: 'tickets', params: { projectId: pid } },
+    { title: 'Riesgos', icon: 'ri-error-warning-line', name: 'risks', params: { projectId: pid } },
+    { title: 'Bloqueadores', icon: 'ri-forbid-line', name: 'blockers', params: { projectId: pid } },
+    { title: 'Entregables', icon: 'ri-archive-line', name: 'deliverables', params: { projectId: pid } },
+    { title: 'Hitos', icon: 'ri-map-pin-line', name: 'milestones', params: { projectId: pid } },
+    { title: 'Miembros', icon: 'ri-group-line', name: 'members', params: { projectId: pid } },
+    { title: 'Métricas', icon: 'ri-bar-chart-line', name: 'metrics', params: { projectId: pid } },
   ];
 });
 
@@ -58,9 +58,9 @@ const projectMenu = computed(() => {
 const adminMenu = computed(() => {
   if (!isSuperAdmin.value) return [];
   return [
-    { title: 'Dashboard Admin', icon: 'mdi-shield-crown-outline', name: 'admin' },
-    { title: 'Usuarios', icon: 'mdi-account-multiple', name: 'admin-users' },
-    { title: 'Roles', icon: 'mdi-shield-key-outline', name: 'roles' },
+    { title: 'Dashboard Admin', icon: 'ri-vip-crown-line', name: 'admin' },
+    { title: 'Usuarios', icon: 'ri-team-fill', name: 'admin-users' },
+    { title: 'Roles', icon: 'ri-key-line', name: 'roles' },
   ];
 });
 
@@ -85,28 +85,59 @@ async function handleLogout() {
 
 <template>
   <!-- ── App Bar ───────────────────────────────────────────────── -->
-  <VAppBar flat border="b">
+  <VAppBar flat border="b" class="app-bar">
     <VAppBarNavIcon @click="toggleDrawer" />
-    <VAppBarTitle>Gestión de Proyectos</VAppBarTitle>
+    <VAppBarTitle class="text-primary">Gestión de Proyectos</VAppBarTitle>
     <VSpacer />
+    <VChip v-if="currentProject" variant="tonal" color="primary" size="small" class="me-2 d-none d-md-flex"
+      :prepend-icon="'ri-folder-open-line'" :to="{ name: 'project-detail', params: { projectId: currentProject.id } }">
+      {{ currentProject.name }}
+    </VChip>
     <NotificationBell />
+    <VMenu location="bottom end" :offset="8">
+      <template #activator="{ props }">
+        <VBtn v-bind="props" icon variant="text" class="ms-2">
+          <VAvatar size="34" color="primary" variant="tonal">
+            <span class="text-caption font-weight-bold">
+              {{(authUser?.name ?? 'U').split(' ').slice(0, 2).map((w: string) => w[0]).join('').toUpperCase()}}
+            </span>
+          </VAvatar>
+        </VBtn>
+      </template>
+      <VList density="compact" min-width="200">
+        <VListItem :title="authUser?.name ?? 'Usuario'" :subtitle="authUser?.email" class="text-wrap">
+          <template #prepend>
+            <VAvatar size="36" color="primary" variant="tonal">
+              <span class="text-caption font-weight-bold">
+                {{ (authUser?.name ?? 'U').charAt(0).toUpperCase() }}
+              </span>
+            </VAvatar>
+          </template>
+        </VListItem>
+        <VDivider />
+        <VListItem prepend-icon="ri-user-line" title="Mi perfil" :active="isActive('profile')"
+          @click="navigate('profile')" />
+        <VListItem prepend-icon="ri-palette-line" title="Apariencia" @click="themeDialogOpen = true" />
+        <VListItem prepend-icon="ri-logout-box-line" title="Cerrar sesión" @click="handleLogout" base-color="error" />
+      </VList>
+    </VMenu>
   </VAppBar>
 
   <!-- ── Sidebar ────────────────────────────────────────────────── -->
   <VNavigationDrawer v-model="drawer" :rail="rail">
 
     <!-- Header -->
-    <VListItem prepend-icon="mdi-chart-gantt" title="Gestión de Proyectos" nav>
+    <VListItem prepend-icon="ri-bar-chart-horizontal-line" title="Gestión de Proyectos" nav>
       <template #append>
-        <VBtn :icon="rail ? 'mdi-chevron-right' : 'mdi-chevron-left'" variant="text" @click="rail = !rail" />
+        <VBtn :icon="rail ? 'ri-arrow-right-s-line' : 'ri-arrow-left-s-line'" variant="text" @click="rail = !rail" />
       </template>
     </VListItem>
 
     <VDivider />
 
     <!-- Usuario -->
-    <VListItem :prepend-icon="'mdi-account-circle-outline'" :title="authUser?.name ?? 'Usuario'"
-      :subtitle="authUser?.email" nav class="my-1" />
+    <VListItem :prepend-icon="'ri-user-3-line'" :title="authUser?.name ?? 'Usuario'" :subtitle="authUser?.email" nav
+      class="my-1" />
 
     <VDivider />
 
@@ -120,7 +151,7 @@ async function handleLogout() {
     <template v-if="currentProject">
       <VDivider />
       <VListSubheader v-if="!rail" class="text-caption font-weight-bold px-4 pt-2">
-        <VIcon icon="mdi-folder-open" size="14" class="me-1" />
+        <VIcon icon="ri-folder-open-line" size="14" class="me-1" />
         {{ currentProject.name }}
       </VListSubheader>
       <VList density="compact" nav>
@@ -145,11 +176,11 @@ async function handleLogout() {
     <template #append>
       <VDivider />
       <VList density="compact" nav class="pb-2">
-        <VListItem prepend-icon="mdi-account-outline" title="Mi perfil" :active="isActive('profile')"
+        <VListItem prepend-icon="ri-user-line" title="Mi perfil" :active="isActive('profile')"
           @click="navigate('profile')" active-color="primary" />
-        <VListItem prepend-icon="mdi-palette-outline" title="Apariencia" @click="themeDialogOpen = true"
+        <VListItem prepend-icon="ri-palette-line" title="Apariencia" @click="themeDialogOpen = true"
           active-color="primary" />
-        <VListItem prepend-icon="mdi-logout" title="Cerrar sesión" @click="handleLogout" base-color="error" />
+        <VListItem prepend-icon="ri-logout-box-line" title="Cerrar sesión" @click="handleLogout" base-color="error" />
       </VList>
     </template>
 
@@ -160,11 +191,11 @@ async function handleLogout() {
     <VCard>
       <VCardItem>
         <VCardTitle class="d-flex align-center gap-2">
-          <VIcon icon="mdi-palette-outline" color="primary" />
+          <VIcon icon="ri-palette-line" color="primary" />
           Apariencia
         </VCardTitle>
         <template #append>
-          <VBtn icon="mdi-close" variant="text" size="small" @click="themeDialogOpen = false" />
+          <VBtn icon="ri-close-line" variant="text" size="small" @click="themeDialogOpen = false" />
         </template>
       </VCardItem>
       <VDivider />

@@ -45,17 +45,17 @@ const handleDestroy = async () => {
 const getStatusConfig = (status: ProjectStatus) => {
   switch (status) {
     case 'completed':
-      return { color: 'success', icon: 'mdi-check-circle-outline', text: 'Completado' };
+      return { color: 'success', icon: 'ri-checkbox-circle-line', text: 'Completado' };
     case 'active':
-      return { color: 'info', icon: 'mdi-play-circle-outline', text: 'Activo' };
+      return { color: 'info', icon: 'ri-play-circle-line', text: 'Activo' };
     case 'planning':
-      return { color: 'secondary', icon: 'mdi-calendar-clock', text: 'Planificación' };
+      return { color: 'secondary', icon: 'ri-calendar-schedule-line', text: 'Planificación' };
     case 'on_hold':
-      return { color: 'warning', icon: 'mdi-pause-circle-outline', text: 'En Espera' };
+      return { color: 'warning', icon: 'ri-pause-circle-line', text: 'En Espera' };
     case 'cancelled':
-      return { color: 'error', icon: 'mdi-close-circle-outline', text: 'Cancelado' };
+      return { color: 'error', icon: 'ri-close-circle-line', text: 'Cancelado' };
     default:
-      return { color: 'grey', icon: 'mdi-help-circle-outline', text: status };
+      return { color: 'grey', icon: 'ri-question-line', text: status };
   }
 };
 
@@ -90,7 +90,7 @@ onMounted(handleGetData);
           <VRow class="d-flex align-center gap-4 mt-2">
             <VCol>
               <form @submit.prevent="() => { paginacionYquery.page = 1; handleGetData(); }">
-                <VTextField label="Buscador" prepend-inner-icon="mdi-magnify" type="search"
+                <VTextField label="Buscador" prepend-inner-icon="ri-search-line" type="search"
                   clearable v-model="paginacionYquery.query" />
               </form>
             </VCol>
@@ -189,7 +189,7 @@ onMounted(handleGetData);
 
             <!-- Acceso inferior estilo v-list-item de tu diseño -->
             <VListItem
-              append-icon="mdi-chevron-right"
+              append-icon="ri-arrow-right-s-line"
               lines="two"
               subtitle="Ver detalles y documentación"
               link
@@ -206,9 +206,9 @@ onMounted(handleGetData);
                     v-if="canAction('Proyecto.Destroy')"
                     @click.stop.prevent="() => { itemDestroy = item; isDialogVisible = true; }"
                   >
-                    <VIcon icon="mdi-delete" color="error" />
+                    <VIcon icon="ri-delete-bin-fill" color="error" />
                   </VBtn>
-                  <VIcon icon="mdi-chevron-right" class="ms-2" />
+                  <VIcon icon="ri-arrow-right-s-line" class="ms-2" />
                 </div>
               </template>
             </VListItem>

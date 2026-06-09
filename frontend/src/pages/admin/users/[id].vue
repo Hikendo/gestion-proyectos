@@ -40,7 +40,7 @@ async function confirmAction() {
           <VCardTitle>
             <div class="d-flex justify-space-between flex-wrap">
               <h4 class="text-h4 text-wrap">Editar <strong>usuario</strong></h4>
-              <VBtn variant="outlined" :to="{ name: 'admin-users' }" prepend-icon="mdi-arrow-left">
+              <VBtn variant="outlined" :to="{ name: 'admin-users' }" prepend-icon="ri-arrow-left-line">
                 Volver
               </VBtn>
             </div>

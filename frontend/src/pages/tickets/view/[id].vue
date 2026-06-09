@@ -37,14 +37,14 @@ onMounted(async () => {
                 <VCardItem>
                     <VCardTitle class="d-flex justify-space-between flex-wrap align-center">
                         <span class="d-flex align-center gap-2">
-                            <VIcon icon="mdi-ticket-outline" color="primary" />
+                            <VIcon icon="ri-coupon-line" color="primary" />
                             Ticket: {{ ticket.subject }}
                         </span>
                         <div class="d-flex gap-2">
-                            <VBtn variant="outlined" prepend-icon="mdi-arrow-left"
+                            <VBtn variant="outlined" prepend-icon="ri-arrow-left-line"
                                 :to="{ name: 'tickets', params: { projectId } }">Volver</VBtn>
                             <VBtn v-if="canAction('Ticket.Update')" variant="tonal" color="warning"
-                                :to="{ name: 'tickets-id', params: { projectId, id } }" prepend-icon="mdi-pencil">Editar
+                                :to="{ name: 'tickets-id', params: { projectId, id } }" prepend-icon="ri-pencil-line">Editar
                             </VBtn>
                         </div>
                     </VCardTitle>

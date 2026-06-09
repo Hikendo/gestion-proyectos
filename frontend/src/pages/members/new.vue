@@ -64,7 +64,7 @@ async function confirmAction() {
           <VCardTitle>
             <div class="d-flex justify-space-between flex-wrap">
               <h4 class="text-h4">Agregar <strong>Miembro</strong></h4>
-              <VBtn variant="outlined" :to="{ name: 'members', params: { projectId: route.params.projectId } }" prepend-icon="mdi-arrow-left">Volver</VBtn>
+              <VBtn variant="outlined" :to="{ name: 'members', params: { projectId: route.params.projectId } }" prepend-icon="ri-arrow-left-line">Volver</VBtn>
             </div>
           </VCardTitle>
         </VCardItem>

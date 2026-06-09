@@ -72,7 +72,7 @@ onUnmounted(() => {
         <VSnackbar v-model="snackbar.show" :color="snackbar.color" location="bottom right" :timeout="3500">
             {{ snackbar.text }}
             <template #actions>
-                <VBtn icon="mdi-close" variant="text" @click="snackbar.show = false" />
+                <VBtn icon="ri-close-line" variant="text" @click="snackbar.show = false" />
             </template>
         </VSnackbar>
 

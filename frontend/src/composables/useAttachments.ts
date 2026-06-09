@@ -31,18 +31,18 @@ export function useAttachments() {
    * Obtiene el tipo de icono según el mime_type del archivo.
    */
   function getFileIcon(mimeType: string | null): string {
-    if (!mimeType) return 'mdi-file-document-outline';
+    if (!mimeType) return 'ri-file-text-line';
 
-    if (mimeType.includes('pdf')) return 'mdi-file-pdf-box';
-    if (mimeType.includes('image')) return 'mdi-file-image-outline';
-    if (mimeType.includes('zip') || mimeType.includes('rar')) return 'mdi-folder-zip-outline';
+    if (mimeType.includes('pdf')) return 'ri-file-pdf-line';
+    if (mimeType.includes('image')) return 'ri-image-line';
+    if (mimeType.includes('zip') || mimeType.includes('rar')) return 'ri-folder-line-zip-outline';
     // Excel/PowerPoint deben evaluarse antes que Word porque los mimes Office Open XML
     // contienen "document" en "officedocument" y causarían falsos positivos con Word
-    if (mimeType.includes('excel') || mimeType.includes('sheet')) return 'mdi-file-excel-outline';
-    if (mimeType.includes('powerpoint') || mimeType.includes('presentation')) return 'mdi-file-powerpoint-outline';
-    if (mimeType.includes('word') || mimeType.includes('document')) return 'mdi-file-word-outline';
+    if (mimeType.includes('excel') || mimeType.includes('sheet')) return 'ri-file-excel-line';
+    if (mimeType.includes('powerpoint') || mimeType.includes('presentation')) return 'ri-file-ppt-line';
+    if (mimeType.includes('word') || mimeType.includes('document')) return 'ri-file-word-line';
 
-    return 'mdi-file-document-outline';
+    return 'ri-file-text-line';
   }
 
   /**

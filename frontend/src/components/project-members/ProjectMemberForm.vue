@@ -19,7 +19,7 @@ const roles: { title: string; value: ProjectMemberRole }[] = [
 <template>
   <VCard class="mb-4">
     <VCardItem>
-      <h5 class="text-h5 text-wrap">Miembro del proyecto</h5>
+      <VCardTitle class="text-h6">Miembro del proyecto</VCardTitle>
     </VCardItem>
 
     <VCardText class="px-8 pb-8">
@@ -37,7 +37,7 @@ const roles: { title: string; value: ProjectMemberRole }[] = [
 
         <VCol cols="12" class="d-flex gap-4">
           <VSpacer />
-          <VBtn type="submit">Guardar</VBtn>
+          <VBtn type="submit" color="primary" variant="flat" size="large">Guardar</VBtn>
         </VCol>
       </VRow>
     </VCardText>

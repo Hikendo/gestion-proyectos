@@ -189,7 +189,7 @@ const barOptionsSingle = {
         <VCardItem>
           <template #prepend>
             <VAvatar color="primary" variant="tonal" size="48" rounded="lg">
-              <VIcon icon="mdi-chart-areaspline" size="28" />
+              <VIcon icon="ri-line-chart-line" size="28" />
             </VAvatar>
           </template>
           <VCardTitle class="text-h5 font-weight-bold">
@@ -203,7 +203,7 @@ const barOptionsSingle = {
           </VCardSubtitle>
           <template #append>
             <VBtn variant="outlined" size="small" :to="{ name: 'project-detail', params: { projectId: projectId() } }"
-              prepend-icon="mdi-arrow-left">
+              prepend-icon="ri-arrow-left-line">
               Proyecto
             </VBtn>
           </template>
@@ -213,7 +213,7 @@ const barOptionsSingle = {
 
     <!-- ── Error ─────────────────────────────────────────────────────────── -->
     <VCol v-if="hasError && !loader" cols="12">
-      <VAlert type="error" variant="tonal" icon="mdi-alert-circle-outline">
+      <VAlert type="error" variant="tonal" icon="ri-error-warning-line">
         No se pudieron cargar las métricas. Verifica que tienes acceso al proyecto.
       </VAlert>
     </VCol>
@@ -224,7 +224,7 @@ const barOptionsSingle = {
         <VCard elevation="0" border class="text-center pa-4">
           <div class="text-h3 font-weight-bold text-primary">{{ metrics.tasks.total }}</div>
           <div class="text-caption text-medium-emphasis mt-1">TAREAS TOTALES</div>
-          <VIcon icon="mdi-checkbox-marked-circle-outline" color="primary" size="24" class="mt-2" />
+          <VIcon icon="ri-checkbox-circle-line" color="primary" size="24" class="mt-2" />
         </VCard>
       </VCol>
 
@@ -232,7 +232,7 @@ const barOptionsSingle = {
         <VCard elevation="0" border class="text-center pa-4">
           <div class="text-h3 font-weight-bold text-success">{{ metrics.tasks.completed }}</div>
           <div class="text-caption text-medium-emphasis mt-1">TAREAS COMPLETADAS</div>
-          <VIcon icon="mdi-check-all" color="success" size="24" class="mt-2" />
+          <VIcon icon="ri-check-double-line" color="success" size="24" class="mt-2" />
         </VCard>
       </VCol>
 
@@ -240,7 +240,7 @@ const barOptionsSingle = {
         <VCard elevation="0" border class="text-center pa-4">
           <div class="text-h3 font-weight-bold text-warning">{{ metrics.tickets.open }}</div>
           <div class="text-caption text-medium-emphasis mt-1">TICKETS ABIERTOS</div>
-          <VIcon icon="mdi-ticket-outline" color="warning" size="24" class="mt-2" />
+          <VIcon icon="ri-coupon-line" color="warning" size="24" class="mt-2" />
         </VCard>
       </VCol>
 
@@ -248,7 +248,7 @@ const barOptionsSingle = {
         <VCard elevation="0" border class="text-center pa-4">
           <div class="text-h3 font-weight-bold text-error">{{ metrics.blockers.active }}</div>
           <div class="text-caption text-medium-emphasis mt-1">BLOQUEADORES ACTIVOS</div>
-          <VIcon icon="mdi-alert-circle-outline" color="error" size="24" class="mt-2" />
+          <VIcon icon="ri-error-warning-line" color="error" size="24" class="mt-2" />
         </VCard>
       </VCol>
 
@@ -257,7 +257,7 @@ const barOptionsSingle = {
         <VCard elevation="0" border>
           <VCardItem>
             <VCardTitle class="text-body-1 font-weight-medium">
-              <VIcon icon="mdi-speedometer" class="me-2" />Progreso global
+              <VIcon icon="ri-speed-line" class="me-2" />Progreso global
             </VCardTitle>
           </VCardItem>
           <VCardText class="pt-0">
@@ -281,7 +281,7 @@ const barOptionsSingle = {
         <VCard elevation="0" border height="340">
           <VCardItem>
             <VCardTitle class="text-body-1 font-weight-medium">
-              <VIcon icon="mdi-chart-donut" class="me-2" />Distribución de tareas
+              <VIcon icon="ri-donut-chart-line" class="me-2" />Distribución de tareas
             </VCardTitle>
           </VCardItem>
           <VCardText style="height: 260px; position: relative;">
@@ -299,28 +299,28 @@ const barOptionsSingle = {
         <VCard elevation="0" border height="340">
           <VCardItem>
             <VCardTitle class="text-body-1 font-weight-medium">
-              <VIcon icon="mdi-calendar-range" class="me-2" />Cronograma y presupuesto
+              <VIcon icon="ri-calendar-line" class="me-2" />Cronograma y presupuesto
             </VCardTitle>
           </VCardItem>
           <VCardText>
             <VList density="compact" lines="one">
-              <VListItem prepend-icon="mdi-play-circle-outline" title="Fecha inicio"
+              <VListItem prepend-icon="ri-play-circle-line" title="Fecha inicio"
                 :subtitle="metrics.project.start_date ?? 'No definida'" />
-              <VListItem prepend-icon="mdi-stop-circle-outline" title="Fecha fin"
+              <VListItem prepend-icon="ri-stop-circle-line" title="Fecha fin"
                 :subtitle="metrics.project.end_date ?? 'No definida'" />
-              <VListItem prepend-icon="mdi-currency-usd" title="Presupuesto"
+              <VListItem prepend-icon="ri-money-dollar-circle-line" title="Presupuesto"
                 :subtitle="metrics.project.budget ? `$${Number(metrics.project.budget).toLocaleString()}` : 'No definido'" />
-              <VListItem prepend-icon="mdi-account" title="Responsable"
+              <VListItem prepend-icon="ri-user-fill" title="Responsable"
                 :subtitle="metrics.project.owner?.name ?? '—'" />
             </VList>
             <div class="d-flex mt-3 ga-3">
-              <VChip size="small" color="primary" variant="tonal" prepend-icon="mdi-account-group">
+              <VChip size="small" color="primary" variant="tonal" prepend-icon="ri-group-fill">
                 {{ metrics.project.members.length }} miembros
               </VChip>
-              <VChip size="small" color="success" variant="tonal" prepend-icon="mdi-flag-checkered">
+              <VChip size="small" color="success" variant="tonal" prepend-icon="ri-flag-line">
                 {{ metrics.milestones.completed }}/{{ metrics.milestones.total }} hitos
               </VChip>
-              <VChip size="small" color="info" variant="tonal" prepend-icon="mdi-package-variant">
+              <VChip size="small" color="info" variant="tonal" prepend-icon="ri-archive-line">
                 {{ metrics.deliverables.approved }}/{{ metrics.deliverables.total }} entregables
               </VChip>
             </div>
@@ -336,7 +336,7 @@ const barOptionsSingle = {
           <VCard elevation="0" border>
             <VCardItem>
               <VCardTitle class="text-body-1 font-weight-medium">
-                <VIcon icon="mdi-account-hard-hat" class="me-2" />Tareas por miembro del equipo
+                <VIcon icon="ri-hard-hat-line" class="me-2" />Tareas por miembro del equipo
               </VCardTitle>
             </VCardItem>
             <VCardText>
@@ -389,7 +389,7 @@ const barOptionsSingle = {
           <VCard elevation="0" border height="340">
             <VCardItem>
               <VCardTitle class="text-body-1 font-weight-medium">
-                <VIcon icon="mdi-ticket-outline" class="me-2" />Tickets por estado
+                <VIcon icon="ri-coupon-line" class="me-2" />Tickets por estado
                 <VChip size="x-small" class="ms-2" color="warning" variant="tonal">
                   {{ metrics.tickets.total }} totales
                 </VChip>
@@ -411,7 +411,7 @@ const barOptionsSingle = {
           <VCard elevation="0" border>
             <VCardItem>
               <VCardTitle class="text-body-1 font-weight-medium">
-                <VIcon icon="mdi-shield-alert-outline" class="me-2" />Riesgos: activos vs resueltos
+                <VIcon icon="ri-shield-flash-line" class="me-2" />Riesgos: activos vs resueltos
               </VCardTitle>
             </VCardItem>
             <VCardText>
@@ -428,14 +428,14 @@ const barOptionsSingle = {
                   <div class="d-flex flex-column ga-3 mt-4">
                     <div class="d-flex align-center justify-space-between">
                       <div class="d-flex align-center ga-2">
-                        <VIcon icon="mdi-circle" color="error" size="12" />
+                        <VIcon icon="ri-circle-fill" color="error" size="12" />
                         <span class="text-body-2">Activos</span>
                       </div>
                       <VChip size="small" color="error" variant="tonal">{{ metrics.risks.active }}</VChip>
                     </div>
                     <div class="d-flex align-center justify-space-between">
                       <div class="d-flex align-center ga-2">
-                        <VIcon icon="mdi-circle" color="success" size="12" />
+                        <VIcon icon="ri-circle-fill" color="success" size="12" />
                         <span class="text-body-2">Resueltos / Mitigados</span>
                       </div>
                       <VChip size="small" color="success" variant="tonal">{{ metrics.risks.resolved }}</VChip>
@@ -461,7 +461,7 @@ const barOptionsSingle = {
           <VCard elevation="0" border>
             <VCardItem>
               <VCardTitle class="text-body-1 font-weight-medium">
-                <VIcon icon="mdi-alert-circle-outline" class="me-2" />Bloqueadores
+                <VIcon icon="ri-error-warning-line" class="me-2" />Bloqueadores
                 <VChip size="x-small" class="ms-2" color="error" variant="tonal">
                   {{ metrics.blockers.active }} activos
                 </VChip>
@@ -517,7 +517,7 @@ const barOptionsSingle = {
           <VCard elevation="0" border height="340">
             <VCardItem>
               <VCardTitle class="text-body-1 font-weight-medium">
-                <VIcon icon="mdi-target" class="me-2" />Objetivos cumplidos
+                <VIcon icon="ri-crosshair-2-line" class="me-2" />Objetivos cumplidos
               </VCardTitle>
             </VCardItem>
             <VCardText style="height:260px; position:relative;">
@@ -537,7 +537,7 @@ const barOptionsSingle = {
           <VCard elevation="0" border>
             <VCardItem>
               <VCardTitle class="text-body-1 font-weight-medium">
-                <VIcon icon="mdi-format-list-checks" class="me-2" />Objetivos por tipo
+                <VIcon icon="ri-list-check" class="me-2" />Objetivos por tipo
               </VCardTitle>
             </VCardItem>
             <VCardText>
@@ -560,7 +560,7 @@ const barOptionsSingle = {
           <VCard elevation="0" border class="mt-4">
             <VCardItem>
               <VCardTitle class="text-body-1 font-weight-medium">
-                <VIcon icon="mdi-flag-checkered" class="me-2" />Hitos y entregables
+                <VIcon icon="ri-flag-line" class="me-2" />Hitos y entregables
               </VCardTitle>
             </VCardItem>
             <VCardText>

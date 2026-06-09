@@ -15,18 +15,18 @@ const roles = [
 <template>
   <VCard class="mb-4">
     <VCardItem>
-      <h5 class="text-h5 text-wrap">Datos del usuario</h5>
+      <VCardTitle class="text-h6">Datos del usuario</VCardTitle>
     </VCardItem>
 
     <VCardText class="px-8 pb-8">
       <VRow>
         <VCol cols="12" md="6">
-          <VTextField v-model="form.name" :error-messages="errores.name" name="name" label="Nombre"
+          <VTextField v-model="form.name" :error-messages="errores.name" name="name" label="Nombre" variant="outlined" density="comfortable"
             placeholder="Nombre completo" />
         </VCol>
 
         <VCol cols="12" md="6">
-          <VTextField v-model="form.email" :error-messages="errores.email" name="email" type="email" label="Email"
+          <VTextField v-model="form.email" :error-messages="errores.email" name="email" type="email" label="Email" variant="outlined" density="comfortable"
             placeholder="email@example.com" />
         </VCol>
 
@@ -48,7 +48,7 @@ const roles = [
 
         <VCol cols="12" class="d-flex gap-4">
           <VSpacer />
-          <VBtn type="submit">Guardar</VBtn>
+          <VBtn type="submit" color="primary" variant="flat" size="large">Guardar</VBtn>
         </VCol>
       </VRow>
     </VCardText>

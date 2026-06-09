@@ -61,17 +61,17 @@ function formatDate(dateString: string | null): string {
 function getNotificationIcon(type: string): string {
     switch (type) {
         case 'scheduled_event':
-            return 'mdi-clock-outline';
+            return 'ri-time-line';
         case 'task_assigned':
-            return 'mdi-check-circle-outline';
+            return 'ri-checkbox-circle-line';
         case 'ticket_created':
-            return 'mdi-ticket-outline';
+            return 'ri-coupon-line';
         case 'project_update':
-            return 'mdi-folder-outline';
+            return 'ri-folder-line';
         case 'mention':
-            return 'mdi-at';
+            return 'ri-at-line';
         default:
-            return 'mdi-bell-outline';
+            return 'ri-notification-3-line';
     }
 }
 
@@ -107,7 +107,7 @@ function getNotificationColor(type: string): string {
                     <span v-else class="text-success">Todas leídas</span>
                 </p>
             </div>
-            <VBtn v-if="unreadCount > 0" variant="outlined" color="primary" prepend-icon="mdi-check-all"
+            <VBtn v-if="unreadCount > 0" variant="outlined" color="primary" prepend-icon="ri-check-double-line"
                 @click="handleMarkAllRead" :loading="loading">
                 Marcar todas leídas
             </VBtn>
@@ -116,7 +116,7 @@ function getNotificationColor(type: string): string {
         <!-- Estado vacío -->
         <VCard v-if="!loading && notifications.length === 0" class="empty-state-card">
             <VCardText class="d-flex flex-column align-center justify-center pa-12">
-                <VIcon icon="mdi-bell-off-outline" size="64" color="grey-lighten-1" class="mb-4" />
+                <VIcon icon="ri-notification-off-line" size="64" color="grey-lighten-1" class="mb-4" />
                 <span class="text-h6 text-medium-emphasis mb-1">No tienes notificaciones</span>
                 <span class="text-body-2 text-disabled">
                     Las notificaciones aparecerán aquí cuando haya actividad relevante.
@@ -156,7 +156,7 @@ function getNotificationColor(type: string): string {
                                 <span class="text-caption text-disabled">{{ formatDate(notification.created_at)
                                     }}</span>
                                 <VBtn v-if="notification.read_at === null" size="x-small" variant="text" color="primary"
-                                    icon="mdi-check" @click.stop="handleMarkAsRead(notification)" />
+                                    icon="ri-check-line" @click.stop="handleMarkAsRead(notification)" />
                             </div>
                         </template>
                     </VListItem>

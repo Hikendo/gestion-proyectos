@@ -22,18 +22,18 @@ const project = ref<ProjectI | null>(null);
 const projectId = Number(route.params.projectId);
 
 const featureTabs = [
-  { key: 'objectives', label: 'Objetivos', icon: 'mdi-flag-checkered', route: 'objectives' },
-  { key: 'phases', label: 'Fases', icon: 'mdi-timeline-outline', route: 'phases' },
-  { key: 'plans', label: 'Planes', icon: 'mdi-calendar-clock', route: 'plans' },
-  { key: 'tasks', label: 'Tareas', icon: 'mdi-check-circle-outline', route: 'tasks' },
-  { key: 'tickets', label: 'Tickets', icon: 'mdi-ticket-outline', route: 'tickets' },
-  { key: 'risks', label: 'Riesgos', icon: 'mdi-alert-circle-outline', route: 'risks' },
-  { key: 'blockers', label: 'Bloqueadores', icon: 'mdi-block-helper', route: 'blockers' },
-  { key: 'deliverables', label: 'Entregables', icon: 'mdi-package-variant-closed', route: 'deliverables' },
-  { key: 'milestones', label: 'Hitos', icon: 'mdi-map-marker-check', route: 'milestones' },
-  { key: 'members', label: 'Miembros', icon: 'mdi-account-group-outline', route: 'members' },
-  { key: 'metrics', label: 'Métricas', icon: 'mdi-chart-bar', route: 'metrics' },
-  { key: 'reports', label: 'Reportes', icon: 'mdi-file-chart-outline', route: 'project-reports' },
+  { key: 'objectives', label: 'Objetivos', icon: 'ri-flag-line', route: 'objectives' },
+  { key: 'phases', label: 'Fases', icon: 'ri-timeline-view', route: 'phases' },
+  { key: 'plans', label: 'Planes', icon: 'ri-calendar-schedule-line', route: 'plans' },
+  { key: 'tasks', label: 'Tareas', icon: 'ri-checkbox-circle-line', route: 'tasks' },
+  { key: 'tickets', label: 'Tickets', icon: 'ri-coupon-line', route: 'tickets' },
+  { key: 'risks', label: 'Riesgos', icon: 'ri-error-warning-line', route: 'risks' },
+  { key: 'blockers', label: 'Bloqueadores', icon: 'ri-forbid-line', route: 'blockers' },
+  { key: 'deliverables', label: 'Entregables', icon: 'ri-archive-line', route: 'deliverables' },
+  { key: 'milestones', label: 'Hitos', icon: 'ri-map-pin-line', route: 'milestones' },
+  { key: 'members', label: 'Miembros', icon: 'ri-group-line', route: 'members' },
+  { key: 'metrics', label: 'Métricas', icon: 'ri-bar-chart-line', route: 'metrics' },
+  { key: 'reports', label: 'Reportes', icon: 'ri-file-chart-line', route: 'project-reports' },
 ];
 
 const statusColor: Record<string, string> = {
@@ -69,7 +69,7 @@ function navigateToFeature(routeName: string) {
           <VCardItem>
             <template #prepend>
               <VAvatar :color="statusColor[project.status] ?? 'grey'" variant="tonal" size="48">
-                <VIcon icon="mdi-folder-open" />
+                <VIcon icon="ri-folder-open-line" />
               </VAvatar>
             </template>
             <VCardTitle class="text-h5">{{ project.name }}</VCardTitle>
@@ -80,7 +80,7 @@ function navigateToFeature(routeName: string) {
               <span v-if="project.code" class="text-caption">{{ project.code }}</span>
             </VCardSubtitle>
             <template #append>
-              <VBtn variant="outlined" size="small" :to="{ name: 'projects' }" prepend-icon="mdi-arrow-left">
+              <VBtn variant="outlined" size="small" :to="{ name: 'projects' }" prepend-icon="ri-arrow-left-line">
                 Proyectos
               </VBtn>
             </template>
@@ -95,7 +95,7 @@ function navigateToFeature(routeName: string) {
         <VCard>
           <VCardItem>
             <VCardTitle class="text-subtitle-1 font-weight-bold mb-3">
-              <VIcon icon="mdi-view-grid" class="me-2" />
+              <VIcon icon="ri-layout-grid-line" class="me-2" />
               Módulos del proyecto
             </VCardTitle>
           </VCardItem>
@@ -122,10 +122,10 @@ function navigateToFeature(routeName: string) {
             <VCardTitle>
               <div class="d-flex justify-space-between flex-wrap align-center">
                 <span>
-                  <VIcon icon="mdi-information-outline" class="me-2" />
+                  <VIcon icon="ri-information-line" class="me-2" />
                   Información del proyecto
                 </span>
-                <VBtn v-if="canAction('Proyecto.Update')" variant="flat" color="warning" prepend-icon="mdi-pencil"
+                <VBtn v-if="canAction('Proyecto.Update')" variant="flat" color="warning" prepend-icon="ri-pencil-line"
                   :to="{ name: 'project-edit', params: { projectId: projectId } }">
                   Editar proyecto
                 </VBtn>

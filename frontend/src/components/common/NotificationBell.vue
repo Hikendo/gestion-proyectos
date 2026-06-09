@@ -25,7 +25,7 @@ function goToAllNotifications() {
 <template>
     <div class="notification-bell-wrapper">
         <VBadge :model-value="hasUnread" color="error" dot bordered overlap="circle">
-            <VBtn icon="mdi-bell-outline" variant="text" :color="trayOpen ? 'primary' : undefined"
+            <VBtn icon="ri-notification-3-line" variant="text" :color="trayOpen ? 'primary' : undefined"
                 @click="handleClick" />
         </VBadge>
         <span v-if="unreadCount > 0" class="unread-badge text-caption font-weight-bold">

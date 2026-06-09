@@ -69,7 +69,7 @@ function showAllPermissions(role) {
                 class="cursor-pointer"
               >
                 +{{ role.permissions.length - 6 }} más
-                <v-icon right size="14" class="ml-1">mdi-chevron-down</v-icon>
+                <v-icon right size="14" class="ml-1">ri-arrow-down-s-line</v-icon>
               </v-chip>
             </div>
           </td>
@@ -97,7 +97,7 @@ function showAllPermissions(role) {
             <span class="text-h6">{{ selectedRole.label }}</span>
             <span class="text-caption text-grey ml-2 font-mono">({{ selectedRole.name }})</span>
           </div>
-          <v-btn icon="mdi-close" variant="text" @click="dialog = false"></v-btn>
+          <v-btn icon="ri-close-line" variant="text" @click="dialog = false"></v-btn>
         </v-card-title>
 
         <v-divider></v-divider>

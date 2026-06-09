@@ -39,7 +39,7 @@ onMounted(handleGetData);
                 color="primary"
 
                 :to="{ name: 'admin-users-new' }"
-                prepend-icon="mdi-plus"
+                prepend-icon="ri-add-line"
                 v-if="canAction('User.Store')"
               >
                 Nuevo usuario
@@ -57,7 +57,7 @@ onMounted(handleGetData);
           <form @submit.prevent="() => { page = 1; handleGetData(); }">
             <VTextField
               label="Buscar usuario"
-              prepend-inner-icon="mdi-magnify"
+              prepend-inner-icon="ri-search-line"
               clearable
               v-model="query"
               variant="outlined"
@@ -130,7 +130,7 @@ onMounted(handleGetData);
                     title="Editar usuario"
                     :to="{ name: 'admin-users-id', params: { id: user.id } }"
                   >
-                    <VIcon icon="mdi-pencil"/>
+                    <VIcon icon="ri-pencil-line"/>
                   </VBtn>
                 </td>
               </tr>

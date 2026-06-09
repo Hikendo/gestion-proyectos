@@ -83,7 +83,7 @@ function errorMsg(err: unknown): string {
                 <v-card variant="outlined" rounded="lg">
                     <v-card-item>
                         <template #prepend>
-                            <v-icon color="primary" size="36" class="mr-2">mdi-file-word-outline</v-icon>
+                            <v-icon color="primary" size="36" class="mr-2">ri-file-word-line</v-icon>
                         </template>
                         <v-card-title>Reporte Ejecutivo</v-card-title>
                         <v-card-subtitle>Formato DOCX — Microsoft Word</v-card-subtitle>
@@ -95,7 +95,7 @@ function errorMsg(err: unknown): string {
                     </v-card-text>
 
                     <v-card-actions class="pa-4 pt-0">
-                        <v-btn color="primary" variant="flat" prepend-icon="mdi-download" :loading="loadingExec"
+                        <v-btn color="primary" variant="flat" prepend-icon="ri-download-line" :loading="loadingExec"
                             :disabled="loadingDash" @click="downloadExecutive">
                             Descargar Reporte Ejecutivo
                         </v-btn>
@@ -108,7 +108,7 @@ function errorMsg(err: unknown): string {
                 <v-card variant="outlined" rounded="lg">
                     <v-card-item>
                         <template #prepend>
-                            <v-icon color="success" size="36" class="mr-2">mdi-microsoft-excel</v-icon>
+                            <v-icon color="success" size="36" class="mr-2">ri-file-excel-2-line</v-icon>
                         </template>
                         <v-card-title>Dashboard Analítico</v-card-title>
                         <v-card-subtitle>Formato XLSX — Microsoft Excel</v-card-subtitle>
@@ -120,7 +120,7 @@ function errorMsg(err: unknown): string {
                     </v-card-text>
 
                     <v-card-actions class="pa-4 pt-0">
-                        <v-btn color="success" variant="flat" prepend-icon="mdi-download" :loading="loadingDash"
+                        <v-btn color="success" variant="flat" prepend-icon="ri-download-line" :loading="loadingDash"
                             :disabled="loadingExec" @click="downloadDashboard">
                             Descargar Dashboard
                         </v-btn>

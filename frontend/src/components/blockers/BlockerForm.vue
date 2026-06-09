@@ -51,13 +51,13 @@ const TASK_STATUS_LABELS: Record<string, string> = {
 <template>
   <VCard class="mb-4">
     <VCardItem>
-      <h5 class="text-h5 text-wrap">Datos del bloqueador</h5>
+      <VCardTitle class="text-h6">Datos del bloqueador</VCardTitle>
     </VCardItem>
 
     <VCardText class="px-8 pb-8">
       <VRow>
         <VCol cols="12" md="8">
-          <VTextField v-model="form.title" :error-messages="errores.title" name="title" label="Título"
+          <VTextField v-model="form.title" :error-messages="errores.title" name="title" label="Título" variant="outlined" density="comfortable"
             placeholder="Título del bloqueador" />
         </VCol>
 
@@ -78,14 +78,14 @@ const TASK_STATUS_LABELS: Record<string, string> = {
         </VCol>
 
         <VCol cols="12">
-          <VFileInput label="Archivos adjuntos (PDF, imágenes, ZIP, DOCX)" multiple
-            accept=".pdf,.jpeg,.jpg,.png,.zip,.docx,.xlsx" :max-file-size="10240" prepend-icon="mdi-paperclip"
+          <VFileInput label="Archivos adjuntos (PDF, imágenes, ZIP, DOCX)" variant="outlined" density="comfortable" multiple
+            accept=".pdf,.jpeg,.jpg,.png,.zip,.docx,.xlsx" :max-file-size="10240" prepend-icon="ri-attachment-2"
             @change="onFilesChanged" />
         </VCol>
 
         <VCol cols="12" class="d-flex gap-4">
           <VSpacer />
-          <VBtn type="submit">Guardar</VBtn>
+          <VBtn type="submit" color="primary" variant="flat" size="large">Guardar</VBtn>
         </VCol>
       </VRow>
     </VCardText>

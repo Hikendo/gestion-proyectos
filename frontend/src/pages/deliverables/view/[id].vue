@@ -33,13 +33,13 @@ onMounted(async () => {
                 <VCardItem>
                     <VCardTitle class="d-flex justify-space-between flex-wrap align-center">
                         <span class="d-flex align-center gap-2">
-                            <VIcon icon="mdi-package-variant-closed" color="primary" />Entregable: {{ item.name }}
+                            <VIcon icon="ri-archive-line" color="primary" />Entregable: {{ item.name }}
                         </span>
                         <div class="d-flex gap-2">
-                            <VBtn variant="outlined" prepend-icon="mdi-arrow-left"
+                            <VBtn variant="outlined" prepend-icon="ri-arrow-left-line"
                                 :to="{ name: 'deliverables', params: { projectId } }">Volver</VBtn>
                             <VBtn v-if="canAction('Entregable.Update')" variant="tonal" color="warning"
-                                :to="{ name: 'deliverables-id', params: { projectId, id } }" prepend-icon="mdi-pencil">
+                                :to="{ name: 'deliverables-id', params: { projectId, id } }" prepend-icon="ri-pencil-line">
                                 Editar</VBtn>
                         </div>
                     </VCardTitle>

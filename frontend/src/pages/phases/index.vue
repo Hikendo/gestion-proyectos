@@ -82,14 +82,14 @@ const getStatusIcon = (phase: ProjectPhaseI) => {
   const endDate = phase.end_date ? new Date(phase.end_date) : null;
   const today = new Date();
 
-  if (progress === 100) return 'mdi-check-circle';
-  if (endDate && endDate < today) return 'mdi-alert-circle';
+  if (progress === 100) return 'ri-checkbox-circle-fill';
+  if (endDate && endDate < today) return 'ri-error-warning-fill';
   if (endDate) {
     const daysRemaining = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
-    if (daysRemaining <= 3) return 'mdi-alert';
-    if (daysRemaining <= 7) return 'mdi-clock-alert';
+    if (daysRemaining <= 3) return 'ri-alert-fill';
+    if (daysRemaining <= 7) return 'ri-alarm-warning-line';
   }
-  return 'mdi-progress-clock';
+  return 'ri-progress-5-line';
 };
 
 // Función para obtener el texto del estado
@@ -190,14 +190,14 @@ onMounted(handleGetData);
           <div class="d-flex gap-1">
             <VBtn icon size="small" variant="text"
               @click="router.push({ name: 'phases-view', params: { projectId: projectId(), id: item.id } })">
-              <VIcon icon="mdi-eye" color="primary" size="small" />
+              <VIcon icon="ri-eye-line" color="primary" size="small" />
             </VBtn>
             <VBtn icon size="small" variant="text"
               @click="router.push({ name: 'phases-id', params: { projectId: projectId(), id: item.id } })">
-              <VIcon icon="mdi-pencil" color="warning" size="small" />
+              <VIcon icon="ri-pencil-line" color="warning" size="small" />
             </VBtn>
             <VBtn icon size="small" variant="text" @click="itemDestroy = item; isDialogVisible = true">
-              <VIcon icon="mdi-delete" color="error" size="small" />
+              <VIcon icon="ri-delete-bin-fill" color="error" size="small" />
             </VBtn>
           </div>
         </td>

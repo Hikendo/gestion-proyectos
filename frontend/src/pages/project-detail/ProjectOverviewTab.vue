@@ -144,13 +144,13 @@ const groupedAttachments = computed(() => {
       <VCardItem>
         <div class="d-flex align-center justify-space-between flex-wrap gap-2">
           <VCardTitle class="d-flex align-center gap-2 pa-0">
-            <VIcon icon="mdi-folder-zip-outline" />
+            <VIcon icon="ri-folder-line-zip-outline" />
             Expediente digital del proyecto
             <VChip v-if="groupedAttachments.length > 0" size="small" variant="tonal" color="primary">
               {{ groupedAttachments.length }} archivo(s)
             </VChip>
           </VCardTitle>
-          <VBtn variant="tonal" color="primary" prepend-icon="mdi-upload" :loading="uploading"
+          <VBtn variant="tonal" color="primary" prepend-icon="ri-upload-line" :loading="uploading"
             @click="triggerFileInput">
             Subir archivos
           </VBtn>
@@ -163,7 +163,7 @@ const groupedAttachments = computed(() => {
       <VCardText class="drop-zone pa-4" :class="{ 'drop-zone--active': dragOver }" @dragover="onDragOver"
         @dragleave="onDragLeave" @drop="onDrop">
         <div v-if="groupedAttachments.length === 0 && !uploading" class="empty-state">
-          <VIcon icon="mdi-cloud-upload-outline" size="48" class="text-medium-emphasis mb-2" />
+          <VIcon icon="ri-cloud-upload-line" size="48" class="text-medium-emphasis mb-2" />
           <p class="text-body-1 text-medium-emphasis mb-1">
             Arrastra archivos aquí o haz clic en "Subir archivos"
           </p>
@@ -207,13 +207,13 @@ const groupedAttachments = computed(() => {
             <template #append>
               <div class="d-flex ga-1">
                 <!-- Download -->
-                <VBtn icon="mdi-download" size="small" variant="text" color="primary"
+                <VBtn icon="ri-download-line" size="small" variant="text" color="primary"
                   @click.stop="handleDownload(attachment)" />
                 <!-- Replace -->
-                <VBtn icon="mdi-file-replace-outline" size="small" variant="text" color="warning"
+                <VBtn icon="ri-file-transfer-line" size="small" variant="text" color="warning"
                   @click.stop="confirmReplace(attachment)" />
                 <!-- Delete -->
-                <VBtn v-if="props.canDelete" icon="mdi-delete-outline" size="small" variant="text" color="error"
+                <VBtn v-if="props.canDelete" icon="ri-delete-bin-line" size="small" variant="text" color="error"
                   @click.stop="confirmDelete(attachment)" />
               </div>
             </template>
@@ -227,7 +227,7 @@ const groupedAttachments = computed(() => {
       <VCard>
         <VCardItem>
           <VCardTitle class="d-flex align-center gap-2">
-            <VIcon icon="mdi-alert-circle-outline" color="error" />
+            <VIcon icon="ri-error-warning-line" color="error" />
             Eliminar archivo
           </VCardTitle>
         </VCardItem>
@@ -253,7 +253,7 @@ const groupedAttachments = computed(() => {
       <VCard>
         <VCardItem>
           <VCardTitle class="d-flex align-center gap-2">
-            <VIcon icon="mdi-file-replace-outline" color="warning" />
+            <VIcon icon="ri-file-transfer-line" color="warning" />
             Reemplazar archivo
           </VCardTitle>
         </VCardItem>
@@ -264,7 +264,7 @@ const groupedAttachments = computed(() => {
           <p class="text-body-2 text-medium-emphasis mb-4">
             El archivo actual se eliminará y se conservará el mismo registro en el expediente.
           </p>
-          <VFileInput v-model="replaceFile" label="Selecciona el nuevo archivo" prepend-icon="mdi-file-upload-outline"
+          <VFileInput v-model="replaceFile" label="Selecciona el nuevo archivo" prepend-icon="ri-upload-cloud-line"
             accept="*/*" :show-size="true" variant="outlined" density="compact" />
         </VCardText>
         <VDivider />

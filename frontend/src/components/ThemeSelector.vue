@@ -37,7 +37,7 @@ function onSelect(key: string) {
       label="Tema de la interfaz"
       variant="outlined"
       density="comfortable"
-      prepend-inner-icon="mdi-palette-outline"
+      prepend-inner-icon="ri-palette-line"
       hide-details
       @update:model-value="onSelect"
     >
@@ -55,7 +55,7 @@ function onSelect(key: string) {
           <template #append>
             <VIcon
               v-if="currentKey === item.raw.value"
-              icon="mdi-check-circle"
+              icon="ri-checkbox-circle-fill"
               size="16"
               color="primary"
             />

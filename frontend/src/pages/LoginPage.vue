@@ -45,7 +45,7 @@ async function handleLogin() {
     <VCard width="440" class="pa-2" elevation="4">
 
       <VCardItem class="pt-8 px-6 pb-2 text-center">
-        <VIcon icon="mdi-chart-gantt" size="52" color="primary" class="mb-2" />
+        <VIcon icon="ri-bar-chart-horizontal-line" size="52" color="primary" class="mb-2" />
         <VCardTitle class="text-h5 font-weight-bold">Gestión de Proyectos</VCardTitle>
         <VCardSubtitle class="pb-1">Ingresa con tus credenciales para continuar</VCardSubtitle>
       </VCardItem>
@@ -53,14 +53,14 @@ async function handleLogin() {
       <VCardText class="px-6 pb-8">
         <VForm @submit.prevent="handleLogin">
           <VTextField v-model="form.email" label="Correo electrónico" type="email"
-            prepend-inner-icon="mdi-email-outline" variant="outlined" density="comfortable"
+            prepend-inner-icon="ri-mail-line" variant="outlined" density="comfortable"
             :error-messages="errors.email" class="mb-3" autocomplete="email" autofocus />
           <VTextField v-model="form.password" label="Contraseña" :type="showPassword ? 'text' : 'password'"
-            prepend-inner-icon="mdi-lock-outline" :append-inner-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+            prepend-inner-icon="ri-lock-line" :append-inner-icon="showPassword ? 'ri-eye-line-off' : 'ri-eye-line'"
             @click:append-inner="showPassword = !showPassword" variant="outlined" density="comfortable"
             :error-messages="errors.password" class="mb-4" autocomplete="current-password" />
 
-          <VBtn type="submit" color="primary" block size="large" :loading="loader" prepend-icon="mdi-login">
+          <VBtn type="submit" color="primary" block size="large" :loading="loader" prepend-icon="ri-login-box-line">
             Iniciar sesión
           </VBtn>
         </VForm>

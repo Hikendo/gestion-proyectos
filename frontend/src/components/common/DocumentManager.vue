@@ -121,13 +121,13 @@ const sortedAttachments = computed(() =>
         <VCardItem>
             <div class="d-flex align-center justify-space-between flex-wrap gap-2">
                 <VCardTitle class="d-flex align-center gap-2 pa-0">
-                    <VIcon icon="mdi-folder-zip-outline" />
+                    <VIcon icon="ri-folder-line-zip-outline" />
                     Expediente digital
                     <VChip v-if="sortedAttachments.length > 0" size="small" variant="tonal" color="primary">
                         {{ sortedAttachments.length }} archivo(s)
                     </VChip>
                 </VCardTitle>
-                <VBtn v-if="canManage" variant="tonal" color="primary" prepend-icon="mdi-upload" :loading="uploading"
+                <VBtn v-if="canManage" variant="tonal" color="primary" prepend-icon="ri-upload-line" :loading="uploading"
                     @click="triggerFileInput">
                     Subir archivos
                 </VBtn>
@@ -140,7 +140,7 @@ const sortedAttachments = computed(() =>
             @dragover.prevent="canManage && (dragOver = true)" @dragleave="dragOver = false"
             @drop.prevent="canManage && onDrop">
             <div v-if="sortedAttachments.length === 0 && !uploading" class="empty-state">
-                <VIcon icon="mdi-cloud-upload-outline" size="40" class="text-medium-emphasis mb-2" />
+                <VIcon icon="ri-cloud-upload-line" size="40" class="text-medium-emphasis mb-2" />
                 <p class="text-body-2 text-medium-emphasis">
                     {{ canManage ? 'Arrastra archivos aquí o haz clic en "Subir archivos"' : 'No hay archivos adjuntos'
                     }}
@@ -174,11 +174,11 @@ const sortedAttachments = computed(() =>
 
                     <template #append>
                         <div class="d-flex ga-1">
-                            <VBtn icon="mdi-download" size="x-small" variant="text" color="primary"
+                            <VBtn icon="ri-download-line" size="x-small" variant="text" color="primary"
                                 @click.stop="download(att)" />
-                            <VBtn v-if="canManage" icon="mdi-file-replace-outline" size="x-small" variant="text"
+                            <VBtn v-if="canManage" icon="ri-file-transfer-line" size="x-small" variant="text"
                                 color="warning" @click.stop="confirmReplace(att)" />
-                            <VBtn v-if="canManage" icon="mdi-delete-outline" size="x-small" variant="text" color="error"
+                            <VBtn v-if="canManage" icon="ri-delete-bin-line" size="x-small" variant="text" color="error"
                                 @click.stop="confirmDelete(att)" />
                         </div>
                     </template>
@@ -192,7 +192,7 @@ const sortedAttachments = computed(() =>
         <VCard>
             <VCardItem>
                 <VCardTitle class="d-flex align-center gap-2">
-                    <VIcon icon="mdi-alert-circle-outline" color="error" /> Eliminar archivo
+                    <VIcon icon="ri-error-warning-line" color="error" /> Eliminar archivo
                 </VCardTitle>
             </VCardItem>
             <VCardText>
@@ -212,12 +212,12 @@ const sortedAttachments = computed(() =>
         <VCard>
             <VCardItem>
                 <VCardTitle class="d-flex align-center gap-2">
-                    <VIcon icon="mdi-file-replace-outline" color="warning" /> Reemplazar archivo
+                    <VIcon icon="ri-file-transfer-line" color="warning" /> Reemplazar archivo
                 </VCardTitle>
             </VCardItem>
             <VCardText>
                 <p class="mb-2">Reemplazar <strong>{{ attachmentToReplace?.original_name }}</strong></p>
-                <VFileInput v-model="replaceFile" label="Nuevo archivo" prepend-icon="mdi-file-upload-outline"
+                <VFileInput v-model="replaceFile" label="Nuevo archivo" prepend-icon="ri-upload-cloud-line"
                     accept="*/*" variant="outlined" density="compact" />
             </VCardText>
             <VDivider />

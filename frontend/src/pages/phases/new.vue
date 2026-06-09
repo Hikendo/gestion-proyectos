@@ -29,7 +29,7 @@ async function handleSubmit(form: PhaseFormFields) {
             <div class="d-flex justify-space-between flex-wrap">
               <h4 class="text-h4">Agregar <strong>Fase</strong></h4>
               <VBtn variant="outlined" :to="{ name: 'phases', params: { projectId: route.params.projectId } }"
-                prepend-icon="mdi-arrow-left">Volver</VBtn>
+                prepend-icon="ri-arrow-left-line">Volver</VBtn>
             </div>
           </VCardTitle>
         </VCardItem>

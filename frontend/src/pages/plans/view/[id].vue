@@ -30,14 +30,14 @@ onMounted(async () => {
                 <VCardItem>
                     <VCardTitle class="d-flex justify-space-between flex-wrap align-center">
                         <span class="d-flex align-center gap-2">
-                            <VIcon icon="mdi-calendar-clock" color="primary" />Plan
+                            <VIcon icon="ri-calendar-schedule-line" color="primary" />Plan
                         </span>
                         <div class="d-flex gap-2">
-                            <VBtn variant="outlined" prepend-icon="mdi-arrow-left"
+                            <VBtn variant="outlined" prepend-icon="ri-arrow-left-line"
                                 :to="{ name: 'plans', params: { projectId } }">Volver</VBtn>
                             <VBtn v-if="canAction('Plan.Update')" variant="tonal" color="warning"
                                 :to="{ name: 'plans-id', params: { projectId, id: item.id } }"
-                                prepend-icon="mdi-pencil">Editar
+                                prepend-icon="ri-pencil-line">Editar
                             </VBtn>
                         </div>
                     </VCardTitle>

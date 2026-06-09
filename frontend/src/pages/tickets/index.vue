@@ -58,10 +58,10 @@ const handleDestroy = async () => {
 // ── Kanban ────────────────────────────────────────────────────────────────────
 
 const KANBAN_COLUMNS = [
-  { id: 'open', title: 'Abierto', color: 'info', icon: 'mdi-ticket-outline' },
-  { id: 'in_progress', title: 'En Progreso', color: 'warning', icon: 'mdi-progress-clock' },
-  { id: 'resolved', title: 'Resuelto', color: 'success', icon: 'mdi-check-circle-outline' },
-  { id: 'closed', title: 'Cerrado', color: 'secondary', icon: 'mdi-lock-outline' },
+  { id: 'open', title: 'Abierto', color: 'info', icon: 'ri-coupon-line' },
+  { id: 'in_progress', title: 'En Progreso', color: 'warning', icon: 'ri-progress-5-line' },
+  { id: 'resolved', title: 'Resuelto', color: 'success', icon: 'ri-checkbox-circle-line' },
+  { id: 'closed', title: 'Cerrado', color: 'secondary', icon: 'ri-lock-line' },
 ];
 
 const getByStatus = (status: string) => data.value.filter(t => t.status === status);
@@ -166,7 +166,7 @@ const viewOptions = [
               <div class="d-flex align-center gap-3">
                 <VSelect v-model="viewMode" :items="viewOptions" item-title="title" item-value="value" density="compact"
                   variant="solo" flat hide-details class="view-selector" style="max-width: 130px;" />
-                <VBtn variant="flat" prepend-icon="mdi-plus"
+                <VBtn variant="flat" prepend-icon="ri-add-line"
                   :to="{ name: 'tickets-new', params: { projectId: projectId() } }" v-if="canAction('Ticket.Store')">
                   Nuevo ticket
                 </VBtn>
@@ -184,7 +184,7 @@ const viewOptions = [
           <VRow class="d-flex align-center gap-4 mt-2">
             <VCol>
               <form @submit.prevent="() => { paginacionYquery.page = 1; handleGetData(); }">
-                <VTextField label="Buscador" prepend-inner-icon="mdi-magnify" type="search" clearable
+                <VTextField label="Buscador" prepend-inner-icon="ri-search-line" type="search" clearable
                   v-model="paginacionYquery.query" />
               </form>
             </VCol>
@@ -206,7 +206,7 @@ const viewOptions = [
               <tr v-for="item in data" :key="item.id">
                 <td>
                   <div class="d-flex align-center gap-2">
-                    <VIcon size="16" :color="STATUS_COLORS[item.status]">mdi-ticket-outline</VIcon>
+                    <VIcon size="16" :color="STATUS_COLORS[item.status]">ri-coupon-line</VIcon>
                     <span class="font-weight-medium">{{ item.subject }}</span>
                   </div>
                 </td>
@@ -235,16 +235,16 @@ const viewOptions = [
                   <div class="d-flex gap-1">
                     <VBtn icon size="small" variant="text"
                       :to="{ name: 'tickets-view', params: { projectId: projectId(), id: item.id } }">
-                      <VIcon icon="mdi-eye" color="primary" size="small" />
+                      <VIcon icon="ri-eye-line" color="primary" size="small" />
                     </VBtn>
                     <VBtn icon size="small" variant="text"
                       :to="{ name: 'tickets-id', params: { projectId: projectId(), id: item.id } }"
                       v-if="canAction('Ticket.Update')">
-                      <VIcon icon="mdi-pencil" color="warning" size="small" />
+                      <VIcon icon="ri-pencil-line" color="warning" size="small" />
                     </VBtn>
                     <VBtn icon size="small" variant="text" v-if="canAction('Ticket.Destroy')"
                       @click="() => { itemDestroy = item; isDialogVisible = true; }">
-                      <VIcon icon="mdi-delete" color="error" size="small" />
+                      <VIcon icon="ri-delete-bin-fill" color="error" size="small" />
                     </VBtn>
                   </div>
                 </td>
@@ -289,7 +289,7 @@ const viewOptions = [
                       <!-- Asunto + prioridad -->
                       <div class="d-flex justify-space-between align-start mb-2 gap-2">
                         <div class="d-flex align-center gap-1" style="min-width: 0;">
-                          <VIcon size="14" :color="col.color">mdi-ticket-outline</VIcon>
+                          <VIcon size="14" :color="col.color">ri-coupon-line</VIcon>
                           <span class="text-body-2 font-weight-medium"
                             style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
                             :title="ticket.subject">{{ ticket.subject }}</span>
@@ -318,13 +318,13 @@ const viewOptions = [
                         <VBtn size="x-small" variant="text" :color="col.color"
                           :to="{ name: 'tickets-id', params: { projectId: ticket.project_id, id: ticket.id } }"
                           v-if="canAction('Ticket.Update')">
-                          <VIcon size="14">mdi-pencil</VIcon>
+                          <VIcon size="14">ri-pencil-line</VIcon>
                         </VBtn>
 
                         <VMenu v-if="canAction('Ticket.Update')">
                           <template #activator="{ props: mp }">
                             <VBtn size="x-small" variant="text" v-bind="mp" @click.stop>
-                              <VIcon size="14">mdi-dots-vertical</VIcon>
+                              <VIcon size="14">ri-more-fill</VIcon>
                             </VBtn>
                           </template>
                           <VList density="compact">
@@ -345,7 +345,7 @@ const viewOptions = [
                   <!-- Zona de drop vacía -->
                   <div v-if="getByStatus(col.id).length === 0" class="empty-drop-zone"
                     :class="{ 'empty-drop-zone--active': dragOverColumn === col.id }">
-                    <VIcon size="28" color="grey-lighten-1">mdi-tray-arrow-down</VIcon>
+                    <VIcon size="28" color="grey-lighten-1">ri-inbox-unarchive-line</VIcon>
                     <span class="text-caption text-grey">Arrastra aquí</span>
                   </div>
 

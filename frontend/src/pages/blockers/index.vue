@@ -63,8 +63,8 @@ async function toggleResolved(item: BlockerI) {
 // ── Kanban ────────────────────────────────────────────────────────────────────
 
 const KANBAN_COLUMNS = [
-  { id: 'pending', resolved: false, title: 'Pendiente', color: 'error', icon: 'mdi-block-helper' },
-  { id: 'resolved', resolved: true, title: 'Resuelto', color: 'success', icon: 'mdi-check-decagram-outline' },
+  { id: 'pending', resolved: false, title: 'Pendiente', color: 'error', icon: 'ri-forbid-line' },
+  { id: 'resolved', resolved: true, title: 'Resuelto', color: 'success', icon: 'ri-verified-badge-line' },
 ];
 
 const getByResolved = (resolved: boolean) => data.value.filter(b => b.resolved === resolved);
@@ -148,7 +148,7 @@ const viewOptions = [
               <div class="d-flex align-center gap-3">
                 <VSelect v-model="viewMode" :items="viewOptions" item-title="title" item-value="value" density="compact"
                   variant="solo" flat hide-details class="view-selector" style="max-width: 130px;" />
-                <VBtn variant="flat" prepend-icon="mdi-plus"
+                <VBtn variant="flat" prepend-icon="ri-add-line"
                   :to="{ name: 'blockers-new', params: { projectId: projectId() } }"
                   v-if="canAction('Bloqueador.Store')">
                   Nuevo bloqueador
@@ -179,7 +179,7 @@ const viewOptions = [
                 <td>
                   <div class="d-flex align-center gap-2">
                     <VIcon size="16" :color="item.resolved ? 'success' : 'error'" class="mr-1">
-                      {{ item.resolved ? 'mdi-check-decagram-outline' : 'mdi-block-helper' }}
+                      {{ item.resolved ? 'ri-verified-badge-line' : 'ri-forbid-line' }}
                     </VIcon>
                     <span class="font-weight-medium">{{ item.title }}</span>
                   </div>
@@ -197,12 +197,12 @@ const viewOptions = [
                   <div class="d-flex gap-1">
                     <VBtn icon size="small" variant="text"
                       :to="{ name: 'blockers-view', params: { projectId: projectId(), id: item.id } }">
-                      <VIcon icon="mdi-eye" color="primary" size="small" />
+                      <VIcon icon="ri-eye-line" color="primary" size="small" />
                     </VBtn>
                     <VBtn icon size="small" variant="text"
                       :to="{ name: 'blockers-id', params: { projectId: projectId(), id: item.id } }"
                       v-if="canAction('Bloqueador.Update')">
-                      <VIcon icon="mdi-pencil" color="warning" size="small" />
+                      <VIcon icon="ri-pencil-line" color="warning" size="small" />
                     </VBtn>
                   </div>
                 </td>
@@ -244,7 +244,7 @@ const viewOptions = [
                     <!-- Título + severidad -->
                     <div class="d-flex justify-space-between align-start gap-2 mb-2">
                       <div class="d-flex align-center gap-1" style="min-width: 0;">
-                        <VIcon size="14" :color="col.color">mdi-block-helper</VIcon>
+                        <VIcon size="14" :color="col.color">ri-forbid-line</VIcon>
                         <span class="text-body-2 font-weight-medium"
                           style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" :title="blocker.title">{{
                           blocker.title }}</span>
@@ -257,7 +257,7 @@ const viewOptions = [
 
                     <!-- Tarea asociada -->
                     <div v-if="blocker.task" class="d-flex align-center gap-1 mb-2">
-                      <VIcon size="12" color="grey">mdi-clipboard-check-outline</VIcon>
+                      <VIcon size="12" color="grey">ri-task-line</VIcon>
                       <span class="text-caption text-medium-emphasis">{{ blocker.task.title }}</span>
                     </div>
 
@@ -266,7 +266,7 @@ const viewOptions = [
                       <VBtn size="x-small" variant="text" :color="col.color"
                         :to="{ name: 'blockers-id', params: { projectId: blocker.project_id, id: blocker.id } }"
                         v-if="canAction('Bloqueador.Update')">
-                        <VIcon size="14">mdi-pencil</VIcon>
+                        <VIcon size="14">ri-pencil-line</VIcon>
                       </VBtn>
                     </div>
 
@@ -276,7 +276,7 @@ const viewOptions = [
                 <!-- Zona de drop vacía -->
                 <div v-if="getByResolved(col.resolved).length === 0" class="empty-drop-zone"
                   :class="{ 'empty-drop-zone--active': dragOverColumn === col.id }">
-                  <VIcon size="28" color="grey-lighten-1">mdi-tray-arrow-down</VIcon>
+                  <VIcon size="28" color="grey-lighten-1">ri-inbox-unarchive-line</VIcon>
                   <span class="text-caption text-grey">Arrastra aquí</span>
                 </div>
 

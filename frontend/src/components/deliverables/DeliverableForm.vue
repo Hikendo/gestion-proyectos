@@ -10,13 +10,13 @@ defineProps<{
 <template>
   <VCard class="mb-4">
     <VCardItem>
-      <h5 class="text-h5 text-wrap">Datos del entregable</h5>
+      <VCardTitle class="text-h6">Datos del entregable</VCardTitle>
     </VCardItem>
 
     <VCardText class="px-8 pb-8">
       <VRow>
         <VCol cols="12" md="8">
-          <VTextField v-model="form.name" :error-messages="errores.name" name="name" label="Nombre"
+          <VTextField v-model="form.name" :error-messages="errores.name" name="name" label="Nombre" variant="outlined" density="comfortable"
             placeholder="Nombre del entregable" />
         </VCol>
 
@@ -32,7 +32,7 @@ defineProps<{
 
         <VCol cols="12" class="d-flex gap-4">
           <VSpacer />
-          <VBtn type="submit">Guardar</VBtn>
+          <VBtn type="submit" color="primary" variant="flat" size="large">Guardar</VBtn>
         </VCol>
       </VRow>
     </VCardText>

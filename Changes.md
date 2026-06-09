@@ -138,6 +138,89 @@ cd frontend && npx playwright test --headed
 
 ## Notas operativas para sesiones futuras
 
+---
+
+## [2026-08-06] Auditoría UI/UX — Migración Remix Icons + Estandarización visual
+
+### Fase 1: Migración completa de iconografía MDI → Remix Icons
+
+Se reemplazaron **116 iconos `mdi-*` únicos** en **55+ archivos** del frontend.
+
+#### Infraestructura
+
+| Archivo | Cambio |
+|---------|--------|
+| `package.json` | `@mdi/font` desinstalado, `remixicon` instalado |
+| `src/main.js` | `import 'remixicon/fonts/remixicon.css'` + `defaultSet: 'remix'` |
+| `src/plugins/remix-icons.ts` | NUEVO — Custom icon set de Vuetify |
+
+#### Mapeo de equivalencias principales
+
+| MDI | Remix Icon | Uso |
+|-----|------------|-----|
+| `mdi-view-dashboard` | `ri-dashboard-line` | Dashboard, sidebar |
+| `mdi-check-circle-outline` | `ri-checkbox-circle-line` | Tareas completadas |
+| `mdi-ticket-outline` | `ri-coupon-line` | Tickets |
+| `mdi-shield-alert-outline` | `ri-shield-flash-line` | Bloqueadores |
+| `mdi-bell-outline` | `ri-notification-3-line` | Notificaciones |
+| `mdi-account-group-outline` | `ri-group-line` | Miembros |
+| `mdi-block-helper` | `ri-forbid-line` | Bloqueadores |
+| `mdi-pencil` | `ri-pencil-line` | Editar |
+| `mdi-plus` | `ri-add-line` | Crear nuevo |
+| `mdi-delete` | `ri-delete-bin-fill` | Eliminar |
+| `mdi-logout` | `ri-logout-box-line` | Cerrar sesión |
+| `mdi-chart-bar` | `ri-bar-chart-line` | Métricas |
+| `mdi-folder-multiple` | `ri-folders-line` | Proyectos |
+| `mdi-account` | `ri-user-fill` | Usuario |
+
+### Fase 2: Dashboard — Mejoras visuales
+
+| Cambio | Detalle |
+|--------|---------|
+| Tarjetas métricas | `elevation="2"`, `rounded="lg"`, avatares `size="56" rounded="lg"`, padding `pa-5` |
+| Espaciado | `mb-6` en filas de métricas |
+| Iconos | Actualizados a Remix Icons en todas las tarjetas y listas |
+
+### Fase 3: Layout — AppBar + Sidebar mejorados
+
+| Cambio | Detalle |
+|--------|---------|
+| Avatar usuario | Agregado en AppBar con menú dropdown (perfil, apariencia, cerrar sesión) |
+| Chip proyecto | Visible en AppBar desktop (`d-none d-md-flex`) con link a detalle |
+| Iconos sidebar | Actualizados a Remix Icons (30+ items de menú) |
+| Menú usuario | Movido del sidebar al AppBar (reduce clutter en navegación) |
+
+### Fase 4: Estandarización de formularios (14 archivos)
+
+**Reglas aplicadas a todos los formularios:**
+
+| Elemento | Estándar |
+|----------|----------|
+| Título | `<VCardTitle class="text-h6">` (antes `<h5 class="text-h5">`) |
+| Inputs texto | `variant="outlined" density="comfortable"` |
+| Selects | `variant="outlined" density="comfortable" eager` |
+| Textareas | `variant="outlined" density="comfortable"` |
+| FileInput | `variant="outlined" density="comfortable"` |
+| Botón submit | `<VBtn type="submit" color="primary" variant="flat" size="large">Guardar</VBtn>` |
+| Progreso | `type="number" min="0" max="100" label="Progreso (%)"` |
+| Horas estimadas | `type="number" min="0" step="0.5"` |
+| Selector usuarios | `<VSelect>` con `#item` slot mostrando avatar + email |
+
+**Formularios estandarizados:** TaskForm, TicketForm, ProjectForm, BlockerForm, RiskForm, MilestoneForm, DeliverableForm, ObjectiveForm, ProjectPhaseForm, ProjectPlanForm, ProjectMemberForm, TaskCommentForm, TaskTimeLogForm, UserForm
+
+### Skills UI/UX aprendidas
+
+1. **Usar un solo sistema de iconos.** Remix Icons elegido por consistencia visual y soporte nativo en Vuetify vía custom icon set.
+2. **`variant="outlined" density="comfortable"`** es el estándar moderno de Vuetify 3 para formularios profesionales.
+3. **Los campos tipo número deben tener `min`/`max`/`step`** para mejorar UX en mobile (teclado numérico) y validación nativa.
+4. **El selector de usuarios debe ser consistente** — avatar + nombre + email en todas partes (TaskForm, TicketForm ya alineados).
+5. **Los botones de submit deben ser `color="primary" variant="flat" size="large"`** para máxima visibilidad y accesibilidad.
+6. **Los títulos de formulario con `<VCardTitle class="text-h6">`** dan jerarquía visual correcta dentro de VCard.
+
+### Archivos modificados (frontend): 70+
+
+---
+
 1. **Migraciones ya aplicadas en BD de desarrollo:** `add_status_to_attachments_table`, `make_attachable_columns_nullable`.
 2. **FieldPermissionsService** actualmente solo en `TaskController.show()`. Pendiente agregar a otros controllers.
 3. **Firebase:** Configurar variables de entorno en `backend/.env` para que FCM funcione. Si no, falla silenciosamente.

@@ -36,18 +36,18 @@ const statuses: { title: string; value: ProjectStatus }[] = [
 <template>
   <VCard class="mb-4">
     <VCardItem>
-      <h5 class="text-h5 text-wrap">Información del proyecto</h5>
+      <VCardTitle class="text-h6">Información del proyecto</VCardTitle>
     </VCardItem>
 
     <VCardText class="px-8 pb-8">
       <VRow>
         <VCol cols="12" md="8">
-          <VTextField v-model="form.name" :error-messages="errores.name" name="name" label="Nombre"
+          <VTextField v-model="form.name" :error-messages="errores.name" name="name" label="Nombre" variant="outlined" density="comfortable"
             placeholder="Nombre del proyecto" />
         </VCol>
 
         <VCol cols="12" md="4">
-          <VTextField v-model="form.code" :error-messages="errores.code" name="code" label="Código"
+          <VTextField v-model="form.code" :error-messages="errores.code" name="code" label="Código" variant="outlined" density="comfortable"
             placeholder="PRY-001" />
         </VCol>
 
@@ -82,8 +82,8 @@ const statuses: { title: string; value: ProjectStatus }[] = [
         </VCol>
 
         <VCol cols="12">
-          <VFileInput label="Archivos adjuntos (PDF, imágenes, ZIP, DOCX)" multiple
-            accept=".pdf,.jpeg,.jpg,.png,.zip,.docx,.xlsx" :max-file-size="10240" prepend-icon="mdi-paperclip"
+          <VFileInput label="Archivos adjuntos (PDF, imágenes, ZIP, DOCX)" variant="outlined" density="comfortable" multiple
+            accept=".pdf,.jpeg,.jpg,.png,.zip,.docx,.xlsx" :max-file-size="10240" prepend-icon="ri-attachment-2"
             @change="onFilesChanged" />
           <div v-if="selectedFiles.length" class="mt-2">
             <p class="text-caption text-grey-darken-1 mb-2">
@@ -98,7 +98,7 @@ const statuses: { title: string; value: ProjectStatus }[] = [
 
         <VCol cols="12" class="d-flex gap-4">
           <VSpacer />
-          <VBtn type="submit">Guardar</VBtn>
+          <VBtn type="submit" color="primary" variant="flat" size="large">Guardar</VBtn>
         </VCol>
       </VRow>
     </VCardText>

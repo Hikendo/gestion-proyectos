@@ -41,14 +41,14 @@ onMounted(async () => {
                 <VCardItem>
                     <VCardTitle class="d-flex justify-space-between flex-wrap align-center">
                         <span class="d-flex align-center gap-2">
-                            <VIcon icon="mdi-account-group-outline" color="primary" />Miembro: {{ member.user?.name ??
+                            <VIcon icon="ri-group-line" color="primary" />Miembro: {{ member.user?.name ??
                             member.user_id }}
                         </span>
                         <div class="d-flex gap-2">
-                            <VBtn variant="outlined" prepend-icon="mdi-arrow-left"
+                            <VBtn variant="outlined" prepend-icon="ri-arrow-left-line"
                                 :to="{ name: 'members', params: { projectId } }">Volver</VBtn>
                             <VBtn v-if="canAction('Miembro.Update')" variant="tonal" color="warning"
-                                :to="{ name: 'members-id', params: { projectId, id } }" prepend-icon="mdi-pencil">Editar
+                                :to="{ name: 'members-id', params: { projectId, id } }" prepend-icon="ri-pencil-line">Editar
                             </VBtn>
                         </div>
                     </VCardTitle>
@@ -72,7 +72,7 @@ onMounted(async () => {
             <VCard>
                 <VCardItem>
                     <VCardTitle class="d-flex align-center gap-2">
-                        <VIcon icon="mdi-chart-bar" color="primary" />Métricas del miembro
+                        <VIcon icon="ri-bar-chart-line" color="primary" />Métricas del miembro
                     </VCardTitle>
                 </VCardItem>
                 <VDivider />

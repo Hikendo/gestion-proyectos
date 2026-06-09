@@ -70,7 +70,7 @@ onMounted(handleGetData);
           <VRow class="d-flex align-center gap-4 mt-2">
             <VCol>
               <form @submit.prevent="() => { paginacionYquery.page = 1; handleGetData(); }">
-                <VTextField label="Buscador" prepend-inner-icon="mdi-magnify" type="search" clearable
+                <VTextField label="Buscador" prepend-inner-icon="ri-search-line" type="search" clearable
                   v-model="paginacionYquery.query" />
               </form>
             </VCol>
@@ -103,12 +103,12 @@ onMounted(handleGetData);
                   <div class="d-flex gap-1">
                     <VBtn icon size="small" variant="text"
                       :to="{ name: 'objectives-view', params: { projectId: projectId(), id: item.id } }">
-                      <VIcon icon="mdi-eye" color="primary" size="small" />
+                      <VIcon icon="ri-eye-line" color="primary" size="small" />
                     </VBtn>
                     <VBtn icon size="small" variant="flat"
                       :to="{ name: 'objectives-id', params: { projectId: projectId(), id: item.id } }"
                       v-if="canAction('Objetivo.Update')">
-                      <VIcon icon="mdi-pencil" color="warning" />
+                      <VIcon icon="ri-pencil-line" color="warning" />
                     </VBtn>
 
                   </div>

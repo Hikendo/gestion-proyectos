@@ -53,9 +53,9 @@ const handleDestroy = async () => {
 // ── Kanban ────────────────────────────────────────────────────────────────────
 
 const KANBAN_COLUMNS = [
-  { id: 'active', title: 'Activo', color: 'error', icon: 'mdi-alert-circle-outline' },
-  { id: 'mitigated', title: 'Mitigado', color: 'warning', icon: 'mdi-shield-half-full' },
-  { id: 'resolved', title: 'Resuelto', color: 'success', icon: 'mdi-shield-check-outline' },
+  { id: 'active', title: 'Activo', color: 'error', icon: 'ri-error-warning-line' },
+  { id: 'mitigated', title: 'Mitigado', color: 'warning', icon: 'ri-shield-cross-line' },
+  { id: 'resolved', title: 'Resuelto', color: 'success', icon: 'ri-shield-check-line' },
 ];
 
 const getByStatus = (status: string) => data.value.filter(r => r.status === status);
@@ -161,7 +161,7 @@ const viewOptions = [
                 <!-- Selector de vista con VSelect - VERSIÓN CORREGIDA -->
                 <VSelect v-model="viewMode" :items="viewOptions" item-title="title" item-value="value" density="compact"
                   variant="solo" flat hide-details class="view-selector" style="max-width: 130px;" />
-                <VBtn variant="flat" prepend-icon="mdi-plus"
+                <VBtn variant="flat" prepend-icon="ri-add-line"
                   :to="{ name: 'risks-new', params: { projectId: projectId() } }" v-if="canAction('Riesgo.Store')">
                   Nuevo riesgo
                 </VBtn>
@@ -190,7 +190,7 @@ const viewOptions = [
               <tr v-for="item in data" :key="item.id">
                 <td>
                   <div class="d-flex align-center gap-2">
-                    <VIcon size="16" :color="STATUS_COLORS[item.status]">mdi-alert-circle-outline</VIcon>
+                    <VIcon size="16" :color="STATUS_COLORS[item.status]">ri-error-warning-line</VIcon>
                     <span class="font-weight-medium">{{ item.title }}</span>
                   </div>
                 </td>
@@ -213,16 +213,16 @@ const viewOptions = [
                   <div class="d-flex gap-1">
                     <VBtn icon size="small" variant="text"
                       :to="{ name: 'risks-view', params: { projectId: projectId(), id: item.id } }">
-                      <VIcon icon="mdi-eye" color="primary" size="small" />
+                      <VIcon icon="ri-eye-line" color="primary" size="small" />
                     </VBtn>
                     <VBtn icon size="small" variant="text"
                       :to="{ name: 'risks-id', params: { projectId: projectId(), id: item.id } }"
                       v-if="canAction('Riesgo.Update')">
-                      <VIcon icon="mdi-pencil" color="warning" size="small" />
+                      <VIcon icon="ri-pencil-line" color="warning" size="small" />
                     </VBtn>
                     <VBtn icon size="small" variant="text" v-if="canAction('Riesgo.Destroy')"
                       @click="() => { itemDestroy = item; isDialogVisible = true; }">
-                      <VIcon icon="mdi-delete" color="error" size="small" />
+                      <VIcon icon="ri-delete-bin-fill" color="error" size="small" />
                     </VBtn>
                   </div>
                 </td>
@@ -260,7 +260,7 @@ const viewOptions = [
 
                     <!-- Título -->
                     <div class="d-flex align-center gap-1 mb-2" style="min-width: 0;">
-                      <VIcon size="14" :color="col.color">mdi-alert-circle-outline</VIcon>
+                      <VIcon size="14" :color="col.color">ri-error-warning-line</VIcon>
                       <span class="text-body-2 font-weight-medium"
                         style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" :title="risk.title">{{
                         risk.title }}</span>
@@ -281,13 +281,13 @@ const viewOptions = [
                       <VBtn size="x-small" variant="text" :color="col.color"
                         :to="{ name: 'risks-id', params: { projectId: risk.project_id, id: risk.id } }"
                         v-if="canAction('Riesgo.Update')">
-                        <VIcon size="14">mdi-pencil</VIcon>
+                        <VIcon size="14">ri-pencil-line</VIcon>
                       </VBtn>
 
                       <VMenu v-if="canAction('Riesgo.Update')">
                         <template #activator="{ props: mp }">
                           <VBtn size="x-small" variant="text" v-bind="mp" @click.stop>
-                            <VIcon size="14">mdi-dots-vertical</VIcon>
+                            <VIcon size="14">ri-more-fill</VIcon>
                           </VBtn>
                         </template>
                         <VList density="compact">
@@ -308,7 +308,7 @@ const viewOptions = [
                 <!-- Zona de drop vacía -->
                 <div v-if="getByStatus(col.id).length === 0" class="empty-drop-zone"
                   :class="{ 'empty-drop-zone--active': dragOverColumn === col.id }">
-                  <VIcon size="28" color="grey-lighten-1">mdi-tray-arrow-down</VIcon>
+                  <VIcon size="28" color="grey-lighten-1">ri-inbox-unarchive-line</VIcon>
                   <span class="text-caption text-grey">Arrastra aquí</span>
                 </div>
 

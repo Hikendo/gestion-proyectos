@@ -13,13 +13,13 @@ const { authUser } = storeToRefs(authStore);
         <VCardItem>
           <template #prepend>
             <VAvatar color="primary" variant="tonal" size="56">
-              <VIcon icon="mdi-account" size="32" />
+              <VIcon icon="ri-user-fill" size="32" />
             </VAvatar>
           </template>
           <VCardTitle>{{ authUser?.name }}</VCardTitle>
           <VCardSubtitle>{{ authUser?.email }}</VCardSubtitle>
           <template #append>
-            <VBtn variant="outlined" :to="{ name: 'profile-edit' }" prepend-icon="mdi-pencil">
+            <VBtn variant="outlined" :to="{ name: 'profile-edit' }" prepend-icon="ri-pencil-line">
               Editar perfil
             </VBtn>
           </template>

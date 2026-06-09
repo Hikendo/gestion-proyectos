@@ -251,7 +251,7 @@ const getTooltip = (task: any): string =>
           </VBtnToggle>
           <!-- Slider fino -->
           <div class="d-flex align-center gap-1" style="width: 160px;">
-            <VIcon size="16" color="grey">mdi-magnify-minus-outline</VIcon>
+            <VIcon size="16" color="grey">ri-search-line-minus-outline</VIcon>
             <VSlider
               v-model="zoomPercent"
               :min="0"
@@ -264,7 +264,7 @@ const getTooltip = (task: any): string =>
               color="primary"
               style="flex: 1;"
             />
-            <VIcon size="16" color="grey">mdi-magnify-plus-outline</VIcon>
+            <VIcon size="16" color="grey">ri-search-line-plus-outline</VIcon>
           </div>
           <VChip size="x-small" variant="tonal" color="primary" label>{{ cellWidth }}px/día</VChip>
         </div>
@@ -283,7 +283,7 @@ const getTooltip = (task: any): string =>
         @click="selectAll"
       >
         <template #prepend>
-          <VIcon size="12" class="mr-1">{{ allSelected ? 'mdi-check-all' : 'mdi-filter-outline' }}</VIcon>
+          <VIcon size="12" class="mr-1">{{ allSelected ? 'ri-check-double-line' : 'ri-filter-line' }}</VIcon>
         </template>
         Todas
       </VChip>
@@ -313,7 +313,7 @@ const getTooltip = (task: any): string =>
           v-if="activeFilters.has(key as FilterKey) && !allSelected"
           size="12"
           class="ml-1"
-        >mdi-check</VIcon>
+        >ri-check-line</VIcon>
       </VChip>
 
       <!-- Chip Atrasada -->
@@ -334,7 +334,7 @@ const getTooltip = (task: any): string =>
           ></span>
         </template>
         Atrasada
-        <VIcon v-if="activeFilters.has('overdue') && !allSelected" size="12" class="ml-1">mdi-check</VIcon>
+        <VIcon v-if="activeFilters.has('overdue') && !allSelected" size="12" class="ml-1">ri-check-line</VIcon>
       </VChip>
 
       <!-- Separador + Hoy (no filtrable) -->
@@ -355,7 +355,7 @@ const getTooltip = (task: any): string =>
 
       <!-- ── Estado vacío ──────────────────────────────────────────────────── -->
       <div v-if="ganttTasks.length === 0" class="text-center pa-12">
-        <VIcon icon="mdi-chart-gantt" size="72" color="grey-lighten-1" />
+        <VIcon icon="ri-bar-chart-horizontal-line" size="72" color="grey-lighten-1" />
         <p class="text-h6 mt-4 text-medium-emphasis">Sin tareas con fechas asignadas</p>
         <p class="text-body-2 text-disabled mt-1">
           Asigna fechas de vencimiento a las tareas para visualizarlas aquí
@@ -404,7 +404,7 @@ const getTooltip = (task: any): string =>
 
         <!-- Sin resultados por filtro -->
         <div v-if="visibleTasks.length === 0" class="text-center pa-8">
-          <VIcon icon="mdi-filter-off-outline" size="48" color="grey-lighten-1" />
+          <VIcon icon="ri-filter-off-line" size="48" color="grey-lighten-1" />
           <p class="text-body-2 text-disabled mt-2">Ninguna tarea coincide con los filtros seleccionados</p>
           <VBtn size="small" variant="text" color="primary" class="mt-1" @click="selectAll">Mostrar todas</VBtn>
         </div>
@@ -421,10 +421,10 @@ const getTooltip = (task: any): string =>
               >
                 {{
                   task.progress === 100
-                    ? 'mdi-check-circle'
+                    ? 'ri-checkbox-circle-fill'
                     : isOverdue(task)
-                      ? 'mdi-alert-circle'
-                      : 'mdi-circle-outline'
+                      ? 'ri-error-warning-fill'
+                      : 'ri-checkbox-blank-circle-line'
                 }}
               </VIcon>
               <span
@@ -478,7 +478,7 @@ const getTooltip = (task: any): string =>
               ></div>
               <!-- Texto superpuesto -->
               <div class="gantt-bar-text">
-                <VIcon v-if="isOverdue(task)" size="10" color="white">mdi-alert</VIcon>
+                <VIcon v-if="isOverdue(task)" size="10" color="white">ri-alert-fill</VIcon>
                 {{ task.progress ?? 0 }}%
               </div>
             </div>

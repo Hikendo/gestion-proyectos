@@ -82,8 +82,8 @@ async function toggleCompleted(item: MilestoneI) {
 // ── Kanban ────────────────────────────────────────────────────────────────────
 
 const KANBAN_COLUMNS = [
-  { id: 'pending', completed: false, title: 'Pendiente', color: 'warning', icon: 'mdi-clock-outline' },
-  { id: 'completed', completed: true, title: 'Completado', color: 'success', icon: 'mdi-check-decagram-outline' },
+  { id: 'pending', completed: false, title: 'Pendiente', color: 'warning', icon: 'ri-time-line' },
+  { id: 'completed', completed: true, title: 'Completado', color: 'success', icon: 'ri-verified-badge-line' },
 ];
 
 const getByCompleted = (completed: boolean) => data.value.filter(m => m.completed === completed);
@@ -168,7 +168,7 @@ onMounted(handleGetData);
             <VRow class="d-flex align-center gap-4 mt-2">
               <VCol>
                 <form @submit.prevent="() => { paginacionYquery.page = 1; handleGetData(); }">
-                  <VTextField label="Buscador" prepend-inner-icon="mdi-magnify" type="search" clearable
+                  <VTextField label="Buscador" prepend-inner-icon="ri-search-line" type="search" clearable
                     v-model="paginacionYquery.query" />
                 </form>
               </VCol>
@@ -198,16 +198,16 @@ onMounted(handleGetData);
                     <div class="d-flex gap-1">
                       <VBtn icon size="small" variant="text"
                         :to="{ name: 'milestones-view', params: { projectId: projectId(), id: item.id } }">
-                        <VIcon icon="mdi-eye" color="primary" size="small" />
+                        <VIcon icon="ri-eye-line" color="primary" size="small" />
                       </VBtn>
                       <VBtn icon size="small" variant="flat"
                         :to="{ name: 'milestones-id', params: { projectId: projectId(), id: item.id } }"
                         v-if="canAction('Hito.Update')">
-                        <VIcon icon="mdi-pencil" color="warning" />
+                        <VIcon icon="ri-pencil-line" color="warning" />
                       </VBtn>
                       <VBtn icon size="small" variant="flat" v-if="canAction('Hito.Destroy')"
                         @click="() => { itemDestroy = item; isDialogVisible = true; }">
-                        <VIcon icon="mdi-delete" color="error" />
+                        <VIcon icon="ri-delete-bin-fill" color="error" />
                       </VBtn>
                     </div>
                   </td>
@@ -250,7 +250,7 @@ onMounted(handleGetData);
 
                     <!-- Título -->
                     <div class="d-flex align-center gap-2 mb-2">
-                      <VIcon size="14" :color="col.color">mdi-flag-checkered</VIcon>
+                      <VIcon size="14" :color="col.color">ri-flag-line</VIcon>
                       <span class="text-body-2 font-weight-medium"
                         style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" :title="milestone.title">{{
                           milestone.title }}</span>
@@ -258,7 +258,7 @@ onMounted(handleGetData);
 
                     <!-- Fecha objetivo -->
                     <div class="d-flex align-center gap-1 mb-2">
-                      <VIcon size="12" color="grey">mdi-calendar</VIcon>
+                      <VIcon size="12" color="grey">ri-calendar-line</VIcon>
                       <span class="text-caption text-medium-emphasis">
                         {{ formatDate(milestone.target_date!) ?? '—' }}
                       </span>
@@ -269,11 +269,11 @@ onMounted(handleGetData);
                       <VBtn size="x-small" variant="text" :color="col.color"
                         :to="{ name: 'milestones-id', params: { projectId: milestone.project_id, id: milestone.id } }"
                         v-if="canAction('Hito.Update')">
-                        <VIcon size="14">mdi-pencil</VIcon>
+                        <VIcon size="14">ri-pencil-line</VIcon>
                       </VBtn>
                       <VBtn size="x-small" variant="text" color="error" v-if="canAction('Hito.Destroy')"
                         @click="() => { itemDestroy = milestone; isDialogVisible = true; }">
-                        <VIcon size="14">mdi-delete</VIcon>
+                        <VIcon size="14">ri-delete-bin-fill</VIcon>
                       </VBtn>
                     </div>
 
@@ -283,7 +283,7 @@ onMounted(handleGetData);
                 <!-- Zona de drop vacía -->
                 <div v-if="getByCompleted(col.completed).length === 0" class="empty-drop-zone"
                   :class="{ 'empty-drop-zone--active': dragOverColumn === col.id }">
-                  <VIcon size="28" color="grey-lighten-1">mdi-tray-arrow-down</VIcon>
+                  <VIcon size="28" color="grey-lighten-1">ri-inbox-unarchive-line</VIcon>
                   <span class="text-caption text-grey">Arrastra aquí</span>
                 </div>
 

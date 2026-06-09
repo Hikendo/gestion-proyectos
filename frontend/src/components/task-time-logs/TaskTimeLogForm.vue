@@ -10,7 +10,7 @@ defineProps<{
 <template>
   <VCard class="mb-4">
     <VCardItem>
-      <h5 class="text-h5 text-wrap">Registrar tiempo</h5>
+      <VCardTitle class="text-h6">Registrar tiempo</VCardTitle>
     </VCardItem>
 
     <VCardText class="px-8 pb-8">

@@ -16,7 +16,7 @@ const types: { title: string; value: ObjectiveType }[] = [
 <template>
   <VCard class="mb-4">
     <VCardItem>
-      <h5 class="text-h5 text-wrap">Datos del objetivo</h5>
+      <VCardTitle class="text-h6">Datos del objetivo</VCardTitle>
     </VCardItem>
 
     <VCardText class="px-8 pb-8">
@@ -44,7 +44,7 @@ const types: { title: string; value: ObjectiveType }[] = [
 
         <VCol cols="12" class="d-flex gap-4">
           <VSpacer />
-          <VBtn type="submit">Guardar</VBtn>
+          <VBtn type="submit" color="primary" variant="flat" size="large">Guardar</VBtn>
         </VCol>
       </VRow>
     </VCardText>

@@ -20,11 +20,11 @@ const appStore = useAppStore();
 const { snackbar } = storeToRefs(appStore);
 
 const columns = [
-  { id: 'pending',     title: 'Pendientes',   color: 'warning', icon: 'mdi-clock-outline' },
-  { id: 'in_progress', title: 'En Progreso',  color: 'info',    icon: 'mdi-progress-clock' },
-  { id: 'review',      title: 'En Revisión',  color: 'primary', icon: 'mdi-account-check' },
-  { id: 'completed',   title: 'Completadas',  color: 'success', icon: 'mdi-check-circle' },
-  { id: 'cancelled',   title: 'Canceladas',   color: 'error',   icon: 'mdi-cancel' },
+  { id: 'pending',     title: 'Pendientes',   color: 'warning', icon: 'ri-time-line' },
+  { id: 'in_progress', title: 'En Progreso',  color: 'info',    icon: 'ri-progress-5-line' },
+  { id: 'review',      title: 'En Revisión',  color: 'primary', icon: 'ri-user-received-fill' },
+  { id: 'completed',   title: 'Completadas',  color: 'success', icon: 'ri-checkbox-circle-fill' },
+  { id: 'cancelled',   title: 'Canceladas',   color: 'error',   icon: 'ri-close-circle-fill' },
 ];
 
 // ── Drag & Drop state ────────────────────────────────────────────────────────
@@ -188,7 +188,7 @@ const goToTask = (taskId: number) => {
 
                   <div class="d-flex justify-space-between align-center text-caption">
                     <div class="d-flex align-center gap-1">
-                      <VIcon size="small" color="grey">mdi-calendar</VIcon>
+                      <VIcon size="small" color="grey">ri-calendar-line</VIcon>
                       <span :class="{ 'text-error': new Date(task.due_date!) < new Date() && task.progress !== 100 }">
                         {{ formatDate(task.due_date!) ?? '—' }}
                       </span>
@@ -197,7 +197,7 @@ const goToTask = (taskId: number) => {
                     <VMenu v-if="column.id !== 'completed' && column.id !== 'cancelled'">
                       <template #activator="{ props: menuProps }">
                         <VBtn size="x-small" variant="text" v-bind="menuProps" @click.stop>
-                          <VIcon size="small">mdi-dots-vertical</VIcon>
+                          <VIcon size="small">ri-more-fill</VIcon>
                         </VBtn>
                       </template>
                       <VList density="compact">
@@ -220,7 +220,7 @@ const goToTask = (taskId: number) => {
                 class="empty-drop-zone"
                 :class="{ 'empty-drop-zone--active': dragOverColumn === column.id }"
               >
-                <VIcon size="32" color="grey-lighten-1">mdi-tray-arrow-down</VIcon>
+                <VIcon size="32" color="grey-lighten-1">ri-inbox-unarchive-line</VIcon>
                 <span class="text-caption text-grey">Arrastra aquí</span>
               </div>
             </div>

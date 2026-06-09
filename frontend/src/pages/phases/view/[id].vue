@@ -33,13 +33,13 @@ onMounted(async () => {
                 <VCardItem>
                     <VCardTitle class="d-flex justify-space-between flex-wrap align-center">
                         <span class="d-flex align-center gap-2">
-                            <VIcon icon="mdi-timeline-outline" color="primary" />Fase: {{ item.name }}
+                            <VIcon icon="ri-timeline-view" color="primary" />Fase: {{ item.name }}
                         </span>
                         <div class="d-flex gap-2">
-                            <VBtn variant="outlined" prepend-icon="mdi-arrow-left"
+                            <VBtn variant="outlined" prepend-icon="ri-arrow-left-line"
                                 :to="{ name: 'phases', params: { projectId } }">Volver</VBtn>
                             <VBtn v-if="canAction('Fase.Update')" variant="tonal" color="warning"
-                                :to="{ name: 'phases-id', params: { projectId, id } }" prepend-icon="mdi-pencil">Editar
+                                :to="{ name: 'phases-id', params: { projectId, id } }" prepend-icon="ri-pencil-line">Editar
                             </VBtn>
                         </div>
                     </VCardTitle>

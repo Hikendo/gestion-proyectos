@@ -47,7 +47,7 @@ async function handleUpdate() {
           <VCardTitle>
             <div class="d-flex justify-space-between">
               <h4 class="text-h4">Editar perfil</h4>
-              <VBtn variant="outlined" :to="{ name: 'profile' }" prepend-icon="mdi-arrow-left">Volver</VBtn>
+              <VBtn variant="outlined" :to="{ name: 'profile' }" prepend-icon="ri-arrow-left-line">Volver</VBtn>
             </div>
           </VCardTitle>
         </VCardItem>
