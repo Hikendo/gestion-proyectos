@@ -17,6 +17,7 @@ class StoreProjectPhaseRequest extends FormRequest
             'name'       => ['required', 'string', 'max:255'],
             'start_date' => ['nullable', 'date'],
             'end_date'   => ['nullable', 'date', 'after_or_equal:start_date'],
+            'progress'   => ['nullable', 'integer', 'min:0', 'max:100'],
         ];
     }
 }

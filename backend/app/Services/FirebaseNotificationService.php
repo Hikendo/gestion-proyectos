@@ -16,26 +16,42 @@ class FirebaseNotificationService
     private string $projectId;
     private array $serviceAccount;
 
+    private bool $configured = false;
+
     public function __construct()
     {
-        $this->projectId = config('services.firebase.project_id');
+        $this->projectId = config('services.firebase.project_id', '');
+        $privateKey = config('services.firebase.private_key', '');
+
+        if (empty($this->projectId) || empty($privateKey)) {
+            Log::channel('notifications')->warning('FirebaseNotificationService: configuración FCM incompleta. Las notificaciones push no funcionarán.');
+            $this->configured = false;
+            return;
+        }
 
         // Cargamos la estructura de la cuenta de servicio desde variables de entorno seguras
         $this->serviceAccount = [
             'type' => 'service_account',
             'project_id' => $this->projectId,
             'private_key_id' => config('services.firebase.private_key_id'),
-            'private_key' => str_replace('\n', "\n", config('services.firebase.private_key') ?? ''),
+            'private_key' => str_replace('\n', "\n", $privateKey),
             'client_email' => config('services.firebase.client_email'),
             'client_id' => config('services.firebase.client_id'),
             'auth_uri' => 'https://accounts.google.com/o/oauth2/auth',
             'token_uri' => 'https://oauth2.googleapis.com/token',
         ];
+
+        $this->configured = true;
     }
 
     /**
      * Envía una notificación push a un token FCM específico.
      */
+    private function isConfigured(): bool
+    {
+        return $this->configured;
+    }
+
     public function sendToToken(
         string $token,
         string $title,
@@ -45,6 +61,11 @@ class FirebaseNotificationService
         ?string $clickAction = null,
         array $customData = []
     ): bool {
+        if (! $this->isConfigured()) {
+            Log::channel('notifications')->warning('FCM no configurado — omitiendo envío de notificación push.');
+            return false;
+        }
+
         $accessToken = $this->getGoogleAccessToken();
         $url = "https://fcm.googleapis.com/v1/projects/{$this->projectId}/messages:send";
 

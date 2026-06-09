@@ -32,7 +32,7 @@ interface BlockerResponseI extends ResponseBaseI {
   items: BlockerI;
 }
 
-export const store = async (projectId: number, payload: BlockerPayload) => {
+export const store = async (projectId: number, payload: BlockerPayload | FormData) => {
   try {
     const { data } = await apiWithToken.post<BlockerResponseI>(`/projects/${projectId}/blockers`, payload);
     return {
@@ -55,7 +55,7 @@ export const store = async (projectId: number, payload: BlockerPayload) => {
 
 // ─── Update ───────────────────────────────────────────────────────────────────
 
-export const update = async (projectId: number, blockerId: number, payload: BlockerPayload) => {
+export const update = async (projectId: number, blockerId: number, payload: BlockerPayload | FormData) => {
   try {
     const { data } = await apiWithToken.put<BlockerResponseI>(`/projects/${projectId}/blockers/${blockerId}`, payload);
     return {

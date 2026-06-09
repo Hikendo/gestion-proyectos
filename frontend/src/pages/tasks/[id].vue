@@ -63,7 +63,7 @@ onMounted(async () => {
     </VCol>
     <VCol cols="12">
       <VForm @submit.prevent="requestSave(handleUpdate)">
-        <TaskForm :form="form" :errores="errores" />
+        <TaskForm :form="form" :errores="errores" :project-id="Number(route.params.projectId)" />
       </VForm>
     </VCol>
     <VCol cols="12">

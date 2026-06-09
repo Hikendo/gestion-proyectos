@@ -71,6 +71,8 @@ class SendPushNotificationJob implements ShouldQueue
             return;
         }
 
+        $anySuccess = false;
+
         foreach ($tokens as $token) {
             $success = $service->sendToToken(
                 token: $token,
@@ -83,14 +85,14 @@ class SendPushNotificationJob implements ShouldQueue
             );
 
             if ($success) {
-                $this->notification->update([
-                    'status' => 'sent',
-                    'sent_at' => now(),
-                ]);
-            } else {
-                $this->notification->update(['status' => 'failed']);
+                $anySuccess = true;
             }
         }
+
+        $this->notification->update([
+            'status' => $anySuccess ? 'sent' : 'failed',
+            'sent_at' => $anySuccess ? now() : null,
+        ]);
     }
 
     /**

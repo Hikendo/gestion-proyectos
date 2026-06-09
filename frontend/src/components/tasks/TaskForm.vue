@@ -3,18 +3,27 @@ import { ref, onMounted } from 'vue';
 import type { TaskI, TaskErroresFormI } from '@/interfaces/TaskI';
 import type { TaskStatus, TaskPriority } from '@/interfaces/enums';
 import * as usersService from '@/services/users.service';
+import * as phasesService from '@/services/project-phases.service';
 
-defineProps<{
+const props = defineProps<{
   form: TaskI;
   errores: TaskErroresFormI;
+  projectId: number;
 }>();
 
 const users = ref<{ id: number; name: string; email: string }[]>([]);
+const phases = ref<{ id: number; name: string }[]>([]);
 
 onMounted(async () => {
-  const response = await usersService.all();
-  if (response.status && response.items) {
-    users.value = response.items;
+  const [usersRes, phasesRes] = await Promise.all([
+    usersService.all(),
+    phasesService.index(props.projectId),
+  ]);
+  if (usersRes.status && usersRes.items) {
+    users.value = usersRes.items;
+  }
+  if (phasesRes.status && phasesRes.items) {
+    phases.value = phasesRes.items.map(p => ({ id: p.id, name: p.name }));
   }
 });
 
@@ -75,6 +84,11 @@ const priorities: { title: string; value: TaskPriority }[] = [
         <VCol cols="12" md="4">
           <VTextField v-model="form.progress" :error-messages="errores.progress" name="progress" type="number"
             label="Progreso (%)" placeholder="0" />
+        </VCol>
+
+        <VCol cols="12" md="4">
+          <VSelect v-model="form.phase_id" :error-messages="errores.phase_id" :items="phases" item-title="name"
+            item-value="id" name="phase_id" label="Fase" placeholder="Selecciona una fase" clearable eager />
         </VCol>
 
         <VCol cols="12" md="4">

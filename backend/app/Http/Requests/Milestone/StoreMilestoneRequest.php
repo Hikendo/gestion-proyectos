@@ -23,6 +23,7 @@ class StoreMilestoneRequest extends FormRequest
         return [
             'title'       => ['required', 'string', 'max:255'],
             'target_date' => ['required', 'date'],
+            'completed'   => ['nullable', 'boolean'],
         ];
     }
 }

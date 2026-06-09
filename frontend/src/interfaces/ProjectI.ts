@@ -30,7 +30,7 @@ export interface ProjectI extends SoftDeletesModelI {
   start_date?: DateString | null; // Nullable en Laravel
   end_date?: DateString | null; // Nullable en Laravel
 
-  budget?: string | null; // Nullable en Laravel
+  budget?: number | null; // Nullable en Laravel
   progress?: number | null; // Nullable en Laravel
 
   owner_id: number; // Required en Laravel

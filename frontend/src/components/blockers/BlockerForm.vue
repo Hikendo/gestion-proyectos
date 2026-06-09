@@ -10,11 +10,22 @@ const props = defineProps<{
   projectId: number;
 }>();
 
+const emit = defineEmits<{
+  (e: 'update:attachments', files: File[]): void;
+}>();
+
+function onFilesChanged(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  if (input.files) {
+    emit('update:attachments', Array.from(input.files));
+  }
+}
+
 const severities: { title: string; value: BlockerSeverity }[] = [
-  { title: 'Baja',     value: 'low' },
-  { title: 'Media',    value: 'medium' },
-  { title: 'Alta',     value: 'high' },
-  { title: 'Crítica',  value: 'critical' },
+  { title: 'Baja', value: 'low' },
+  { title: 'Media', value: 'medium' },
+  { title: 'Alta', value: 'high' },
+  { title: 'Crítica', value: 'critical' },
 ];
 
 const tasks = ref<{ id: number; title: string; subtitle: string }[]>([]);
@@ -46,40 +57,30 @@ const TASK_STATUS_LABELS: Record<string, string> = {
     <VCardText class="px-8 pb-8">
       <VRow>
         <VCol cols="12" md="8">
-          <VTextField v-model="form.title" :error-messages="errores.title"
-            name="title" label="Título" placeholder="Título del bloqueador" />
+          <VTextField v-model="form.title" :error-messages="errores.title" name="title" label="Título"
+            placeholder="Título del bloqueador" />
         </VCol>
 
         <VCol cols="12" md="4">
-          <VSelect v-model="form.severity" :error-messages="errores.severity"
-            name="severity" :items="severities" item-title="title" item-value="value"
-            label="Severidad" eager />
+          <VSelect v-model="form.severity" :error-messages="errores.severity" name="severity" :items="severities"
+            item-title="title" item-value="value" label="Severidad" eager />
         </VCol>
 
         <VCol cols="12">
-          <VTextarea v-model="form.description" :error-messages="errores.description"
-            name="description" label="Descripción" placeholder="Descripción del bloqueador" rows="3" />
+          <VTextarea v-model="form.description" :error-messages="errores.description" name="description"
+            label="Descripción" placeholder="Descripción del bloqueador" rows="3" />
         </VCol>
 
         <VCol cols="12" md="6">
-          <VSelect
-            v-model="form.task_id"
-            :error-messages="errores.task_id"
-            :items="tasks"
-            item-title="title"
-            item-value="id"
-            item-subtitle="subtitle"
-            name="task_id"
-            label="Tarea asociada"
-            placeholder="Selecciona una tarea"
-            clearable
-            eager
-          />
+          <VSelect v-model="form.task_id" :error-messages="errores.task_id" :items="tasks" item-title="title"
+            item-value="id" item-subtitle="subtitle" name="task_id" label="Tarea asociada"
+            placeholder="Selecciona una tarea" clearable eager />
         </VCol>
 
-        <VCol cols="12" md="6" class="d-flex align-center">
-          <VSwitch v-model="form.resolved" :error-messages="errores.resolved"
-            name="resolved" label="Resuelto" color="success" />
+        <VCol cols="12">
+          <VFileInput label="Archivos adjuntos (PDF, imágenes, ZIP, DOCX)" multiple
+            accept=".pdf,.jpeg,.jpg,.png,.zip,.docx,.xlsx" :max-file-size="10240" prepend-icon="mdi-paperclip"
+            @change="onFilesChanged" />
         </VCol>
 
         <VCol cols="12" class="d-flex gap-4">

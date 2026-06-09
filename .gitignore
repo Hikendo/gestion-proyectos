@@ -33,7 +33,7 @@ dbdata/
 
 backend/vendor/
 backend/node_modules/
-
+backend/.composer/
 backend/.env
 backend/.env.*
 !backend/.env.example

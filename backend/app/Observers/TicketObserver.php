@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Events\TicketAssigned;
+use App\Events\TicketClosed;
 use App\Events\TicketCreated;
 use App\Models\Ticket;
 use Illuminate\Support\Facades\Auth;
@@ -37,6 +38,10 @@ class TicketObserver
             if ($assignee) {
                 TicketAssigned::dispatch($ticket, $assignee, $actor);
             }
+        }
+
+        if ($ticket->wasChanged('status') && $ticket->status === 'closed') {
+            TicketClosed::dispatch($ticket, $actor);
         }
     }
 }

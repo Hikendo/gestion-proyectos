@@ -24,6 +24,7 @@ class StoreObjectiveRequest extends FormRequest
             'type'        => ['required', 'in:general,specific'],
             'title'       => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'completed'   => ['nullable', 'boolean'],
         ];
     }
 }

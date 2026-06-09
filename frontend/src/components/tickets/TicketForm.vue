@@ -9,6 +9,17 @@ defineProps<{
   errores: TicketErroresFormI;
 }>();
 
+const emit = defineEmits<{
+  (e: 'update:attachments', files: File[]): void;
+}>();
+
+function onFilesChanged(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  if (input.files) {
+    emit('update:attachments', Array.from(input.files));
+  }
+}
+
 const users = ref<{ id: number; name: string; email: string }[]>([]);
 
 onMounted(async () => {
@@ -77,6 +88,12 @@ const priorities: { title: string; value: TicketPriority }[] = [
               </VListItem>
             </template>
           </VSelect>
+        </VCol>
+
+        <VCol cols="12">
+          <VFileInput label="Archivos adjuntos (PDF, imágenes, ZIP, DOCX)" multiple
+            accept=".pdf,.jpeg,.jpg,.png,.zip,.docx,.xlsx" :max-file-size="10240" prepend-icon="mdi-paperclip"
+            @change="onFilesChanged" />
         </VCol>
 
         <VCol cols="12" class="d-flex gap-4">

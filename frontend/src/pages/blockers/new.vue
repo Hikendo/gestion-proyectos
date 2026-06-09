@@ -6,19 +6,28 @@ import BlockerForm from '@/components/blockers/BlockerForm.vue';
 
 const route = useRoute();
 const { errores, form, handleStore } = useBlockers();
+const pendingFiles = ref<File[]>([]);
 
 const confirmVisible = ref(false);
-const pendingAction   = ref<(() => Promise<void>) | null>(null);
+const pendingAction = ref<(() => Promise<void>) | null>(null);
+
+function onAttachmentsChanged(files: File[]): void {
+  pendingFiles.value = files;
+}
 
 function requestSave(action: () => Promise<void>) {
-    pendingAction.value = action;
-    confirmVisible.value = true;
+  pendingAction.value = action;
+  confirmVisible.value = true;
 }
 
 async function confirmAction() {
-    confirmVisible.value = false;
-    if (pendingAction.value) await pendingAction.value();
-    pendingAction.value = null;
+  confirmVisible.value = false;
+  if (pendingAction.value) await pendingAction.value();
+  pendingAction.value = null;
+}
+
+async function onSubmit(): Promise<void> {
+  await handleStore(pendingFiles.value.length ? pendingFiles.value : undefined);
 }
 </script>
 
@@ -32,8 +41,7 @@ async function confirmAction() {
               <h4 class="text-h4 text-wrap">
                 Agregar <strong>Bloqueador</strong>
               </h4>
-              <VBtn variant="outlined"
-                :to="{ name: 'blockers', params: { projectId: route.params.projectId } }">
+              <VBtn variant="outlined" :to="{ name: 'blockers', params: { projectId: route.params.projectId } }">
                 Volver
               </VBtn>
             </div>
@@ -42,8 +50,9 @@ async function confirmAction() {
       </VCard>
     </VCol>
     <VCol cols="12">
-      <VForm @submit.prevent="requestSave(handleStore)">
-        <BlockerForm :form="form" :errores="errores" :project-id="Number(route.params.projectId)" />
+      <VForm @submit.prevent="requestSave(onSubmit)">
+        <BlockerForm :form="form" :errores="errores" :project-id="Number(route.params.projectId)"
+          @update:attachments="onAttachmentsChanged" />
       </VForm>
     </VCol>
 

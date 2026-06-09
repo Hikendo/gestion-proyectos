@@ -22,15 +22,12 @@ class FcmTokenController extends Controller
         $validated = $request->validated();
         $user = $request->user();
 
-        // Buscar token globalmente (sin scope de usuario) para evitar
-        // errores de unique-constraint cuando el token ya existe para otro usuario.
-        $existing = \App\Models\FcmToken::where('token', $validated['token'])->first();
+        // Buscar token en el ámbito del usuario actual para evitar
+        // reasignación accidental entre diferentes usuarios.
+        $existing = $user->fcmTokens()->where('token', $validated['token'])->first();
 
         if ($existing) {
-            // Si el token ya existe (mismo u otro usuario), actualizamos
-            // y reasignamos al usuario actual.
             $existing->update([
-                'user_id'      => $user->id,
                 'platform'     => $validated['platform'] ?? 'web',
                 'browser'      => $validated['browser'],
                 'device_name'  => $validated['device_name'],

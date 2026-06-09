@@ -24,6 +24,7 @@ class UpdateProjectRequest extends FormRequest
     {
         return [
             'name'        => ['sometimes', 'string', 'max:255'],
+            'code'        => ['sometimes', 'string', 'max:50', 'unique:projects,code'],
             'description' => ['nullable', 'string'],
             'status'      => ['nullable', 'in:planning,active,on_hold,completed,cancelled'],
             'start_date'  => ['nullable', 'date'],

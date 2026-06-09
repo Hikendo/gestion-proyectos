@@ -3,6 +3,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
 import * as blockersService from '@/services/project-blockers.service';
+import { buildFormData } from '@/composables/useAttachments';
 import type { BlockerI, BlockerErroresFormI } from '@/interfaces/BlockerI';
 
 const emptyForm = (): BlockerI => ({
@@ -24,8 +25,12 @@ export function useBlockers() {
 
     const projectId = () => Number(route.params.projectId);
 
-    async function handleStore() {
-        const response = await blockersService.store(projectId(), form.value);
+    async function handleStore(files?: File[]) {
+        const payload = files?.length
+            ? buildFormData({ ...form.value }, files)
+            : { ...form.value };
+
+        const response = await blockersService.store(projectId(), payload);
         if (response.status) {
             snackbar.value = { show: true, text: 'Bloqueador registrado', color: 'success' };
             router.push({ name: 'blockers', params: { projectId: projectId() } });
@@ -35,8 +40,12 @@ export function useBlockers() {
         }
     }
 
-    async function handleUpdate() {
-        const response = await blockersService.update(projectId(), form.value.id, form.value);
+    async function handleUpdate(files?: File[]) {
+        const payload = files?.length
+            ? buildFormData({ ...form.value }, files)
+            : { ...form.value };
+
+        const response = await blockersService.update(projectId(), form.value.id, payload);
         if (response.status) {
             snackbar.value = { show: true, text: 'Bloqueador actualizado', color: 'success' };
             router.push({ name: 'blockers', params: { projectId: projectId() } });

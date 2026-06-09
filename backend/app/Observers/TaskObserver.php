@@ -2,47 +2,60 @@
 
 namespace App\Observers;
 
+use App\Events\TaskAssigned;
+use App\Events\TaskCompleted;
+use App\Events\TaskCreated;
+use App\Events\TaskStatusChanged;
+use App\Enums\TaskStatus;
 use App\Models\Task;
+use Illuminate\Support\Facades\Auth;
 
 class TaskObserver
 {
     /**
-     * Handle the Task "created" event.
+     * Dispara TaskCreated al crear la tarea.
+     * Si la tarea se crea con asignado, también dispara TaskAssigned.
      */
     public function created(Task $task): void
     {
-        //
+        $actor = Auth::user() ?? $task->creator;
+
+        TaskCreated::dispatch($task, $actor);
+
+        if ($task->assigned_to && $task->assignee) {
+            TaskAssigned::dispatch($task, $task->assignee, $actor);
+        }
     }
 
     /**
-     * Handle the Task "updated" event.
+     * Detecta cambios de estado y cambios de asignado en update.
      */
     public function updated(Task $task): void
     {
-        //
-    }
+        $actor = Auth::user() ?? $task->creator;
+        $previousStatus = TaskStatus::tryFrom($task->getOriginal('status'));
 
-    /**
-     * Handle the Task "deleted" event.
-     */
-    public function deleted(Task $task): void
-    {
-        //
-    }
+        // 1. Cambio de status
+        if ($task->isDirty('status')) {
+            $newStatus = TaskStatus::tryFrom($task->status);
 
-    /**
-     * Handle the Task "restored" event.
-     */
-    public function restored(Task $task): void
-    {
-        //
-    }
+            if ($previousStatus && $newStatus) {
+                TaskStatusChanged::dispatch(
+                    $task,
+                    $previousStatus,
+                    $newStatus,
+                    $actor,
+                );
 
-    /**
-     * Handle the Task "force deleted" event.
-     */
-    public function forceDeleted(Task $task): void
-    {
-        //
+                if ($newStatus === TaskStatus::Done) {
+                    TaskCompleted::dispatch($task, $actor);
+                }
+            }
+        }
+
+        // 2. Cambio de asignado
+        if ($task->isDirty('assigned_to') && $task->assigned_to && $task->assignee) {
+            TaskAssigned::dispatch($task, $task->assignee, $actor);
+        }
     }
 }
