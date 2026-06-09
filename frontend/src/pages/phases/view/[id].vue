@@ -39,7 +39,8 @@ onMounted(async () => {
                             <VBtn variant="outlined" prepend-icon="ri-arrow-left-line"
                                 :to="{ name: 'phases', params: { projectId } }">Volver</VBtn>
                             <VBtn v-if="canAction('Fase.Update')" variant="tonal" color="warning"
-                                :to="{ name: 'phases-id', params: { projectId, id } }" prepend-icon="ri-pencil-line">Editar
+                                :to="{ name: 'phases-id', params: { projectId, id } }" prepend-icon="ri-pencil-line">
+                                Editar
                             </VBtn>
                         </div>
                     </VCardTitle>
@@ -49,11 +50,11 @@ onMounted(async () => {
                     <VRow>
                         <VCol cols="12" md="4">
                             <div class="text-caption text-medium-emphasis">Fecha inicio</div>
-                            <div class="text-body-1 mt-1">{{ formatDate(item.start_date) ?? '—' }}</div>
+                            <div class="text-body-1 mt-1">{{ formatDate(item.start_date!) ?? '—' }}</div>
                         </VCol>
                         <VCol cols="12" md="4">
                             <div class="text-caption text-medium-emphasis">Fecha fin</div>
-                            <div class="text-body-1 mt-1">{{ formatDate(item.end_date) ?? '—' }}</div>
+                            <div class="text-body-1 mt-1">{{ formatDate(item.end_date!) ?? '—' }}</div>
                         </VCol>
                         <VCol cols="12" md="4">
                             <div class="text-caption text-medium-emphasis">Progreso</div>

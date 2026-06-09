@@ -201,7 +201,7 @@ const groupedAttachments = computed(() => {
             </VListItemTitle>
             <VListItemSubtitle class="text-caption">
               {{ formatSize(attachment.size) }}
-              <span class="text-disabled"> · {{ new Date(attachment.created_at).toLocaleDateString('es-MX') }}</span>
+              <span class="text-disabled"> · {{ new Date(attachment.created_at!).toLocaleDateString('es-MX') }}</span>
             </VListItemSubtitle>
 
             <template #append>

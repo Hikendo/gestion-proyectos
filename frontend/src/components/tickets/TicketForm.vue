@@ -53,8 +53,8 @@ const priorities: { title: string; value: TicketPriority }[] = [
     <VCardText class="px-8 pb-8">
       <VRow>
         <VCol cols="12">
-          <VTextField v-model="form.subject" :error-messages="errores.subject" name="subject" label="Asunto" variant="outlined" density="comfortable"
-            placeholder="Asunto del ticket" variant="outlined" density="comfortable" />
+          <VTextField v-model="form.subject" :error-messages="errores.subject" name="subject" label="Asunto"
+            variant="outlined" density="comfortable" placeholder="Asunto del ticket" />
         </VCol>
 
         <VCol cols="12">
@@ -92,9 +92,9 @@ const priorities: { title: string; value: TicketPriority }[] = [
         </VCol>
 
         <VCol cols="12">
-          <VFileInput label="Archivos adjuntos (PDF, imágenes, ZIP, DOCX)" variant="outlined" density="comfortable" multiple
-            accept=".pdf,.jpeg,.jpg,.png,.zip,.docx,.xlsx" :max-file-size="10240" prepend-icon="ri-attachment-2"
-            variant="outlined" density="comfortable" @change="onFilesChanged" />
+          <VFileInput label="Archivos adjuntos (PDF, imágenes, ZIP, DOCX)" variant="outlined" density="comfortable"
+            multiple accept=".pdf,.jpeg,.jpg,.png,.zip,.docx,.xlsx" :max-file-size="10240"
+            prepend-icon="ri-attachment-2" @change="onFilesChanged" />
         </VCol>
 
         <VCol cols="12" class="d-flex gap-4">

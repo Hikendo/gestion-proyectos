@@ -29,36 +29,19 @@ function onSelect(key: string) {
 
 <template>
   <div class="pa-4">
-    <VSelect
-      :model-value="currentKey"
-      :items="selectItems"
-      item-value="value"
-      item-title="title"
-      label="Tema de la interfaz"
-      variant="outlined"
-      density="comfortable"
-      prepend-inner-icon="ri-palette-line"
-      hide-details
-      @update:model-value="onSelect"
-    >
+    <VSelect :model-value="currentKey" :items="selectItems" item-value="value" item-title="title"
+      label="Tema de la interfaz" variant="outlined" density="comfortable" prepend-inner-icon="ri-palette-line"
+      hide-details @update:model-value="onSelect">
       <!-- Custom item: swatch dot + label + description -->
       <template #item="{ item, props: itemProps }">
         <VListItem v-bind="itemProps" :title="undefined">
           <template #prepend>
-            <span
-              class="theme-swatch"
-              :style="{ background: item.raw.color }"
-            />
+            <span class="theme-swatch" :style="{ background: item.color }" />
           </template>
-          <VListItemTitle class="font-weight-medium">{{ item.raw.title }}</VListItemTitle>
-          <VListItemSubtitle class="text-caption">{{ item.raw.subtitle }}</VListItemSubtitle>
+          <VListItemTitle class="font-weight-medium">{{ item.title }}</VListItemTitle>
+          <VListItemSubtitle class="text-caption">{{ item.subtitle }}</VListItemSubtitle>
           <template #append>
-            <VIcon
-              v-if="currentKey === item.raw.value"
-              icon="ri-checkbox-circle-fill"
-              size="16"
-              color="primary"
-            />
+            <VIcon v-if="currentKey === item.value" icon="ri-checkbox-circle-fill" size="16" color="primary" />
           </template>
         </VListItem>
       </template>
@@ -66,10 +49,7 @@ function onSelect(key: string) {
       <!-- Selected value display: swatch + label -->
       <template #selection>
         <div class="d-flex align-center gap-2">
-          <span
-            class="theme-swatch"
-            :style="{ background: selectedItem.color }"
-          />
+          <span class="theme-swatch" :style="{ background: selectedItem.color }" />
           <span>{{ selectedItem.title }}</span>
         </div>
       </template>
@@ -77,15 +57,8 @@ function onSelect(key: string) {
 
     <!-- Live preview strip -->
     <div class="preview-strip mt-3">
-      <span
-        v-for="t in themeList"
-        :key="t.key"
-        class="preview-dot"
-        :class="{ active: currentKey === t.key }"
-        :title="t.label"
-        :style="{ background: t.preview }"
-        @click="onSelect(t.key)"
-      />
+      <span v-for="t in themeList" :key="t.key" class="preview-dot" :class="{ active: currentKey === t.key }"
+        :title="t.label" :style="{ background: t.preview }" @click="onSelect(t.key)" />
     </div>
   </div>
 </template>

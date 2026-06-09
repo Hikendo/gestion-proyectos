@@ -49,8 +49,9 @@ function cancel() {
 
                         <VRow>
                             <VCol cols="12" md="6">
-                                <VTextField v-model="form.start_date" label="Fecha inicio" variant="outlined" density="comfortable" type="date"
-                                    variant="outlined" :error-messages="errors.start_date" class="mb-3" />
+                                <VTextField v-model="form.start_date" label="Fecha inicio" variant="outlined"
+                                    density="comfortable" type="date" :error-messages="errors.start_date"
+                                    class="mb-3" />
                             </VCol>
                             <VCol cols="12" md="6">
                                 <VTextField v-model="form.end_date" label="Fecha fin" type="date" variant="outlined"

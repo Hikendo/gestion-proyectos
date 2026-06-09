@@ -39,7 +39,8 @@ onMounted(async () => {
                             <VBtn variant="outlined" prepend-icon="ri-arrow-left-line"
                                 :to="{ name: 'deliverables', params: { projectId } }">Volver</VBtn>
                             <VBtn v-if="canAction('Entregable.Update')" variant="tonal" color="warning"
-                                :to="{ name: 'deliverables-id', params: { projectId, id } }" prepend-icon="ri-pencil-line">
+                                :to="{ name: 'deliverables-id', params: { projectId, id } }"
+                                prepend-icon="ri-pencil-line">
                                 Editar</VBtn>
                         </div>
                     </VCardTitle>
@@ -49,7 +50,7 @@ onMounted(async () => {
                     <VRow>
                         <VCol cols="12" md="4">
                             <div class="text-caption text-medium-emphasis">Fecha entrega</div>
-                            <div class="text-body-1 mt-1">{{ formatDate(item.delivery_date) ?? '—' }}</div>
+                            <div class="text-body-1 mt-1">{{ formatDate(item.delivery_date!) ?? '—' }}</div>
                         </VCol>
                         <VCol cols="12" md="4">
                             <div class="text-caption text-medium-emphasis">Aprobado</div>
