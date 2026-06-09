@@ -167,7 +167,7 @@ const viewOptions = [
                 <VSelect v-model="viewMode" :items="viewOptions" item-title="title" item-value="value" density="compact"
                   variant="solo" flat hide-details class="view-selector" style="max-width: 130px;" />
                 <VBtn variant="flat" prepend-icon="ri-add-line"
-                  :to="{ name: 'tickets-new', params: { projectId: projectId() } }" v-if="canAction('Ticket.Store')">
+                  :to="{ name: 'tickets-new', params: { projectId: projectId() } }" v-if="canAction('ticket.create')">
                   Nuevo ticket
                 </VBtn>
               </div>
@@ -239,10 +239,10 @@ const viewOptions = [
                     </VBtn>
                     <VBtn icon size="small" variant="text"
                       :to="{ name: 'tickets-id', params: { projectId: projectId(), id: item.id } }"
-                      v-if="canAction('Ticket.Update')">
+                      v-if="canAction(['ticket.edit-any', 'ticket.edit-own'])">
                       <VIcon icon="ri-pencil-line" color="warning" size="small" />
                     </VBtn>
-                    <VBtn icon size="small" variant="text" v-if="canAction('Ticket.Destroy')"
+                    <VBtn icon size="small" variant="text" v-if="canAction('ticket.delete')"
                       @click="() => { itemDestroy = item; isDialogVisible = true; }">
                       <VIcon icon="ri-delete-bin-fill" color="error" size="small" />
                     </VBtn>
@@ -317,11 +317,11 @@ const viewOptions = [
                       <div class="d-flex justify-space-between align-center">
                         <VBtn size="x-small" variant="text" :color="col.color"
                           :to="{ name: 'tickets-id', params: { projectId: ticket.project_id, id: ticket.id } }"
-                          v-if="canAction('Ticket.Update')">
+                          v-if="canAction(['ticket.edit-any', 'ticket.edit-own'])">
                           <VIcon size="14">ri-pencil-line</VIcon>
                         </VBtn>
 
-                        <VMenu v-if="canAction('Ticket.Update')">
+                        <VMenu v-if="canAction(['ticket.edit-any', 'ticket.edit-own'])">
                           <template #activator="{ props: mp }">
                             <VBtn size="x-small" variant="text" v-bind="mp" @click.stop>
                               <VIcon size="14">ri-more-fill</VIcon>

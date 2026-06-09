@@ -65,7 +65,7 @@ onMounted(async () => {
     </VCol>
     <VCol cols="12">
       <DocumentManager parent-type="blockers" :parent-id="form.id" :attachments="form.attachments ?? []"
-        :can-manage="canAction('Bloqueador.Update')" @refresh="onMounted(() => { })" />
+        :can-manage="canAction('blocker.edit')" @refresh="onMounted(() => { })" />
     </VCol>
 
     <VDialog v-model="confirmVisible" persistent max-width="400">

@@ -38,7 +38,7 @@ onMounted(async () => {
                         <div class="d-flex gap-2">
                             <VBtn variant="outlined" prepend-icon="ri-arrow-left-line"
                                 :to="{ name: 'phases', params: { projectId } }">Volver</VBtn>
-                            <VBtn v-if="canAction('Fase.Update')" variant="tonal" color="warning"
+                            <VBtn v-if="canAction('phase.edit')" variant="tonal" color="warning"
                                 :to="{ name: 'phases-id', params: { projectId, id } }" prepend-icon="ri-pencil-line">
                                 Editar
                             </VBtn>

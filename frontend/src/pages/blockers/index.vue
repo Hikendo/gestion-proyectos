@@ -149,8 +149,7 @@ const viewOptions = [
                 <VSelect v-model="viewMode" :items="viewOptions" item-title="title" item-value="value" density="compact"
                   variant="solo" flat hide-details class="view-selector" style="max-width: 130px;" />
                 <VBtn variant="flat" prepend-icon="ri-add-line"
-                  :to="{ name: 'blockers-new', params: { projectId: projectId() } }"
-                  v-if="canAction('Bloqueador.Store')">
+                  :to="{ name: 'blockers-new', params: { projectId: projectId() } }" v-if="canAction('blocker.create')">
                   Nuevo bloqueador
                 </VBtn>
               </div>
@@ -201,7 +200,7 @@ const viewOptions = [
                     </VBtn>
                     <VBtn icon size="small" variant="text"
                       :to="{ name: 'blockers-id', params: { projectId: projectId(), id: item.id } }"
-                      v-if="canAction('Bloqueador.Update')">
+                      v-if="canAction('blocker.edit')">
                       <VIcon icon="ri-pencil-line" color="warning" size="small" />
                     </VBtn>
                   </div>
@@ -247,7 +246,7 @@ const viewOptions = [
                         <VIcon size="14" :color="col.color">ri-forbid-line</VIcon>
                         <span class="text-body-2 font-weight-medium"
                           style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" :title="blocker.title">{{
-                          blocker.title }}</span>
+                            blocker.title }}</span>
                       </div>
                       <VChip :color="SEVERITY_COLORS[blocker.severity]" size="x-small" variant="flat"
                         class="flex-shrink-0">
@@ -265,7 +264,7 @@ const viewOptions = [
                     <div class="d-flex justify-end">
                       <VBtn size="x-small" variant="text" :color="col.color"
                         :to="{ name: 'blockers-id', params: { projectId: blocker.project_id, id: blocker.id } }"
-                        v-if="canAction('Bloqueador.Update')">
+                        v-if="canAction('blocker.edit')">
                         <VIcon size="14">ri-pencil-line</VIcon>
                       </VBtn>
                     </div>

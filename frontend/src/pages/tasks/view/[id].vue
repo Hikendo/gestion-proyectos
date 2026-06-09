@@ -48,7 +48,7 @@ onMounted(async () => {
                         <div class="d-flex gap-2">
                             <VBtn variant="outlined" prepend-icon="ri-arrow-left-line"
                                 :to="{ name: 'tasks', params: { projectId } }">Volver</VBtn>
-                            <VBtn v-if="canAction('Tarea.Update')" variant="tonal" color="warning"
+                            <VBtn v-if="canAction(['task.edit-content', 'task.edit-own'])" variant="tonal" color="warning"
                                 :to="{ name: 'tasks-id', params: { projectId, id } }" prepend-icon="ri-pencil-line">
                                 Editar
                             </VBtn>
@@ -100,7 +100,7 @@ onMounted(async () => {
         </VCol>
         <VCol cols="12">
             <DocumentManager parent-type="tasks" :parent-id="task.id" :attachments="task.attachments ?? []"
-                :can-manage="canAction('Tarea.Update')" @refresh="onMounted(() => { })" />
+                :can-manage="canAction(['task.edit-content', 'task.edit-own'])" @refresh="onMounted(() => { })" />
         </VCol>
     </VRow>
     <VRow v-else>

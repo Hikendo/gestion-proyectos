@@ -139,7 +139,7 @@ onMounted(handleGetData);
                 <VSelect v-model="viewMode" :items="viewOptions" item-title="title" item-value="value" density="compact"
                   variant="solo" flat hide-details style="max-width: 130px;" />
                 <VBtn variant="flat" :to="{ name: 'deliverables-new', params: { projectId: projectId() } }"
-                  v-if="canAction('Entregable.Store')">
+                  v-if="canAction('deliverable.create')">
                   Nuevo entregable
                 </VBtn>
               </div>
@@ -190,7 +190,7 @@ onMounted(handleGetData);
                       </VBtn>
                       <VBtn icon size="small" variant="flat"
                         :to="{ name: 'deliverables-id', params: { projectId: projectId(), id: item.id } }"
-                        v-if="canAction('Entregable.Update')">
+                        v-if="canAction('deliverable.edit')">
                         <VIcon icon="ri-pencil-line" color="warning" />
                       </VBtn>
                     </div>
@@ -253,7 +253,7 @@ onMounted(handleGetData);
                     <div class="d-flex justify-end">
                       <VBtn size="x-small" variant="text" :color="col.color"
                         :to="{ name: 'deliverables-id', params: { projectId: deliverable.project_id, id: deliverable.id } }"
-                        v-if="canAction('Entregable.Update')">
+                        v-if="canAction('deliverable.edit')">
                         <VIcon size="14">ri-pencil-line</VIcon>
                       </VBtn>
                     </div>

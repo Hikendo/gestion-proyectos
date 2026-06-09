@@ -65,7 +65,7 @@ onMounted(async () => {
     </VCol>
     <VCol cols="12">
       <DocumentManager parent-type="tickets" :parent-id="form.id" :attachments="form.attachments ?? []"
-        :can-manage="canAction('Ticket.Update')" @refresh="onMounted(() => { })" />
+        :can-manage="canAction(['ticket.edit-any', 'ticket.edit-own'])" @refresh="onMounted(() => { })" />
     </VCol>
 
     <VDialog v-model="confirmVisible" persistent max-width="400">

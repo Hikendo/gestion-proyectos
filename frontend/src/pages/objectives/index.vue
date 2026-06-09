@@ -55,7 +55,7 @@ onMounted(handleGetData);
             <div class="d-flex justify-space-between flex-wrap">
               <h4 class="text-h4 text-wrap me-3">Listado de <strong>Objetivos</strong></h4>
               <VBtn variant="flat" :to="{ name: 'objectives-new', params: { projectId: projectId() } }"
-                v-if="canAction('Objetivo.Store')">
+                v-if="canAction('objective.create')">
                 Nuevo objetivo
               </VBtn>
             </div>
@@ -107,7 +107,7 @@ onMounted(handleGetData);
                     </VBtn>
                     <VBtn icon size="small" variant="flat"
                       :to="{ name: 'objectives-id', params: { projectId: projectId(), id: item.id } }"
-                      v-if="canAction('Objetivo.Update')">
+                      v-if="canAction('objective.edit')">
                       <VIcon icon="ri-pencil-line" color="warning" />
                     </VBtn>
 

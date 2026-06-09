@@ -150,7 +150,7 @@ onMounted(handleGetData);
                 <VSelect v-model="viewMode" :items="viewOptions" item-title="title" item-value="value" density="compact"
                   variant="solo" flat hide-details style="max-width: 130px;" />
                 <VBtn variant="flat" :to="{ name: 'milestones-new', params: { projectId: projectId() } }"
-                  v-if="canAction('Hito.Store')">
+                  v-if="canAction('milestone.create')">
                   Nuevo hito
                 </VBtn>
               </div>
@@ -202,10 +202,10 @@ onMounted(handleGetData);
                       </VBtn>
                       <VBtn icon size="small" variant="flat"
                         :to="{ name: 'milestones-id', params: { projectId: projectId(), id: item.id } }"
-                        v-if="canAction('Hito.Update')">
+                        v-if="canAction('milestone.edit')">
                         <VIcon icon="ri-pencil-line" color="warning" />
                       </VBtn>
-                      <VBtn icon size="small" variant="flat" v-if="canAction('Hito.Destroy')"
+                      <VBtn icon size="small" variant="flat" v-if="canAction('milestone.delete')"
                         @click="() => { itemDestroy = item; isDialogVisible = true; }">
                         <VIcon icon="ri-delete-bin-fill" color="error" />
                       </VBtn>
@@ -268,10 +268,10 @@ onMounted(handleGetData);
                     <div class="d-flex justify-end gap-1">
                       <VBtn size="x-small" variant="text" :color="col.color"
                         :to="{ name: 'milestones-id', params: { projectId: milestone.project_id, id: milestone.id } }"
-                        v-if="canAction('Hito.Update')">
+                        v-if="canAction('milestone.edit')">
                         <VIcon size="14">ri-pencil-line</VIcon>
                       </VBtn>
-                      <VBtn size="x-small" variant="text" color="error" v-if="canAction('Hito.Destroy')"
+                      <VBtn size="x-small" variant="text" color="error" v-if="canAction('milestone.delete')"
                         @click="() => { itemDestroy = milestone; isDialogVisible = true; }">
                         <VIcon size="14">ri-delete-bin-fill</VIcon>
                       </VBtn>

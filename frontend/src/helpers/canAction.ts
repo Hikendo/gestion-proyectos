@@ -13,26 +13,32 @@ import { useAuthStore } from '@/store/useAuthStore';
  * All state/role-based business rules are enforced by Laravel policies;
  * field-level locking is driven by `field_permissions` returned by the API.
  */
-export function canAction(action: string, resourceOwnerId?: number | null): boolean {
+export function canAction(
+  action: string | string[],
+  resourceOwnerId?: number | null,
+): boolean {
   if (!getAuthToken()) return false;
 
   const permissionStore = usePermissionStore();
 
   if (!permissionStore.loaded) {
-    // Permissions not yet loaded — be permissive only if we have a valid token.
-    // Once the store hydrates, the UI will reactively lock itself.
-    return true;
+    return true; // permisos aún no hidratados → permissive
   }
 
-  if (!permissionStore.hasPermission(action)) {
-    return false;
-  }
+  const actions = Array.isArray(action) ? action : [action];
 
-  // "-own" actions require the resource to belong to the current user.
-  if (action.endsWith('-own') && resourceOwnerId !== undefined && resourceOwnerId !== null) {
+  // ¿Tiene al menos un permiso no-own de la lista?
+  const hasNonOwn = actions.some(a => !a.endsWith('-own') && permissionStore.hasPermission(a));
+  if (hasNonOwn) return true;
+
+  // ¿Tiene un permiso -own y es el dueño del recurso?
+  if (resourceOwnerId !== undefined && resourceOwnerId !== null) {
     const authStore = useAuthStore();
-    return authStore.authUser?.id === resourceOwnerId;
+    return actions.some(
+      a => a.endsWith('-own') && permissionStore.hasPermission(a),
+    ) && authStore.authUser?.id === resourceOwnerId;
   }
 
-  return true;
+  // Solo permiso -own sin resourceOwnerId → no mostramos (contexto de lista)
+  return false;
 }

@@ -42,7 +42,7 @@ onMounted(async () => {
                         <div class="d-flex gap-2">
                             <VBtn variant="outlined" prepend-icon="ri-arrow-left-line"
                                 :to="{ name: 'blockers', params: { projectId } }">Volver</VBtn>
-                            <VBtn v-if="canAction('Bloqueador.Update')" variant="tonal" color="warning"
+                            <VBtn v-if="canAction('blocker.edit')" variant="tonal" color="warning"
                                 :to="{ name: 'blockers-id', params: { projectId, id } }" prepend-icon="ri-pencil-line">
                                 Editar</VBtn>
                         </div>
@@ -77,7 +77,7 @@ onMounted(async () => {
         </VCol>
         <VCol cols="12">
             <DocumentManager parent-type="blockers" :parent-id="blocker.id" :attachments="blocker.attachments ?? []"
-                :can-manage="canAction('Bloqueador.Update')" @refresh="onMounted(() => { })" />
+                :can-manage="canAction('blocker.edit')" @refresh="onMounted(() => { })" />
         </VCol>
     </VRow>
     <VRow v-else>

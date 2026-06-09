@@ -63,7 +63,7 @@ onMounted(handleGetData);
                   prepend-icon="ri-arrow-left-line">
                   Proyecto
                 </VBtn>
-                <VBtn v-if="!editing && canAction('Plan.Store')"
+                <VBtn v-if="!editing && canAction('project.edit')"
                   variant="flat" size="small" prepend-icon="ri-pencil-line"
                   @click="editing = true">
                   Editar plan
@@ -88,7 +88,7 @@ onMounted(handleGetData);
         </VCardText>
         <VCardText v-else class="text-medium-emphasis">
           No hay plan definido aún.
-          <VBtn v-if="canAction('Plan.Store')" variant="text" @click="editing = true">
+          <VBtn v-if="canAction('project.edit')" variant="text" @click="editing = true">
             Crear plan
           </VBtn>
         </VCardText>

@@ -57,7 +57,7 @@ onMounted(handleGetData);
                   Proyecto
                 </VBtn>
                 <VBtn variant="flat" :to="{ name: 'members-new', params: { projectId: projectId() } }"
-                  v-if="canAction('Miembro.Store')" prepend-icon="ri-add-line">
+                  v-if="canAction('project.assign-members')" prepend-icon="ri-add-line">
                   Nuevo
                 </VBtn>
               </div>
@@ -90,7 +90,7 @@ onMounted(handleGetData);
                     </VBtn>
                     <VBtn icon size="small" variant="flat"
                       :to="{ name: 'members-id', params: { projectId: projectId(), id: item.id } }"
-                      v-if="canAction('Miembro.Update')">
+                      v-if="canAction('project.assign-members')">
                       <VIcon icon="ri-pencil-line" color="warning" />
                     </VBtn>
                     <VBtn icon size="small" variant="flat"

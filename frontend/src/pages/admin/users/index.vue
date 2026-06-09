@@ -40,7 +40,7 @@ onMounted(handleGetData);
 
                 :to="{ name: 'admin-users-new' }"
                 prepend-icon="ri-add-line"
-                v-if="canAction('User.Store')"
+                v-if="canAction('user.create')"
               >
                 Nuevo usuario
               </VBtn>

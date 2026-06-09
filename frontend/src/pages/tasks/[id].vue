@@ -68,7 +68,7 @@ onMounted(async () => {
     </VCol>
     <VCol cols="12">
       <DocumentManager parent-type="tasks" :parent-id="form.id" :attachments="form.attachments ?? []"
-        :can-manage="canAction('Tarea.Update')" @refresh="onMounted(() => { })" />
+        :can-manage="canAction(['task.edit-content', 'task.edit-own'])" @refresh="onMounted(() => { })" />
     </VCol>
 
     <VDialog v-model="confirmVisible" persistent max-width="400">

@@ -120,7 +120,7 @@ onMounted(handleGetData);
                   variant="solo" flat hide-details class="view-selector" style="max-width: 130px;" />
 
                 <VBtn variant="flat" :to="{ name: 'tasks-new', params: { projectId: projectId() } }"
-                  v-if="canAction('Tarea.Store')" prepend-icon="ri-add-line">
+                  v-if="canAction('task.create')" prepend-icon="ri-add-line">
                   Nueva Tarea
                 </VBtn>
               </div>
@@ -187,8 +187,8 @@ onMounted(handleGetData);
                 <td>
                   <div class="d-flex align-center gap-1">
                     <VIcon :color="getTaskColor(item)" size="small">
-                      {{ new Date(item.due_date!) < new Date() && item.progress !== 100 ? 'ri-alert-fill' : 'ri-calendar-line' }}
-                        </VIcon>
+                      {{ new Date(item.due_date!) < new Date() && item.progress !== 100 ? 'ri-alert-fill'
+                        : 'ri-calendar-line' }} </VIcon>
                         {{ formatDate(item.due_date!) ?? '—' }}
                   </div>
                 </td>
@@ -200,10 +200,10 @@ onMounted(handleGetData);
                     </VBtn>
                     <VBtn icon size="small" variant="text"
                       :to="{ name: 'tasks-id', params: { projectId: projectId(), id: item.id } }"
-                      v-if="canAction('Tarea.Update')">
+                      v-if="canAction(['task.edit-content', 'task.edit-own'])">
                       <VIcon icon="ri-pencil-line" color="warning" size="small" />
                     </VBtn>
-                    <VBtn icon size="small" variant="text" v-if="canAction('Tarea.Destroy')"
+                    <VBtn icon size="small" variant="text" v-if="canAction('task.delete')"
                       @click="() => { itemDestroy = item; isDialogVisible = true; }">
                       <VIcon icon="ri-delete-bin-fill" color="error" size="small" />
                     </VBtn>

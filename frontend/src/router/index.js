@@ -3,6 +3,7 @@ import { getAuthToken, clearAuthToken } from '../services';
 import { me } from '../services/auth.service';
 import * as projectsService from '../services/projects.service';
 import { useAuthStore } from '../store/useAuthStore';
+import { useAppStore } from '../store/useAppStore';
 import MainLayout from '../layouts/MainLayout.vue';
 
 // ── Auth / Guest pages ─────────────────────────────────────────────────────
@@ -166,18 +167,6 @@ router.beforeEach(async (to) => {
         }
     }
 
-    // ── Restaurar currentProject tras recarga en submódulos ──────────────
-    if (to.params.projectId && isAuthenticated) {
-        const authStore = useAuthStore();
-        const projectId = Number(to.params.projectId);
-        if (!authStore.currentProject || authStore.currentProject.id !== projectId) {
-            const response = await projectsService.show(projectId);
-            if (response.status && response.items) {
-                authStore.setCurrentProject(response.items);
-            }
-        }
-    }
-
     if (to.meta.requiresAuth && !isAuthenticated) {
         return { name: 'login', query: { redirect: to.fullPath } };
     }
@@ -187,6 +176,24 @@ router.beforeEach(async (to) => {
             ? to.query.redirect
             : '/dashboard';
         return redirect;
+    }
+
+    // ── Pre-cache currentProject con loader para feedback visual ───────────
+    if (to.params.projectId && isAuthenticated) {
+        const authStore = useAuthStore();
+        const projectId = Number(to.params.projectId);
+        if (!authStore.currentProject || authStore.currentProject.id !== projectId) {
+            const appStore = useAppStore();
+            appStore.loader = true;
+            try {
+                const response = await projectsService.show(projectId);
+                if (response.status && response.items) {
+                    authStore.setCurrentProject(response.items);
+                }
+            } finally {
+                appStore.loader = false;
+            }
+        }
     }
 
     if (to.meta.requiresSuperAdmin && !isAuthenticated) {

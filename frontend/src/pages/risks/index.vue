@@ -162,7 +162,7 @@ const viewOptions = [
                 <VSelect v-model="viewMode" :items="viewOptions" item-title="title" item-value="value" density="compact"
                   variant="solo" flat hide-details class="view-selector" style="max-width: 130px;" />
                 <VBtn variant="flat" prepend-icon="ri-add-line"
-                  :to="{ name: 'risks-new', params: { projectId: projectId() } }" v-if="canAction('Riesgo.Store')">
+                  :to="{ name: 'risks-new', params: { projectId: projectId() } }" v-if="canAction('risk.create')">
                   Nuevo riesgo
                 </VBtn>
               </div>
@@ -217,10 +217,10 @@ const viewOptions = [
                     </VBtn>
                     <VBtn icon size="small" variant="text"
                       :to="{ name: 'risks-id', params: { projectId: projectId(), id: item.id } }"
-                      v-if="canAction('Riesgo.Update')">
+                      v-if="canAction('risk.edit')">
                       <VIcon icon="ri-pencil-line" color="warning" size="small" />
                     </VBtn>
-                    <VBtn icon size="small" variant="text" v-if="canAction('Riesgo.Destroy')"
+                    <VBtn icon size="small" variant="text" v-if="canAction('risk.delete')"
                       @click="() => { itemDestroy = item; isDialogVisible = true; }">
                       <VIcon icon="ri-delete-bin-fill" color="error" size="small" />
                     </VBtn>
@@ -263,7 +263,7 @@ const viewOptions = [
                       <VIcon size="14" :color="col.color">ri-error-warning-line</VIcon>
                       <span class="text-body-2 font-weight-medium"
                         style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" :title="risk.title">{{
-                        risk.title }}</span>
+                          risk.title }}</span>
                     </div>
 
                     <!-- Impacto + Probabilidad -->
@@ -280,11 +280,11 @@ const viewOptions = [
                     <div class="d-flex justify-space-between align-center">
                       <VBtn size="x-small" variant="text" :color="col.color"
                         :to="{ name: 'risks-id', params: { projectId: risk.project_id, id: risk.id } }"
-                        v-if="canAction('Riesgo.Update')">
+                        v-if="canAction('risk.edit')">
                         <VIcon size="14">ri-pencil-line</VIcon>
                       </VBtn>
 
-                      <VMenu v-if="canAction('Riesgo.Update')">
+                      <VMenu v-if="canAction('risk.edit')">
                         <template #activator="{ props: mp }">
                           <VBtn size="x-small" variant="text" v-bind="mp" @click.stop>
                             <VIcon size="14">ri-more-fill</VIcon>

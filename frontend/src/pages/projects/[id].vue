@@ -125,7 +125,7 @@ function navigateToFeature(routeName: string) {
                   <VIcon icon="ri-information-line" class="me-2" />
                   Información del proyecto
                 </span>
-                <VBtn v-if="canAction('Proyecto.Update')" variant="flat" color="warning" prepend-icon="ri-pencil-line"
+                <VBtn v-if="canAction('project.edit')" variant="flat" color="warning" prepend-icon="ri-pencil-line"
                   :to="{ name: 'project-edit', params: { projectId: projectId } }">
                   Editar proyecto
                 </VBtn>
@@ -161,7 +161,7 @@ function navigateToFeature(routeName: string) {
                 <div class="text-caption text-medium-emphasis">Fecha fin</div>
                 <div class="text-body-1">{{ formatDate(project.end_date!) ?? '—' }}</div>
               </VCol>
-              <VCol v-if="canAction('Proyecto.ViewBudget')" cols="12" md="3">
+              <VCol v-if="canAction('project.view')" cols="12" md="3">
                 <div class="text-caption text-medium-emphasis">Presupuesto</div>
                 <div class="text-body-1">{{ project.budget ?? '—' }}</div>
               </VCol>
@@ -183,7 +183,7 @@ function navigateToFeature(routeName: string) {
     <VRow class="mt-4">
       <VCol cols="12">
         <ProjectOverviewTab :project-id="projectId" :attachments="project.attachments ?? []"
-          :can-delete="canAction('Proyecto.Update')" @refresh="loadProject" />
+          :can-delete="canAction('project.edit')" @refresh="loadProject" />
       </VCol>
     </VRow>
   </div>

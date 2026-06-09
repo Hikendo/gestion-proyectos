@@ -18,27 +18,27 @@ const paginacionYquery = ref<PaginacionYQueryI>({ page: 1, query: '', last_page:
 const data = ref<ProjectI[]>([]);
 
 const handleGetData = async () => {
-    loader.value = true;
-    const response = await projectsService.index({ page: paginacionYquery.value.page, query: paginacionYquery.value.query });
-    if (response.status && response.items) {
-        data.value = (response.items as any).data ?? [];
-        paginacionYquery.value.last_page = (response.items as any).last_page ?? 1;
-    }
-    loader.value = false;
+  loader.value = true;
+  const response = await projectsService.index({ page: paginacionYquery.value.page, query: paginacionYquery.value.query });
+  if (response.status && response.items) {
+    data.value = (response.items as any).data ?? [];
+    paginacionYquery.value.last_page = (response.items as any).last_page ?? 1;
+  }
+  loader.value = false;
 };
 
 const itemDestroy = ref<ProjectI | null>(null);
 
 const handleDestroy = async () => {
-    if (!itemDestroy.value) return;
-    loader.value = true;
-    const response = await projectsService.destroy(itemDestroy.value.id);
-    if (response.status) {
-        snackbar.value = { show: true, text: 'Proyecto eliminado', color: 'success' };
-        handleGetData();
-    }
-    loader.value = false;
-    isDialogVisible.value = false;
+  if (!itemDestroy.value) return;
+  loader.value = true;
+  const response = await projectsService.destroy(itemDestroy.value.id);
+  if (response.status) {
+    snackbar.value = { show: true, text: 'Proyecto eliminado', color: 'success' };
+    handleGetData();
+  }
+  loader.value = false;
+  isDialogVisible.value = false;
 };
 
 // Helper tipado con los estados reales de tu aplicación
@@ -60,7 +60,7 @@ const getStatusConfig = (status: ProjectStatus) => {
 };
 
 watch(() => isDialogVisible.value, (val) => {
-    if (!val) itemDestroy.value = null;
+  if (!val) itemDestroy.value = null;
 });
 onMounted(handleGetData);
 </script>
@@ -74,7 +74,7 @@ onMounted(handleGetData);
           <VCardTitle>
             <div class="d-flex justify-space-between flex-wrap">
               <h4 class="text-h4 text-wrap me-3">Listado de <strong>Proyectos</strong></h4>
-              <VBtn variant="flat" :to="{ name: 'projects-new' }" v-if="canAction('Proyecto.Store')">
+              <VBtn variant="flat" :to="{ name: 'projects-new' }" v-if="canAction('project.create')">
                 Nuevo proyecto
               </VBtn>
             </div>
@@ -90,8 +90,8 @@ onMounted(handleGetData);
           <VRow class="d-flex align-center gap-4 mt-2">
             <VCol>
               <form @submit.prevent="() => { paginacionYquery.page = 1; handleGetData(); }">
-                <VTextField label="Buscador" prepend-inner-icon="ri-search-line" type="search"
-                  clearable v-model="paginacionYquery.query" />
+                <VTextField label="Buscador" prepend-inner-icon="ri-search-line" type="search" clearable
+                  v-model="paginacionYquery.query" />
               </form>
             </VCol>
           </VRow>
@@ -102,14 +102,7 @@ onMounted(handleGetData);
     <!-- Listado en Estilo Premium Card -->
     <VCol cols="12">
       <VRow v-if="data.length > 0">
-        <VCol
-          v-for="item in data"
-          :key="item.id"
-          cols="12"
-          sm="6"
-          md="4"
-          lg="4"
-        >
+        <VCol v-for="item in data" :key="item.id" cols="12" sm="6" md="4" lg="4">
           <VCard variant="flat" border class="h-100 d-flex flex-column justify-space-between">
             <!-- Barra superior semántica discreta -->
             <div :class="`bg-${getStatusConfig(item.status).color}`" style="height: 4px;"></div>
@@ -120,12 +113,7 @@ onMounted(handleGetData);
                 <span class="text-overline text-medium-emphasis">#{{ item.id }} - {{ item.code || 'SIN CÓDIGO' }}</span>
 
                 <!-- Chip de Estado -->
-                <VChip
-                  :color="getStatusConfig(item.status).color"
-                  size="x-small"
-                  label
-                  class="font-weight-bold"
-                >
+                <VChip :color="getStatusConfig(item.status).color" size="x-small" label class="font-weight-bold">
                   <VIcon start :icon="getStatusConfig(item.status).icon" size="12" />
                   {{ getStatusConfig(item.status).text }}
                 </VChip>
@@ -151,27 +139,15 @@ onMounted(handleGetData);
             <VCardText class="pt-2 mt-8 flex-grow-1 position-relative">
 
               <!-- Línea de revisión flotante (Simulada a la mitad (50%) para propósitos visuales dinámicos) -->
-              <div
-                style="right: calc(50% - 32px)"
-                :class="`position-absolute mt-n7 text-caption font-weight-medium text-${getStatusConfig(item.status).color}`"
-              >
+              <div style="right: calc(50% - 32px)"
+                :class="`position-absolute mt-n7 text-caption font-weight-medium text-${getStatusConfig(item.status).color}`">
                 Revisión
               </div>
 
               <!-- Barra Lineal con Badge incrustado -->
-              <VProgressLinear
-                :color="getStatusConfig(item.status).color"
-                height="16"
-                :model-value="item.progress ?? 0"
-                rounded="lg"
-              >
-                <VBadge
-                  style="right: 50%"
-                  class="position-absolute"
-                  color="white"
-                  dot
-                  inline
-                ></VBadge>
+              <VProgressLinear :color="getStatusConfig(item.status).color" height="16" :model-value="item.progress ?? 0"
+                rounded="lg">
+                <VBadge style="right: 50%" class="position-absolute" color="white" dot inline></VBadge>
               </VProgressLinear>
 
               <!-- Fechas del proyecto en el espacio inferior de la barra -->
@@ -188,24 +164,13 @@ onMounted(handleGetData);
             <VDivider />
 
             <!-- Acceso inferior estilo v-list-item de tu diseño -->
-            <VListItem
-              append-icon="ri-arrow-right-s-line"
-              lines="two"
-              subtitle="Ver detalles y documentación"
-              link
-              :to="{ name: 'project-detail', params: { projectId: item.id } }"
-              class="pe-4"
-            >
+            <VListItem append-icon="ri-arrow-right-s-line" lines="two" subtitle="Ver detalles y documentación" link
+              :to="{ name: 'project-detail', params: { projectId: item.id } }" class="pe-4">
               <!-- Botón de eliminar encapsulado de forma limpia a la izquierda del chevron -->
               <template v-slot:append>
                 <div class="d-flex align-center gap-1">
-                  <VBtn
-                    icon
-                    size="small"
-                    variant="text"
-                    v-if="canAction('Proyecto.Destroy')"
-                    @click.stop.prevent="() => { itemDestroy = item; isDialogVisible = true; }"
-                  >
+                  <VBtn icon size="small" variant="text" v-if="canAction('project.delete')"
+                    @click.stop.prevent="() => { itemDestroy = item; isDialogVisible = true; }">
                     <VIcon icon="ri-delete-bin-fill" color="error" />
                   </VBtn>
                   <VIcon icon="ri-arrow-right-s-line" class="ms-2" />
@@ -223,12 +188,8 @@ onMounted(handleGetData);
     </VCol>
 
     <!-- Paginación (Se mantiene igual) -->
-    <VPagination class="mt-4 mr-3" color="primary"
-      v-model="paginacionYquery.page"
-      :total-visible="7"
-      :length="paginacionYquery.last_page"
-      style="margin-left: auto;"
-      @update:model-value="handleGetData" />
+    <VPagination class="mt-4 mr-3" color="primary" v-model="paginacionYquery.page" :total-visible="7"
+      :length="paginacionYquery.last_page" style="margin-left: auto;" @update:model-value="handleGetData" />
 
     <!-- Diálogo de eliminación (Se mantiene igual) -->
     <VDialog v-model="isDialogVisible" persistent class="v-dialog-sm">
