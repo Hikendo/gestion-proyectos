@@ -49,7 +49,8 @@ onMounted(async () => {
                             <VBtn variant="outlined" prepend-icon="ri-arrow-left-line"
                                 :to="{ name: 'tasks', params: { projectId } }">Volver</VBtn>
                             <VBtn v-if="canAction('Tarea.Update')" variant="tonal" color="warning"
-                                :to="{ name: 'tasks-id', params: { projectId, id } }" prepend-icon="ri-pencil-line">Editar
+                                :to="{ name: 'tasks-id', params: { projectId, id } }" prepend-icon="ri-pencil-line">
+                                Editar
                             </VBtn>
                         </div>
                     </VCardTitle>
@@ -68,11 +69,11 @@ onMounted(async () => {
                         <VCol cols="12" md="4">
                             <div class="text-caption text-medium-emphasis">Prioridad</div>
                             <div class="text-body-1 mt-1">{{ priorityLabels[task.priority ?? ''] ?? task.priority ?? '—'
-                                }}</div>
+                            }}</div>
                         </VCol>
                         <VCol cols="12" md="4">
                             <div class="text-caption text-medium-emphasis">Fecha límite</div>
-                            <div class="text-body-1 mt-1">{{ formatDate(task.due_date) ?? '—' }}</div>
+                            <div class="text-body-1 mt-1">{{ formatDate(task.due_date!) ?? '—' }}</div>
                         </VCol>
                         <VCol cols="12" class="mt-3">
                             <div class="text-caption text-medium-emphasis">Descripción</div>
