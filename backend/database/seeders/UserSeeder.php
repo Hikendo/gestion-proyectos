@@ -10,7 +10,7 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Super Admin — único rol global
+        // Super Admin — tiene rol global super-admin
         $admin = User::firstOrCreate(
             ['email' => 'superadmin@test.com'],
             [
@@ -20,13 +20,23 @@ class UserSeeder extends Seeder
         );
         $admin->assignRole('super-admin');
 
-        // Usuarios regulares sin rol global (los roles se asignan por proyecto)
+        // Project Manager — tiene rol global project-manager (puede crear proyectos)
+        $pm = User::firstOrCreate(
+            ['email' => 'pm@test.com'],
+            [
+                'name'     => 'Project Manager',
+                'password' => Hash::make('password'),
+            ]
+        );
+        $pm->assignRole('project-manager');
+
+        // Usuarios regulares SIN rol global — los roles se asignan por proyecto
+        // Estos usuarios solo obtienen permisos cuando un PM los agrega como miembros
         $regularUsers = [
-            ['name' => 'Project Manager', 'email' => 'pm@test.com'],
-            ['name' => 'Developer',        'email' => 'dev@test.com'],
-            ['name' => 'QA Engineer',      'email' => 'qa@test.com'],
-            ['name' => 'Support',          'email' => 'support@test.com'],
-            ['name' => 'Client',           'email' => 'client@test.com'],
+            ['name' => 'Developer',   'email' => 'dev@test.com'],
+            ['name' => 'QA Engineer', 'email' => 'qa@test.com'],
+            ['name' => 'Support',     'email' => 'support@test.com'],
+            ['name' => 'Client',      'email' => 'client@test.com'],
         ];
 
         foreach ($regularUsers as $data) {
@@ -34,12 +44,6 @@ class UserSeeder extends Seeder
                 ['email' => $data['email']],
                 array_merge($data, ['password' => Hash::make('password')])
             );
-        }
-
-        // Asignar rol global project-manager al PM de prueba
-        $pm = User::where('email', 'pm@test.com')->first();
-        if ($pm) {
-            $pm->syncRoles(['project-manager']);
         }
 
         $this->command->info('Usuarios de prueba creados correctamente.');

@@ -46,7 +46,7 @@ services:
     working_dir: /var/www
     volumes:
       - ./backend:/var/www
-    command: ["php", "artisan", "horizon"]
+    command: [ "php", "artisan", "horizon" ]
     depends_on:
       - backend
     networks:
@@ -63,7 +63,7 @@ services:
     working_dir: /var/www
     volumes:
       - ./backend:/var/www
-    command: ["php", "artisan", "schedule:work"]
+    command: [ "php", "artisan", "schedule:work" ]
     depends_on:
       - backend
     networks:
@@ -73,7 +73,7 @@ services:
   # ─────────────────────────────────────────────────────────────
   # NGINX (Tu Proxy / Servidor Web de la API)
   # ─────────────────────────────────────────────────────────────
- # ─────────────────────────────────────────────────────────────
+  # ─────────────────────────────────────────────────────────────
   # NGINX (Tu Proxy / Servidor Web)
   # ─────────────────────────────────────────────────────────────
   nginx:
@@ -81,7 +81,7 @@ services:
     container_name: gestion_proyectos_nginx
     restart: unless-stopped
     ports:
-      - "8000:80"   # 👈 Tu API principal sigue aquí
+      - "8000:80" # 👈 Tu API principal sigue aquí
       - "8001:8001" # 👈 NUEVO: Puerto exclusivo para Horizon
     volumes:
       - ./backend:/var/www
@@ -123,7 +123,7 @@ services:
     volumes:
       - redisdata:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -149,7 +149,7 @@ services:
     networks:
       - gestion_network
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD"]
+      test: [ "CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD" ]
       interval: 5s
       timeout: 5s
       retries: 20

@@ -9,6 +9,7 @@ use App\Http\Requests\Task\UpdateTaskRequest;
 use App\Models\Project;
 use App\Models\Task;
 use App\Services\AttachmentService;
+use App\Services\FieldPermissionsService;
 use App\Services\ProjectService;
 use App\Services\TaskService;
 use App\Traits\BelongsToProject;
@@ -23,6 +24,7 @@ class TaskController extends Controller
         private TaskService $service,
         private ProjectService $projectService,
         private AttachmentService $attachmentService,
+        private FieldPermissionsService $fieldPermissionsService,
     ) {}
 
     /**
@@ -116,6 +118,9 @@ class TaskController extends Controller
                 'blockers',
                 'attachments',
             ]);
+
+            // Attach field-level permissions
+            $task->field_permissions = $this->fieldPermissionsService->compute($request->user(), $task);
 
             return response()->json([
                 'status'  => true,

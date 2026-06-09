@@ -20,6 +20,7 @@ class Attachment extends Model
         'attachable_id',
         'original_name',
         'disk_path',
+        'status',
         'mime_type',
         'size',
         'uploaded_by',

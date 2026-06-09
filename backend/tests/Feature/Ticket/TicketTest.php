@@ -33,6 +33,7 @@ class TicketTest extends TestCase
 
         $this->project = Project::factory()->create(['owner_id' => $this->pm->id]);
         $this->project->members()->createMany([
+            ['user_id' => $this->pm->id,        'role' => 'manager'],
             ['user_id' => $this->developer->id, 'role' => 'developer'],
             ['user_id' => $this->client->id,    'role' => 'client'],
         ]);

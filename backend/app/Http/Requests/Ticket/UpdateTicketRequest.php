@@ -8,7 +8,10 @@ class UpdateTicketRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()->can('ticket.edit');
+        // La autorización fina (edit-any vs edit-own, estado closed) la maneja TicketPolicy.
+        // Aquí solo verificamos que tenga al menos uno de los permisos de edición de tickets.
+        return $this->user()->can('ticket.edit-any')
+            || $this->user()->can('ticket.edit-own');
     }
 
     public function rules(): array

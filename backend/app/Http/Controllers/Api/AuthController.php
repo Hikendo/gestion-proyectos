@@ -97,6 +97,34 @@ class AuthController extends Controller
     }
 
     /**
+     * POST /api/auth/refresh-permissions
+     *
+     * Devuelve los permisos frescos del usuario autenticado.
+     * Se usa después de que el frontend recibe un FCM `permissions_updated`.
+     */
+    public function refreshPermissions(Request $request): JsonResponse
+    {
+        try {
+            $user = $request->user();
+
+            if (!$user) {
+                return response()->json(['status' => false, 'items' => null, 'message' => 'No autenticado.'], 401);
+            }
+
+            // Forzar recarga de permisos desde BD (limpia cache de Spatie para este usuario)
+            app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
+            return response()->json([
+                'status'  => true,
+                'items'   => $user->getAllPermissions()->pluck('name'),
+                'message' => 'Permisos actualizados.',
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
+    }
+
+    /**
      * POST /api/auth/register
      */
     public function register(Request $request): JsonResponse

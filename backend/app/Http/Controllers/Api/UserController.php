@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Models\User;
+use App\Services\FirebaseNotificationService;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -151,6 +152,20 @@ class UserController extends Controller
             if ($isAdmin && array_key_exists('permissions', $data)) {
                 $permissions = $data['permissions'] ?? [];
                 $user->syncPermissions($permissions);
+            }
+
+            // Invalidate permission cache for the affected user and notify via FCM
+            if (($isAdmin && $roleIsSet) || ($isAdmin && array_key_exists('permissions', $data))) {
+                app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+                app(FirebaseNotificationService::class)->sendToUser(
+                    $user,
+                    '',
+                    '',
+                    null,
+                    null,
+                    null,
+                    ['type' => 'permissions_updated']
+                );
             }
 
             $user->refresh();

@@ -1,537 +1,242 @@
-- .editorconfig
-- .gitattributes
-- .gitignore
-- .npmrc
-- .phpunit.result.cache
-- backend/.composer/.htaccess
-- backend/.composer/cache/.htaccess
-- backend/.composer/cache/repo/https---repo.packagist.org/filter-summary.json
-- backend/.composer/cache/repo/https---repo.packagist.org/packages.json
-- backend/.config/psysh/psysh_history
-- backend/.env.example
-- backend/.gitconfig
-- backend/.gitignore
-- backend/Dockerfile
-- backend/README.md
-- backend/app/Console/Commands/CreateAdminCommand.php
-- backend/app/DTOs/ReportPeriodDTO.php
-- backend/app/Enums/BlockerSeverity.php
-- backend/app/Enums/NotificationTarget.php
-- backend/app/Enums/ObjectiveType.php
-- backend/app/Enums/ProjectMemberRole.php
-- backend/app/Enums/ProjectPriority.php
-- backend/app/Enums/ProjectStatus.php
-- backend/app/Enums/RiskImpact.php
-- backend/app/Enums/RiskProbability.php
-- backend/app/Enums/RiskStatus.php
-- backend/app/Enums/TaskPriority.php
-- backend/app/Enums/TaskStatus.php
-- backend/app/Enums/TicketPriority.php
-- backend/app/Enums/TicketStatus.php
-- backend/app/Enums/UserRole.php
-- backend/app/Events/BlockerCreated.php
-- backend/app/Events/BlockerResolved.php
-- backend/app/Events/CommentCreated.php
-- backend/app/Events/DeliverableApproved.php
-- backend/app/Events/MilestoneCompleted.php
-- backend/app/Events/ProjectCreated.php
-- backend/app/Events/ProjectMemberAdded.php
-- backend/app/Events/ProjectUpdated.php
-- backend/app/Events/RiskDetected.php
-- backend/app/Events/TaskAssigned.php
-- backend/app/Events/TaskCompleted.php
-- backend/app/Events/TaskCreated.php
-- backend/app/Events/TaskStatusChanged.php
-- backend/app/Events/TicketAssigned.php
-- backend/app/Events/TicketClosed.php
-- backend/app/Events/TicketCreated.php
-- backend/app/Exceptions/AuthException.php
-- backend/app/Exceptions/BlockerException.php
-- backend/app/Exceptions/DeliverableException.php
-- backend/app/Exceptions/DomainException.php
-- backend/app/Exceptions/Handler.php
-- backend/app/Exceptions/MilestoneException.php
-- backend/app/Exceptions/ProjectException.php
-- backend/app/Exceptions/TaskException.php
-- backend/app/Exceptions/TicketException.php
-- backend/app/Http/Controllers/Api/AuthController.php
-- backend/app/Http/Controllers/Api/BlockerController.php
-- backend/app/Http/Controllers/Api/DashboardController.php
-- backend/app/Http/Controllers/Api/DeliverableController.php
-- backend/app/Http/Controllers/Api/FcmTokenController.php
-- backend/app/Http/Controllers/Api/MilestoneController.php
-- backend/app/Http/Controllers/Api/NotificationController.php
-- backend/app/Http/Controllers/Api/ObjectiveController.php
-- backend/app/Http/Controllers/Api/ProjectController.php
-- backend/app/Http/Controllers/Api/ProjectMemberController.php
-- backend/app/Http/Controllers/Api/ProjectMetricsController.php
-- backend/app/Http/Controllers/Api/ProjectPhaseController.php
-- backend/app/Http/Controllers/Api/ProjectPlanController.php
-- backend/app/Http/Controllers/Api/ProjectReportController.php
-- backend/app/Http/Controllers/Api/RiskController.php
-- backend/app/Http/Controllers/Api/RoleController.php
-- backend/app/Http/Controllers/Api/TaskCommentController.php
-- backend/app/Http/Controllers/Api/TaskController.php
-- backend/app/Http/Controllers/Api/TaskTimeLogController.php
-- backend/app/Http/Controllers/Api/TicketController.php
-- backend/app/Http/Controllers/Api/UserController.php
-- backend/app/Http/Controllers/Controller.php
-- backend/app/Http/Requests/Auth/LoginRequest.php
-- backend/app/Http/Requests/Blocker/StoreBlockerRequest.php
-- backend/app/Http/Requests/Blocker/UpdateBlockerRequest.php
-- backend/app/Http/Requests/Deliverable/StoreDeliverableRequest.php
-- backend/app/Http/Requests/Deliverable/UpdateDeliverableRequest.php
-- backend/app/Http/Requests/Member/StoreProjectMemberRequest.php
-- backend/app/Http/Requests/Milestone/StoreMilestoneRequest.php
-- backend/app/Http/Requests/Milestone/UpdateMilestoneRequest.php
-- backend/app/Http/Requests/Objective/StoreObjectiveRequest.php
-- backend/app/Http/Requests/Objective/UpdateObjectiveRequest.php
-- backend/app/Http/Requests/Project/StoreProjectRequest.php
-- backend/app/Http/Requests/Project/UpdateProjectRequest.php
-- backend/app/Http/Requests/ProjectPhase/StoreProjectPhaseRequest.php
-- backend/app/Http/Requests/ProjectPhase/UpdateProjectPhaseRequest.php
-- backend/app/Http/Requests/ProjectPlan/StoreProjectPlanRequest.php
-- backend/app/Http/Requests/ProjectPlan/UpdateUserRequest.php
-- backend/app/Http/Requests/RegisterFcmTokenRequest.php
-- backend/app/Http/Requests/Report/ProjectReportRequest.php
-- backend/app/Http/Requests/Risk/StoreRiskRequest.php
-- backend/app/Http/Requests/Risk/UpdateRiskRequest.php
-- backend/app/Http/Requests/Task/StoreTaskRequest.php
-- backend/app/Http/Requests/Task/UpdateTaskRequest.php
-- backend/app/Http/Requests/TaskComment/StoreTaskCommentRequest.php
-- backend/app/Http/Requests/TaskTimeLog/StoreTaskTimeLogRequest.php
-- backend/app/Http/Requests/Ticket/StoreTicketRequest.php
-- backend/app/Http/Requests/Ticket/UpdateTicketRequest.php
-- backend/app/Http/Requests/User/StoreUserRequest.php
-- backend/app/Http/Requests/User/UpdateUserRequest.php
-- backend/app/Jobs/GenerateProjectMetricsJob.php
-- backend/app/Jobs/GenerateProjectReportJob.php
-- backend/app/Jobs/LogActivityJob.php
-- backend/app/Jobs/ProcessRiskAnalysisJob.php
-- backend/app/Jobs/RecalculateProjectMetricsJob.php
-- backend/app/Jobs/RecalculateUserMetricsJob.php
-- backend/app/Jobs/SendPushNotificationJob.php
-- backend/app/Jobs/SendTaskAssignedNotificationJob.php
-- backend/app/Listeners/HandleBlockerCreated.php
-- backend/app/Listeners/HandleBlockerResolved.php
-- backend/app/Listeners/HandleCommentCreated.php
-- backend/app/Listeners/HandleDeliverableApproved.php
-- backend/app/Listeners/HandleMilestoneCompleted.php
-- backend/app/Listeners/HandleProjectCreated.php
-- backend/app/Listeners/HandleProjectMemberAdded.php
-- backend/app/Listeners/HandleProjectUpdated.php
-- backend/app/Listeners/HandleTaskAssigned.php
-- backend/app/Listeners/HandleTaskCompleted.php
-- backend/app/Listeners/HandleTaskCreated.php
-- backend/app/Listeners/HandleTaskStatusChanged.php
-- backend/app/Listeners/HandleTicketAssigned.php
-- backend/app/Listeners/HandleTicketCreated.php
-- backend/app/Models/ActivityLog.php
-- backend/app/Models/Blocker.php
-- backend/app/Models/Deliverable.php
-- backend/app/Models/FcmToken.php
-- backend/app/Models/Milestone.php
-- backend/app/Models/Notification.php
-- backend/app/Models/Objective.php
-- backend/app/Models/Project.php
-- backend/app/Models/ProjectMember.php
-- backend/app/Models/ProjectMetric.php
-- backend/app/Models/ProjectPhase.php
-- backend/app/Models/ProjectPlan.php
-- backend/app/Models/Risk.php
-- backend/app/Models/Task.php
-- backend/app/Models/TaskAttachment.php
-- backend/app/Models/TaskComment.php
-- backend/app/Models/TaskTimeLog.php
-- backend/app/Models/Ticket.php
-- backend/app/Models/User.php
-- backend/app/Models/UserMetric.php
-- backend/app/Notifications/BlockerCreatedNotification.php
-- backend/app/Notifications/Domain/TaskAssignedNotification.php
-- backend/app/Notifications/MilestoneCompletedNotification.php
-- backend/app/Notifications/ProjectCreatedNotification.php
-- backend/app/Notifications/RiskDetectedNotification.php
-- backend/app/Notifications/TaskAssignedNotification.php
-- backend/app/Notifications/TaskCompletedNotification.php
-- backend/app/Notifications/TaskStatusChangedNotification.php
-- backend/app/Notifications/TicketAssignedNotification.php
-- backend/app/Notifications/TicketClosedNotification.php
-- backend/app/Observers/BlockerObserver.php
-- backend/app/Observers/DeliverableObserver.php
-- backend/app/Observers/MilestoneObserver.php
-- backend/app/Observers/ProjectObserver.php
-- backend/app/Observers/RiskObserver.php
-- backend/app/Observers/TaskObserver.php
-- backend/app/Observers/TicketObserver.php
-- backend/app/Policies/BlockerPolicy.php
-- backend/app/Policies/DeliverablePolicy.php
-- backend/app/Policies/MilestonePolicy.php
-- backend/app/Policies/ObjectivePolicy.php
-- backend/app/Policies/ProjectPolicy.php
-- backend/app/Policies/RiskPolicy.php
-- backend/app/Policies/TaskPolicy.php
-- backend/app/Policies/TicketPolicy.php
-- backend/app/Policies/UserPolicy.php
-- backend/app/Providers/AppServiceProvider.php
-- backend/app/Providers/AuthServiceProvider.php
-- backend/app/Providers/EventServiceProvider.php
-- backend/app/Providers/HorizonServiceProvider.php
-- backend/app/Repositories/Contracts/ProjectRepositoryInterface.php
-- backend/app/Repositories/Contracts/RiskRepositoryInterface.php
-- backend/app/Repositories/Contracts/TaskRepositoryInterface.php
-- backend/app/Repositories/Contracts/TicketRepositoryInterface.php
-- backend/app/Repositories/ProjectRepository.php
-- backend/app/Repositories/RiskRepository.php
-- backend/app/Repositories/TaskRepository.php
-- backend/app/Repositories/TicketRepository.php
-- backend/app/Services/FirebaseNotificationService.php
-- backend/app/Services/Notifications/AbstractNotificationService.php
-- backend/app/Services/Notifications/Domain/BlockerCreatedNotificationService.php
-- backend/app/Services/Notifications/Domain/CommentCreatedNotificationService.php
-- backend/app/Services/Notifications/Domain/MilestoneCompletedNotificationService.php
-- backend/app/Services/Notifications/Domain/ProjectMemberAddedNotificationService.php
-- backend/app/Services/Notifications/Domain/ProjectUpdatedNotificationService.php
-- backend/app/Services/Notifications/Domain/TaskAssignedNotificationService.php
-- backend/app/Services/Notifications/Domain/TaskCompletedNotificationService.php
-- backend/app/Services/Notifications/Domain/TaskStatusChangedNotificationService.php
-- backend/app/Services/Notifications/Domain/TicketAssignedNotificationService.php
-- backend/app/Services/Notifications/Domain/TicketCreatedNotificationService.php
-- backend/app/Services/Notifications/NotificationRecipientResolver.php
-- backend/app/Services/Notifications/PolicyAwareRecipientFilter.php
-- backend/app/Services/ProjectDashboardReportService.php
-- backend/app/Services/ProjectExecutiveReportService.php
-- backend/app/Services/ProjectService.php
-- backend/app/Services/TaskService.php
-- backend/app/Services/TicketService.php
-- backend/app/Traits/BelongsToProject.php
-- backend/app/Traits/HasActivityLog.php
-- backend/app/Traits/HasMetrics.php
-- backend/app/Traits/HasProjectAccess.php
-- backend/artisan
-- backend/bootstrap/app.php
-- backend/bootstrap/cache/.gitignore
-- backend/bootstrap/providers.php
-- backend/composer.json
-- backend/composer.lock
-- backend/config/app.php
-- backend/config/auth.php
-- backend/config/cache.php
-- backend/config/database.php
-- backend/config/filesystems.php
-- backend/config/horizon.php
-- backend/config/logging.php
-- backend/config/mail.php
-- backend/config/permission.php
-- backend/config/queue.php
-- backend/config/sanctum.php
-- backend/config/scout.php
-- backend/config/services.php
-- backend/config/session.php
-- backend/database/.gitignore
-- backend/database/factories/BlockerFactory.php
-- backend/database/factories/DeliverableFactory.php
-- backend/database/factories/MilestoneFactory.php
-- backend/database/factories/ProjectFactory.php
-- backend/database/factories/TaskCommentFactory.php
-- backend/database/factories/TaskFactory.php
-- backend/database/factories/TicketFactory.php
-- backend/database/factories/UserFactory.php
-- backend/database/migrations/0001_01_01_000000_create_users_table.php
-- backend/database/migrations/0001_01_01_000001_create_cache_table.php
-- backend/database/migrations/0001_01_01_000002_create_jobs_table.php
-- backend/database/migrations/2026_05_15_200000_create_permission_tables.php
-- backend/database/migrations/2026_05_15_200001_create_projects_table.php
-- backend/database/migrations/2026_05_15_200002_create_project_members_table.php
-- backend/database/migrations/2026_05_15_200003_create_project_phases_table.php
-- backend/database/migrations/2026_05_15_200004_create_project_plans_table.php
-- backend/database/migrations/2026_05_15_200005_create_milestones_table.php
-- backend/database/migrations/2026_05_15_200006_create_objectives_table.php
-- backend/database/migrations/2026_05_15_200007_create_tasks_table.php
-- backend/database/migrations/2026_05_15_200008_create_task_comments_table.php
-- backend/database/migrations/2026_05_15_200009_create_task_attachments_table.php
-- backend/database/migrations/2026_05_15_200010_create_task_time_logs_table.php
-- backend/database/migrations/2026_05_15_200011_create_tickets_table.php
-- backend/database/migrations/2026_05_15_200012_create_risks_table.php
-- backend/database/migrations/2026_05_15_200013_create_blockers_table.php
-- backend/database/migrations/2026_05_15_200014_create_deliverables_table.php
-- backend/database/migrations/2026_05_15_200015_create_project_metrics_table.php
-- backend/database/migrations/2026_05_15_200016_create_user_metrics_table.php
-- backend/database/migrations/2026_05_15_200017_create_activity_logs_table.php
-- backend/database/migrations/2026_05_15_200018_create_notifications_table.php
-- backend/database/migrations/2026_05_15_205532_create_personal_access_tokens_table.php
-- backend/database/migrations/2026_05_26_100000_add_status_to_risks_and_created_by_to_blockers.php
-- backend/database/migrations/2026_06_03_215240_create_fcm_tokens_table.php
-- backend/database/migrations/2026_06_03_215243_create_notifications_table.php
-- backend/database/seeders/DatabaseSeeder.php
-- backend/database/seeders/DemoProjectsSeeder.php
-- backend/database/seeders/RolesAndPermissionsSeeder.php
-- backend/database/seeders/UserSeeder.php
-- backend/dev
-- backend/docker-entrypoint.sh
-- backend/package.json
-- backend/phpunit.xml
-- backend/public/.htaccess
-- backend/public/favicon.ico
-- backend/public/index.php
-- backend/public/robots.txt
-- backend/resources/css/app.css
-- backend/resources/js/app.js
-- backend/resources/views/welcome.blade.php
-- backend/routes/api.php
-- backend/routes/api/auth.php
-- backend/routes/api/blockers.php
-- backend/routes/api/dashboard.php
-- backend/routes/api/deliverables.php
-- backend/routes/api/members.php
-- backend/routes/api/milestones.php
-- backend/routes/api/notifications.php
-- backend/routes/api/objectives.php
-- backend/routes/api/phases.php
-- backend/routes/api/plans.php
-- backend/routes/api/projects.php
-- backend/routes/api/reports.php
-- backend/routes/api/risks.php
-- backend/routes/api/roles.php
-- backend/routes/api/tasks.php
-- backend/routes/api/tickets.php
-- backend/routes/api/users.php
-- backend/routes/console.php
-- backend/routes/web.php
-- backend/settings.json
-- backend/storage/app/.gitignore
-- backend/storage/app/private/.gitignore
-- backend/storage/app/public/.gitignore
-- backend/storage/framework/.gitignore
-- backend/storage/framework/cache/.gitignore
-- backend/storage/framework/cache/data/.gitignore
-- backend/storage/framework/sessions/.gitignore
-- backend/storage/framework/testing/.gitignore
-- backend/storage/framework/views/.gitignore
-- backend/storage/logs/.gitignore
-- backend/tests/Feature/Auth/AuthTest.php
-- backend/tests/Feature/DashboardTest.php
-- backend/tests/Feature/ExampleTest.php
-- backend/tests/Feature/Project/BlockerTest.php
-- backend/tests/Feature/Project/DeliverableTest.php
-- backend/tests/Feature/Project/MilestoneTest.php
-- backend/tests/Feature/Project/ProjectMemberTest.php
-- backend/tests/Feature/Project/ProjectTest.php
-- backend/tests/Feature/Task/TaskCommentTest.php
-- backend/tests/Feature/Task/TaskTest.php
-- backend/tests/Feature/Task/TaskTimeLogTest.php
-- backend/tests/Feature/Ticket/TicketTest.php
-- backend/tests/Feature/User/UserTest.php
-- backend/tests/TestCase.php
-- backend/tests/Unit/ExampleTest.php
-- backend/tests/Unit/Notifications/NotificationRecipientResolverTest.php
-- backend/vite
-- backend/vite.config.js
-- docker-compose.yml
-- frontend/.dockerignore
-- frontend/.env.example
-- frontend/.gitignore
-- frontend/Dockerfile
-- frontend/index.html
-- frontend/package-lock.json
-- frontend/package.json
-- frontend/public/firebase-messaging-sw.js
-- frontend/src/App.vue
-- frontend/src/__tests__/composables/useMilestones.spec.ts
-- frontend/src/__tests__/composables/useProjects.spec.ts
-- frontend/src/__tests__/composables/useRisks.spec.ts
-- frontend/src/__tests__/composables/useTasks.spec.ts
-- frontend/src/__tests__/composables/useTickets.spec.ts
-- frontend/src/__tests__/helpers/canAction.spec.ts
-- frontend/src/__tests__/services/auth.service.spec.ts
-- frontend/src/__tests__/services/projects.service.spec.ts
-- frontend/src/__tests__/services/tickets.service.spec.ts
-- frontend/src/__tests__/setup.ts
-- frontend/src/__tests__/store/useAppStore.spec.ts
-- frontend/src/components/FeaturePanel.vue
-- frontend/src/components/GanttChart.vue
-- frontend/src/components/KanbanBoard.vue
-- frontend/src/components/RequestState.vue
-- frontend/src/components/ServiceProbe.vue
-- frontend/src/components/ThemeSelector.vue
-- frontend/src/components/ValidationErrors.vue
-- frontend/src/components/blockers/BlockerForm.vue
-- frontend/src/components/deliverables/DeliverableForm.vue
-- frontend/src/components/milestones/MilestoneForm.vue
-- frontend/src/components/objectives/ObjectiveForm.vue
-- frontend/src/components/project-members/ProjectMemberForm.vue
-- frontend/src/components/project-phases/ProjectPhaseForm.vue
-- frontend/src/components/project-plans/ProjectPlanForm.vue
-- frontend/src/components/projects/ProjectForm.vue
-- frontend/src/components/risks/RiskForm.vue
-- frontend/src/components/task-comments/TaskCommentForm.vue
-- frontend/src/components/task-time-logs/TaskTimeLogForm.vue
-- frontend/src/components/tasks/TaskForm.vue
-- frontend/src/components/tickets/TicketForm.vue
-- frontend/src/components/users/UserForm.vue
-- frontend/src/composables/createServiceComposable.ts
-- frontend/src/composables/index.ts
-- frontend/src/composables/useBlockers.ts
-- frontend/src/composables/useConfirmAction.ts
-- frontend/src/composables/useDeliverables.ts
-- frontend/src/composables/useEnsureCurrentProject.ts
-- frontend/src/composables/useMilestones.ts
-- frontend/src/composables/useObjectives.ts
-- frontend/src/composables/useProjects.ts
-- frontend/src/composables/useRisks.ts
-- frontend/src/composables/useRolesList.ts
-- frontend/src/composables/useServiceRequest.ts
-- frontend/src/composables/useTasks.ts
-- frontend/src/composables/useTickets.ts
-- frontend/src/composables/useUserCreate.ts
-- frontend/src/composables/useUserDelete.ts
-- frontend/src/composables/useUserForm.ts
-- frontend/src/composables/useUserList.ts
-- frontend/src/composables/useUserUpdate.ts
-- frontend/src/composables/useUsers.ts
-- frontend/src/constants/domain-options.js
-- frontend/src/constants/themes.ts
-- frontend/src/features/admin/roles/RolesFeature.vue
-- frontend/src/features/admin/users/UserCreateFeature.vue
-- frontend/src/features/admin/users/UserDeleteFeature.vue
-- frontend/src/features/admin/users/UserForm.vue
-- frontend/src/features/admin/users/UserUpdateFeature.vue
-- frontend/src/features/admin/users/UsersFeature.vue
-- frontend/src/features/admin/users/UsersListFeature.vue
-- frontend/src/features/auth/login/LoginFeature.vue
-- frontend/src/features/dashboard/overview/DashboardFeature.vue
-- frontend/src/features/projects/blockers/BlockersFeature.vue
-- frontend/src/features/projects/deliverables/DeliverablesFeature.vue
-- frontend/src/features/projects/members/MembersFeature.vue
-- frontend/src/features/projects/milestones/MilestonesFeature.vue
-- frontend/src/features/projects/objectives/ObjectivesFeature.vue
-- frontend/src/features/projects/phases/PhasesFeature.vue
-- frontend/src/features/projects/plans/PlansFeature.vue
-- frontend/src/features/projects/risks/RisksFeature.vue
-- frontend/src/features/projects/tasks/TasksFeature.vue
-- frontend/src/features/projects/tickets/TicketsFeature.vue
-- frontend/src/features/projects/workspace/ProjectsFeature.vue
-- frontend/src/features/tasks/comments/TaskCommentsFeature.vue
-- frontend/src/features/tasks/time-logs/TaskTimeLogsFeature.vue
-- frontend/src/helpers/canAction.ts
-- frontend/src/interfaces/ActivityLogI.ts
-- frontend/src/interfaces/BlockerI.ts
-- frontend/src/interfaces/DeliverableI.ts
-- frontend/src/interfaces/MilestoneI.ts
-- frontend/src/interfaces/ModelBaseI.ts
-- frontend/src/interfaces/ObjectiveI.ts
-- frontend/src/interfaces/PaginacionScoutI.ts
-- frontend/src/interfaces/ProjectI.ts
-- frontend/src/interfaces/ProjectMemberI.ts
-- frontend/src/interfaces/ProjectMetricI.ts
-- frontend/src/interfaces/ProjectPhaseI.ts
-- frontend/src/interfaces/ProjectPlanI.ts
-- frontend/src/interfaces/ResponseBaseI.ts
-- frontend/src/interfaces/RiskI.ts
-- frontend/src/interfaces/TaskAttachmentI.ts
-- frontend/src/interfaces/TaskCommentI.ts
-- frontend/src/interfaces/TaskI.ts
-- frontend/src/interfaces/TaskTimeLogI.ts
-- frontend/src/interfaces/TicketI.ts
-- frontend/src/interfaces/UserI.ts
-- frontend/src/interfaces/UserMetricI.ts
-- frontend/src/interfaces/enums.ts
-- frontend/src/interfaces/index.ts
-- frontend/src/layouts/MainLayout.vue
-- frontend/src/main.js
-- frontend/src/pages/AdminPage.vue
-- frontend/src/pages/AuthPage.vue
-- frontend/src/pages/DashboardPage.vue
-- frontend/src/pages/FlowPage.vue
-- frontend/src/pages/ForgotPasswordPage.vue
-- frontend/src/pages/LoginPage.vue
-- frontend/src/pages/ProjectDetailPage.vue
-- frontend/src/pages/ProjectsPage.vue
-- frontend/src/pages/RolesPage.vue
-- frontend/src/pages/admin/index.vue
-- frontend/src/pages/admin/users/[id].vue
-- frontend/src/pages/admin/users/index.vue
-- frontend/src/pages/admin/users/new.vue
-- frontend/src/pages/blockers/[id].vue
-- frontend/src/pages/blockers/index.vue
-- frontend/src/pages/blockers/new.vue
-- frontend/src/pages/deliverables/[id].vue
-- frontend/src/pages/deliverables/index.vue
-- frontend/src/pages/deliverables/new.vue
-- frontend/src/pages/members/[id].vue
-- frontend/src/pages/members/index.vue
-- frontend/src/pages/members/new.vue
-- frontend/src/pages/metrics/index.vue
-- frontend/src/pages/milestones/[id].vue
-- frontend/src/pages/milestones/index.vue
-- frontend/src/pages/milestones/new.vue
-- frontend/src/pages/objectives/[id].vue
-- frontend/src/pages/objectives/index.vue
-- frontend/src/pages/objectives/new.vue
-- frontend/src/pages/phases/[id].vue
-- frontend/src/pages/phases/index.vue
-- frontend/src/pages/phases/new.vue
-- frontend/src/pages/plans/[id].vue
-- frontend/src/pages/plans/index.vue
-- frontend/src/pages/plans/new.vue
-- frontend/src/pages/profile/edit.vue
-- frontend/src/pages/profile/index.vue
-- frontend/src/pages/project-detail/ProjectDeliveryTab.vue
-- frontend/src/pages/project-detail/ProjectExecutionTab.vue
-- frontend/src/pages/project-detail/ProjectOverviewTab.vue
-- frontend/src/pages/project-detail/ProjectPlanningTab.vue
-- frontend/src/pages/project-detail/ProjectReportsTab.vue
-- frontend/src/pages/projects/ProjectFeaturesLayoutPage.vue
-- frontend/src/pages/projects/[id].vue
-- frontend/src/pages/projects/edit.vue
-- frontend/src/pages/projects/index.vue
-- frontend/src/pages/projects/new.vue
-- frontend/src/pages/risks/[id].vue
-- frontend/src/pages/risks/index.vue
-- frontend/src/pages/risks/new.vue
-- frontend/src/pages/tasks/[id].vue
-- frontend/src/pages/tasks/index.vue
-- frontend/src/pages/tasks/new.vue
-- frontend/src/pages/tickets/[id].vue
-- frontend/src/pages/tickets/index.vue
-- frontend/src/pages/tickets/new.vue
-- frontend/src/pages/users/UsersCreatePage.vue
-- frontend/src/pages/users/UsersDeletePage.vue
-- frontend/src/pages/users/UsersLayoutPage.vue
-- frontend/src/pages/users/UsersListPage.vue
-- frontend/src/pages/users/UsersUpdatePage.vue
-- frontend/src/router/index.js
-- frontend/src/services/auth.service.ts
-- frontend/src/services/dashboard.service.ts
-- frontend/src/services/firebase.ts
-- frontend/src/services/http.ts
-- frontend/src/services/index.ts
-- frontend/src/services/project-blockers.service.ts
-- frontend/src/services/project-deliverables.service.ts
-- frontend/src/services/project-members.service.ts
-- frontend/src/services/project-milestones.service.ts
-- frontend/src/services/project-objectives.service.ts
-- frontend/src/services/project-phases.service.ts
-- frontend/src/services/project-plans.service.ts
-- frontend/src/services/project-reports.service.ts
-- frontend/src/services/project-risks.service.ts
-- frontend/src/services/project-tasks.service.ts
-- frontend/src/services/projects.service.ts
-- frontend/src/services/roles.service.ts
-- frontend/src/services/task-comments.service.ts
-- frontend/src/services/task-time-logs.service.ts
-- frontend/src/services/tickets.service.ts
-- frontend/src/services/types.ts
-- frontend/src/services/users.service.ts
-- frontend/src/store/useAppStore.ts
-- frontend/src/store/useAuthStore.ts
-- frontend/src/store/useThemeStore.ts
-- frontend/src/style.css
-- frontend/src/utils/util.ts
-- frontend/tsconfig.json
-- frontend/vite.config.js
-- frontend/vitest.config.ts
-- gestion.session.sql
-- gestion_db
-- nginx.conf
-- nginx.htpasswd
-- testPostman.json
+# Mapa de archivos — Gestión de Proyectos
+
+> **Propósito:** Referencia rápida para sesiones de desarrollo. Cada archivo tiene una descripción de su responsabilidad en el sistema.
+
+---
+
+## Backend (Laravel 12)
+
+### Controllers (`backend/app/Http/Controllers/Api/`)
+
+| Archivo | Responsabilidad |
+|---------|----------------|
+| `AttachmentController.php` | Descarga, subida temporal (`upload-temp`), claim, eliminación y reemplazo de adjuntos |
+| `AuthController.php` | Login, logout, registro, perfil (`me`), refresh de permisos vía FCM |
+| `BlockerController.php` | CRUD de bloqueadores (impedimentos de tareas) |
+| `DashboardController.php` | Dashboard resumen por usuario autenticado |
+| `DeliverableController.php` | CRUD y aprobación de entregables de proyecto |
+| `FcmTokenController.php` | Registro y eliminación de tokens FCM para notificaciones push |
+| `MilestoneController.php` | CRUD de hitos (milestones) |
+| `NotificationController.php` | CRUD de notificaciones internas, marcar como leídas, contador no leídas |
+| `ObjectiveController.php` | CRUD de objetivos del proyecto |
+| `ProjectController.php` | CRUD de proyectos, listado con scope por usuario |
+| `ProjectMemberController.php` | Gestión de miembros del proyecto (agregar, remover) |
+| `ProjectMetricsController.php` | Métricas calculadas del proyecto (progreso, presupuesto, tareas) |
+| `ProjectPhaseController.php` | CRUD de fases del proyecto |
+| `ProjectPlanController.php` | CRUD de planes del proyecto (alcance, requerimientos) |
+| `ProjectReportController.php` | Generación de reportes (DOCX, XLSX) |
+| `RiskController.php` | CRUD de riesgos del proyecto |
+| `RoleController.php` | Listado de roles y permisos disponibles |
+| `TaskCommentController.php` | CRUD de comentarios en tareas |
+| `TaskController.php` | CRUD de tareas, cambio de status, asignación, logs de tiempo, adjuntos, `field_permissions` |
+| `TaskTimeLogController.php` | Registro y listado de horas trabajadas en tareas |
+| `TicketController.php` | CRUD de tickets, asignación, adjuntos |
+| `UserController.php` | CRUD de usuarios, métricas, asignación de roles/permisos, invalidación FCM |
+
+### Requests (FormRequest) (`backend/app/Http/Requests/`)
+
+Validación de entrada para cada recurso. Organizados por subdirectorio: `Auth/`, `Blocker/`, `Deliverable/`, `Member/`, `Milestone/`, `Objective/`, `Project/`, `ProjectPhase/`, `ProjectPlan/`, `Report/`, `Risk/`, `Task/`, `TaskComment/`, `TaskTimeLog/`, `Ticket/`, `User/`.
+
+### Models (`backend/app/Models/`)
+
+| Archivo | Tabla | Relaciones clave |
+|---------|-------|-----------------|
+| `User.php` | `users` | Spatie HasRoles, `projectMemberships`, `ownedProjects`, `assignedTasks`, `fcmTokens` |
+| `Project.php` | `projects` | `owner`, `members`, `phases`, `tasks`, `tickets`, `risks`, `blockers`, `deliverables`, `milestones`, `metrics` |
+| `ProjectMember.php` | `project_members` | `user_id`, `project_id`, `role` |
+| `Task.php` | `tasks` | `project`, `assignee`, `creator`, `phase`, `comments`, `timeLogs`, `attachments` |
+| `Ticket.php` | `tickets` | `project`, `creator`, `assignee`, `attachments` |
+| `Risk.php` | `risks` | `project`, `reported_by` |
+| `Blocker.php` | `blockers` | `project`, `task`, `reported_by`, `resolved_by` |
+| `Milestone.php` | `milestones` | `project` |
+| `Deliverable.php` | `deliverables` | `project`, `approved_by` |
+| `Objective.php` | `objectives` | `project` |
+| `ProjectPhase.php` | `project_phases` | `project` |
+| `ProjectPlan.php` | `project_plans` | `project` |
+| `ProjectMetric.php` | `project_metrics` | `project` |
+| `Attachment.php` | `attachments` | Polimórfico (`attachable`), `uploader`, `uuid`, `disk_path`, `status` |
+| `TaskAttachment.php` | `task_attachments` | Modelo legacy — reemplazado por polimórfico `Attachment` |
+| `TaskComment.php` | `task_comments` | `task`, `user` |
+| `TaskTimeLog.php` | `task_time_logs` | `task`, `user` |
+| `ActivityLog.php` | `activity_logs` | `user`, polimórfico `subject` |
+| `Notification.php` | `notifications` | `user`, datos JSON, `read_at` |
+| `FcmToken.php` | `fcm_tokens` | `user`, `token`, `platform`, `browser` |
+| `UserMetric.php` | `user_metrics` | `user` |
+
+### Policies (`backend/app/Policies/`)
+
+| Archivo | Controla acceso a |
+|---------|------------------|
+| `UserPolicy.php` | `viewAny`, `view`, `create`, `update`, `delete` de usuarios |
+| `ProjectPolicy.php` | `viewAny`, `view`, `create`, `update`, `delete`, `assignMembers`, `manageAttachments` |
+| `TaskPolicy.php` | `view`, `create`, `update`, `updateStatus`, `assign`, `delete`, `logTime`, `manageAttachments` |
+| `TicketPolicy.php` | `view`, `create`, `update` (edit-any vs edit-own + estado closed), `assign`, `delete`, `manageAttachments` |
+| `BlockerPolicy.php` | `view`, `create`, `update`, `resolve` |
+| `RiskPolicy.php` | `view`, `create`, `update`, `delete` |
+| `MilestonePolicy.php` | `view`, `create`, `update`, `delete` |
+| `DeliverablePolicy.php` | `view`, `create`, `update`, `approve` |
+| `ObjectivePolicy.php` | `view`, `create`, `update` |
+
+Todas las policies usan `$user->canForProject($project, 'permiso')` y `$user->hasProjectRole($project, 'rol')` para scope por proyecto.
+
+### Services (`backend/app/Services/`)
+
+| Archivo | Responsabilidad |
+|---------|----------------|
+| `AttachmentService.php` | Subida, subida temporal (`uploadTemporary`), claim (mueve archivos de `drafts/` a `projects/{uuid}/` con `DB::transaction`) |
+| `FieldPermissionsService.php` | Computa `field_permissions` para cada recurso llamando a las policies reales via `Gate::forUser()` |
+| `FirebaseNotificationService.php` | Envío de notificaciones push FCM v1 (token único, masivo, por usuario), Google OAuth2 JWT |
+| `ProjectService.php` | Lógica de negocio de proyectos (crear, agregar/quitar miembros) |
+| `TaskService.php` | Lógica de negocio de tareas (crear, cambio de status con transiciones válidas) |
+| `TicketService.php` | Lógica de negocio de tickets (crear, cambio de estado) |
+| `ProjectDashboardReportService.php` | Generación de reportes XLSX de proyecto |
+| `ProjectExecutiveReportService.php` | Generación de reportes DOCX ejecutivos |
+| `Notifications/` | Servicios de notificación por dominio (TaskAssigned, TicketCreated, etc.) con resolución de destinatarios y filtro por policy |
+
+### Traits (`backend/app/Traits/`)
+
+| Archivo | Uso |
+|---------|-----|
+| `BelongsToProject.php` | Verifica que un recurso pertenezca a un proyecto (usado en controllers) |
+| `HasActivityLog.php` | Registra actividad automáticamente en modelos |
+| `HasAttachments.php` | Relación polimórfica `attachments()`, resuelve `project` padre y `getProjectUuid()` |
+| `HasMetrics.php` | Relación con métricas de proyecto/usuario |
+| `HasProjectAccess.php` | `assertCanAccessProject()`, `assertProjectIsOpen()` para services/controllers |
+
+### Jobs (`backend/app/Jobs/`)
+
+Tareas asíncronas (Horizon/Redis): `GenerateProjectMetricsJob`, `GenerateProjectReportJob`, `LogActivityJob`, `ProcessRiskAnalysisJob`, `RecalculateProjectMetricsJob`, `RecalculateUserMetricsJob`, `SendPushNotificationJob`, `SendTaskAssignedNotificationJob`.
+
+### Events & Listeners (`backend/app/Events/`, `backend/app/Listeners/`)
+
+Sistema de eventos para notificaciones: cada evento de dominio (TaskCreated, TicketAssigned, BlockerResolved, etc.) tiene su listener que dispara notificaciones internas y push.
+
+### Observers (`backend/app/Observers/`)
+
+Observers de Eloquent para generar eventos automáticamente en cambios de modelo.
+
+### Enums (`backend/app/Enums/`)
+
+PHP 8.1 Backed Enums para estados, prioridades, roles, severidades. Cada enum tiene método `permissions()` o `label()`.
+
+### Notifications (`backend/app/Notifications/`)
+
+Clases de notificación Laravel para email y canales internos. Subdirectorio `Domain/` con notificaciones específicas por evento.
+
+### Repositories (`backend/app/Repositories/`)
+
+Capa de acceso a datos con interfaces (`Contracts/`). Implementaciones: `ProjectRepository`, `TaskRepository`, `TicketRepository`, `RiskRepository`.
+
+---
+
+## Frontend (Vue 3 + Pinia + Vuetify 3)
+
+### Stores — Pinia (`frontend/src/store/`)
+
+| Archivo | Estado que gestiona |
+|---------|-------------------|
+| `useAppStore.ts` | `loader` global, `snackbar` (éxito/error) |
+| `useAuthStore.ts` | `authUser`, `currentProject`, `currentProjectRole`, roles, sesión, Firebase init |
+| `useNotificationStore.ts` | Notificaciones internas: lista, no leídas, bandeja, FCM en primer plano |
+| `usePermissionStore.ts` | Permisos del usuario (`permissions[]`), `hasPermission`, `refreshPermissions()` post-FCM |
+| `useThemeStore.ts` | Tema Vuetify (claro/oscuro) |
+
+### Composables (`frontend/src/composables/`)
+
+| Archivo | Uso |
+|---------|-----|
+| `useFieldLock.ts` | `useFieldLock(fieldPermissions)` — Proxy reactivo que devuelve `computed<boolean>` por campo. Reemplaza v-can-action. |
+| `useAttachments.ts` | Subida, descarga, eliminación, reemplazo de archivos |
+| `createServiceComposable.ts` | Factory para crear composables de servicio CRUD genéricos |
+| `useServiceRequest.ts` | Wrapper para peticiones HTTP con manejo de errores |
+| `useEnsureCurrentProject.ts` | Asegura que `currentProject` esté cargado en el store |
+| `useBlockers.ts`, `useDeliverables.ts`, `useMilestones.ts`, `useObjectives.ts`, `useProjects.ts`, `useRisks.ts`, `useTasks.ts`, `useTickets.ts` | Composables CRUD para cada recurso |
+| `useUsers.ts`, `useUserForm.ts`, `useUserCreate.ts`, `useUserUpdate.ts`, `useUserDelete.ts`, `useUserList.ts` | Gestión de usuarios |
+| `useRolesList.ts` | Listado de roles y permisos |
+| `useConfirmAction.ts` | Diálogo de confirmación reutilizable |
+
+### Services (`frontend/src/services/`)
+
+| Archivo | Endpoints |
+|---------|-----------|
+| `http.ts` | Axios instance (`apiWithToken`), interceptors, helpers de token (localStorage) |
+| `firebase.ts` | Inicialización de Firebase, `getToken`, `onMessage`, registro de token FCM |
+| `auth.service.ts` | `login`, `logout`, `me`, `register` |
+| `dashboard.service.ts` | Dashboard del usuario autenticado |
+| `projects.service.ts` | CRUD de proyectos |
+| `project-tasks.service.ts` | CRUD de tareas |
+| `tickets.service.ts` | CRUD de tickets |
+| `project-members.service.ts` | Gestión de miembros |
+| `project-blockers.service.ts` | CRUD de bloqueadores |
+| `project-deliverables.service.ts` | CRUD de entregables |
+| `project-milestones.service.ts` | CRUD de hitos |
+| `project-objectives.service.ts` | CRUD de objetivos |
+| `project-phases.service.ts` | CRUD de fases |
+| `project-plans.service.ts` | CRUD de planes |
+| `project-reports.service.ts` | Generación de reportes |
+| `project-risks.service.ts` | CRUD de riesgos |
+| `roles.service.ts` | Listado de roles |
+| `task-comments.service.ts` | Comentarios de tareas |
+| `task-time-logs.service.ts` | Registro de horas |
+| `users.service.ts` | CRUD de usuarios (admin) |
+| `notifications.service.ts` | Notificaciones internas |
+
+### Helpers (`frontend/src/helpers/`)
+
+| Archivo | Propósito |
+|---------|-----------|
+| `canAction.ts` | Verificación mínima de permisos: token + `PermissionStore` + ownership para acciones `-own` |
+
+### Router (`frontend/src/router/index.js`)
+
+Rutas lazy-loading con guard `beforeEach`: restaura sesión desde token, carga `currentProject` al entrar a submódulos, protege rutas admin con `requiresSuperAdmin`.
+
+### Layouts (`frontend/src/layouts/`)
+
+`MainLayout.vue`: AppBar + NavigationDrawer con menú dinámico (base, proyecto activo, admin), NotificationBell, ThemeSelector.
+
+### Components (`frontend/src/components/`)
+
+Formularios por recurso (TaskForm, TicketForm, ProjectForm, etc.), KanbanBoard, GanttChart, DocumentManager (adjuntos con drag & drop), NotificationBell, NotificationTray.
+
+### Pages (`frontend/src/pages/`)
+
+Vistas organizadas por módulo: `projects/`, `tasks/`, `tickets/`, `blockers/`, `risks/`, `milestones/`, `deliverables/`, `objectives/`, `phases/`, `plans/`, `members/`, `metrics/`, `admin/`, `profile/`.
+
+---
+
+## Base de datos — Migraciones
+
+| Archivo | Tabla/Columna |
+|---------|--------------|
+| `..._create_attachments_table.php` | `attachments` (polimórfica: `attachable_type` + `attachable_id` nullable, `uuid`, `disk_path`) |
+| `..._add_status_to_attachments_table.php` | Agrega `status` (`temp`/`claimed`) a `attachments` |
+| `..._make_attachable_columns_nullable.php` | Hace nullable `attachable_type`/`attachable_id` para attachments temporales |
+
+---
+
+## Testing
+
+| Framework | Ubicación | Archivos | Tests | Ejecutar |
+|-----------|-----------|----------|-------|----------|
+| PHPUnit (backend) | `backend/tests/` | 12 | 88 | `docker compose exec backend php artisan test` |
+| Vitest (frontend) | `frontend/src/__tests__/` | 15 | 135 | `docker compose exec frontend npm run test` |
+| Playwright (E2E) | `frontend/tests/e2e/` | 2 | 6 grupos | `cd frontend && npx playwright test --headed` |
+
+### Documentación de testing
+
+`docs/testing-documentation.md` — Diagramas Mermaid (flujo cross-role, autorización, attachments), matriz de cobertura, instrucciones de ejecución, CI/CD.
+
+---
+
+## Archivos de configuración raíz
+
+| Archivo | Propósito |
+|---------|-----------|
+| `docker-compose.yml` | Servicios: backend (PHP-FPM), nginx, frontend (Vite), horizon, scheduler, redis, mysql |
+| `nginx.conf` | Proxy reverso: API en puerto 8000, Horizon en 8001 |
+| `refactorizar.md` | Especificación original de la refactorización (5 puntos) |
+| `Changes.md` | Registro completo de cambios de esta sesión |
+| `ARCHITECTURAL_AUDIT.md` | Auditoría arquitectónica previa |
+| `ARCHITECTURE_V2.md` | Documento de arquitectura V2 |
+| `checklist.md` | Checklist de tareas pendientes |

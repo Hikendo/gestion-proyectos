@@ -6,6 +6,7 @@ import type { ProjectI } from '@/interfaces/ProjectI';
 import type { ProjectMemberRole } from '@/interfaces/enums';
 // 🔔 Importamos las utilidades de Firebase de forma asíncrona
 import { requestNotificationPermission, listenForegroundNotifications } from '@/services/firebase';
+import { usePermissionStore } from '@/store/usePermissionStore';
 
 export const useAuthStore = defineStore('auth', () => {
     const authUser = ref<UserI | null>(null);
@@ -30,6 +31,12 @@ export const useAuthStore = defineStore('auth', () => {
     async function setSession(user: UserI, token: string) {
         setAuthToken(token);
         authUser.value = user;
+
+        // Prime the PermissionStore with user's permissions from login/me response
+        const permissionStore = usePermissionStore();
+        if (user.permissions && Array.isArray(user.permissions)) {
+            permissionStore.setPermissions(user.permissions);
+        }
 
         // 🔔 El token ya está asegurado en las cabeceras de Axios.
         // Ahora es 100% seguro arrancar Firebase sin riesgo de lanzar un 401.
@@ -56,6 +63,8 @@ export const useAuthStore = defineStore('auth', () => {
         authUser.value = null;
         currentProject.value = null;
         currentProjectRole.value = null;
+        const permissionStore = usePermissionStore();
+        permissionStore.clearPermissions();
     }
 
     return {

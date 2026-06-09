@@ -4,10 +4,12 @@ import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { useNotificationStore } from '@/store/useNotificationStore';
+import { usePermissionStore } from '@/store/usePermissionStore';
 import type { NotificationI } from '@/interfaces/NotificationI';
 
 const appStore = useAppStore();
 const notificationStore = useNotificationStore();
+const permissionStore = usePermissionStore();
 const { loader, snackbar } = storeToRefs(appStore);
 
 // Apply CSS variables and sync Vuetify theme on first render
@@ -15,6 +17,13 @@ const themeStore = useThemeStore();
 
 function handleForegroundNotification(event: CustomEvent) {
     const { title, body, data: fcmData } = event.detail || {};
+
+    // If this is a silent permissions update, just refresh permissions
+    if (fcmData?.type === 'permissions_updated') {
+        permissionStore.refreshPermissions();
+        return;
+    }
+
     // Construir una NotificationI temporal
     const newNotification: NotificationI = {
         id: Date.now(), // id temporal; se refrescará al recargar del backend

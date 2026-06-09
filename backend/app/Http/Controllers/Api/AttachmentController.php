@@ -66,6 +66,97 @@ class AttachmentController extends Controller
     }
 
     /**
+     * POST /api/v1/attachments/upload-temp
+     *
+     * Sube uno o más archivos de forma temporal (status=temp) sin asociarlos
+     * a ningún recurso padre todavía. Devuelve los uuids para usarlos después
+     * en el endpoint de claim.
+     */
+    public function uploadTemporary(Request $request): JsonResponse
+    {
+        $request->validate([
+            'files'   => ['required', 'array'],
+            'files.*' => ['file', 'max:102400'],
+        ]);
+
+        try {
+            $uploaded = [];
+            foreach ($request->file('files') as $file) {
+                $uploaded[] = $this->attachmentService->uploadTemporary($file, $request->user());
+            }
+
+            return response()->json([
+                'status'  => true,
+                'data'    => $uploaded,
+                'message' => count($uploaded) . ' archivo(s) temporal(es) subido(s).',
+            ], 201);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status'  => false,
+                'message' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * POST /api/v1/attachments/claim
+     *
+     * Asocia archivos temporales (status=temp) a un recurso padre y los mueve
+     * del directorio drafts/ al directorio aislado del proyecto.
+     *
+     * Body: { parent_type: "tasks", parent_id: 123, uuids: ["uuid1", "uuid2"] }
+     */
+    public function claim(Request $request): JsonResponse
+    {
+        $request->validate([
+            'parent_type' => ['required', 'string', 'in:tasks,tickets,blockers,projects,deliverables'],
+            'parent_id'   => ['required', 'integer'],
+            'uuids'       => ['required', 'array'],
+            'uuids.*'     => ['string', 'uuid'],
+        ]);
+
+        try {
+            // Resolve the parent model
+            $parentClass = match ($request->parent_type) {
+                'tasks'        => \App\Models\Task::class,
+                'tickets'      => \App\Models\Ticket::class,
+                'blockers'     => \App\Models\Blocker::class,
+                'projects'     => \App\Models\Project::class,
+                'deliverables' => \App\Models\Deliverable::class,
+            };
+
+            $parent = $parentClass::findOrFail($request->parent_id);
+
+            // Authorize: user must be able to update the parent
+            Gate::authorize('update', $parent);
+
+            $claimed = $this->attachmentService->claim(
+                $parent,
+                $request->uuids,
+                $request->user()
+            );
+
+            return response()->json([
+                'status'  => true,
+                'data'    => $claimed,
+                'message' => count($claimed) . ' archivo(s) asociado(s) correctamente.',
+            ]);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Recurso padre no encontrado.',
+            ], 404);
+        } catch (\App\Exceptions\DomainException $e) {
+            return response()->json(['status' => false, 'message' => $e->getMessage()], $e->getStatusCode());
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status'  => false,
+                'message' => $th->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
      * DELETE /api/v1/attachments/{uuid}
      *
      * Elimina un adjunto del disco y la base de datos.

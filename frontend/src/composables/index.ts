@@ -73,3 +73,4 @@ export { useUserUpdate } from './useUserUpdate';
 export { useUserDelete } from './useUserDelete';
 export { useUserList } from './useUserList';
 export { useRoles as useRolesList } from './useRolesList';
+export { useFieldLock, useField } from './useFieldLock';

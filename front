@@ -1,0 +1,346 @@
+import { test, expect } from '@playwright/test';
+import type { TestUser } from './helpers/api';
+import { login, createUser } from './helpers/api';
+
+const ADMIN_EMAIL = 'admin@admin.com';
+const ADMIN_PASSWORD = 'Admin1234!';
+const API = 'http://localhost:8000/api/v1';
+
+// ── Shared state across all tests ──
+let users: Record<string, TestUser> = {};
+let projectId: number;
+let projectCode: string;
+
+test.describe('E2E: Full Cross-Role Project Lifecycle', () => {
+  test.beforeAll(async () => {
+    const admin = await login(ADMIN_EMAIL, ADMIN_PASSWORD);
+    const suffix = Date.now();
+    projectCode = `E2E-${suffix}`;
+
+    // 1. Create PM
+    users.pm = await createUser(admin.token, {
+      name: `PM E2E ${suffix}`,
+      email: `e2e-pm-${suffix}@test.com`,
+      password: 'password123',
+      role: 'project-manager',
+    });
+
+    // 2. PM creates project
+    const projRes = await fetch(`${API}/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${users.pm.token}` },
+      body: JSON.stringify({
+        name: `E2E Cross-Role Project ${suffix}`,
+        code: projectCode,
+        description: 'Proyecto de prueba E2E multi-rol',
+        start_date: '2026-06-01',
+        end_date: '2026-12-31',
+        budget: 500000,
+        progress: 0,
+      }),
+    });
+    const projData = await projRes.json();
+    projectId = projData.items.id;
+
+    // 3. Create all other roles
+    for (const role of ['developer', 'qa', 'support', 'client']) {
+      users[role] = await createUser(admin.token, {
+        name: `${role} E2E ${suffix}`,
+        email: `e2e-${role}-${suffix}@test.com`,
+        password: 'password123',
+        role,
+      });
+
+      // Add to project
+      await fetch(`${API}/projects/${projectId}/members`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${users.pm.token}` },
+        body: JSON.stringify({ user_id: users[role].id, role }),
+      });
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════════
+  // PM: All-module creation
+  // ═══════════════════════════════════════════════════════════════════
+  test.describe('PM creates all resources', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/login');
+      await page.fill('input[name="email"]', users.pm.email);
+      await page.fill('input[name="password"]', users.pm.password);
+      await page.click('button[type="submit"]');
+      await expect(page).toHaveURL(/dashboard/, { timeout: 10000 });
+    });
+
+    test('PM creates objectives, phases, plans, tasks, risks, blockers, milestones, deliverables', async ({ page }) => {
+      // Enter project
+      await page.click('text=Proyectos');
+      await page.click(`text=${projectCode}`);
+
+      // ── Objectives ──
+      await page.click('text=Objetivos');
+      await page.click('text=Nuevo objetivo');
+      await page.fill('input[name="title"]', 'Aumentar ROI en 20%');
+      await page.click('button[type="submit"]');
+      await expect(page.locator('.v-card')).toContainText('Aumentar ROI', { timeout: 5000 });
+
+      // ── Phases ──
+      await page.click('text=Fases');
+      await page.click('text=Nueva fase');
+      await page.fill('input[name="name"]', 'Fase 1 - Inicio');
+      await page.click('button[type="submit"]');
+      await expect(page.locator('.v-card')).toContainText('Fase 1', { timeout: 5000 });
+
+      // ── Plans ──
+      await page.click('text=Planes');
+      await page.click('text=Crear plan');
+      await page.fill('textarea[name="scope"]', 'Alcance del proyecto E2E');
+      await page.click('button[type="submit"]');
+      await expect(page.locator('.v-card')).toContainText('Alcance', { timeout: 5000 });
+
+      // ── Risks ──
+      await page.click('text=Riesgos');
+      await page.click('text=Nuevo riesgo');
+      await page.fill('input[name="title"]', 'Riesgo de retraso en entrega');
+      await page.locator('select[name="impact"]').selectOption('high');
+      await page.locator('select[name="probability"]').selectOption('medium');
+      await page.click('button[type="submit"]');
+      await expect(page.locator('.v-card')).toContainText('Riesgo de retraso', { timeout: 5000 });
+
+      // ── Milestones ──
+      await page.click('text=Hitos');
+      await page.click('text=Nuevo hito');
+      await page.fill('input[name="title"]', 'MVP Release v1.0');
+      await page.click('button[type="submit"]');
+      await expect(page.locator('.v-card')).toContainText('MVP Release', { timeout: 5000 });
+
+      // ── Deliverables ──
+      await page.click('text=Entregables');
+      await page.click('text=Nuevo entregable');
+      await page.fill('input[name="name"]', 'Manual de Usuario');
+      await page.click('button[type="submit"]');
+      await expect(page.locator('.v-card')).toContainText('Manual de Usuario', { timeout: 5000 });
+
+      // ── Tasks (assigned to developer) ──
+      await page.click('text=Tareas');
+      await page.click('text=Nueva Tarea');
+      await page.fill('input[name="title"]', 'Implementar login OAuth');
+      await page.locator('select[name="priority"]').selectOption('high');
+      // Assign to developer
+      const assignSelect = page.locator('[name="assigned_to"]');
+      await assignSelect.click();
+      await page.locator('.v-list-item').filter({ hasText: users.developer.name }).click();
+      await page.click('button[type="submit"]');
+      await expect(page.locator('.v-card')).toContainText('Implementar login OAuth', { timeout: 5000 });
+
+      // ── Tickets (created by PM, assigned to support) ──
+      await page.click('text=Tickets');
+      await page.click('text=Nuevo ticket');
+      await page.fill('input[name="subject"]', 'Bug crítico en producción');
+      await page.locator('select[name="priority"]').selectOption('critical');
+      await page.click('button[type="submit"]');
+      await expect(page.locator('.v-card')).toContainText('Bug crítico', { timeout: 5000 });
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Developer: assigned tasks, time log, status, tickets, blockers
+  // ═══════════════════════════════════════════════════════════════════
+  test.describe('Developer interacts with assigned work', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/login');
+      await page.fill('input[name="email"]', users.developer.email);
+      await page.fill('input[name="password"]', users.developer.password);
+      await page.click('button[type="submit"]');
+      await expect(page).toHaveURL(/dashboard/, { timeout: 10000 });
+    });
+
+    test('Developer views assigned task, updates status, creates ticket and blocker', async ({ page }) => {
+      await page.click('text=Proyectos');
+      await page.click(`text=${projectCode}`);
+
+      // ── Tasks: find assigned task ──
+      await page.click('text=Tareas');
+      await expect(page.locator('.v-card')).toContainText('Implementar login OAuth', { timeout: 5000 });
+
+      // Select the task
+      await page.click('text=Implementar login OAuth');
+
+      // Change status to in_progress
+      await page.locator('[name="status"]').selectOption('in_progress');
+      await page.click('button[type="submit"]');
+      // Should show updated status
+
+      // ── Developer creates a ticket ──
+      await page.click('text=Tickets');
+      await page.click('text=Nuevo ticket');
+      await page.fill('input[name="subject"]', 'Dev report: API lenta en /tasks');
+      await page.click('button[type="submit"]');
+      await expect(page.locator('.v-card')).toContainText('API lenta', { timeout: 5000 });
+
+      // ── Developer creates a blocker ──
+      await page.click('text=Bloqueadores');
+      await page.click('text=Nuevo bloqueador');
+      await page.fill('input[name="title"]', 'Bloqueo: Servidor de staging caído');
+      await page.locator('select[name="severity"]').selectOption('critical');
+      await page.click('button[type="submit"]');
+      await expect(page.locator('.v-card')).toContainText('Servidor de staging', { timeout: 5000 });
+
+      // ── Verify admin menu is NOT visible ──
+      const adminSection = page.locator('text=Administración');
+      await expect(adminSection).not.toBeVisible({ timeout: 2000 });
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════════
+  // QA: views tasks, creates tickets, blockers, verifies permissions
+  // ═══════════════════════════════════════════════════════════════════
+  test.describe('QA validates and reports issues', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/login');
+      await page.fill('input[name="email"]', users.qa.email);
+      await page.fill('input[name="password"]', users.qa.password);
+      await page.click('button[type="submit"]');
+      await expect(page).toHaveURL(/dashboard/, { timeout: 10000 });
+    });
+
+    test('QA views tasks, creates ticket and blocker', async ({ page }) => {
+      await page.click('text=Proyectos');
+      await page.click(`text=${projectCode}`);
+
+      // ── Tasks visible ──
+      await page.click('text=Tareas');
+      await expect(page.locator('.v-card')).toContainText('Implementar login OAuth', { timeout: 5000 });
+
+      // ── QA creates ticket ──
+      await page.click('text=Tickets');
+      await page.click('text=Nuevo ticket');
+      await page.fill('input[name="subject"]', 'QA: Error de validación en formulario');
+      await page.click('button[type="submit"]');
+      await expect(page.locator('.v-card')).toContainText('Error de validación', { timeout: 5000 });
+
+      // ── QA creates blocker ──
+      await page.click('text=Bloqueadores');
+      await page.click('text=Nuevo bloqueador');
+      await page.fill('input[name="title"]', 'QA Blocker: Test suite rota en CI');
+      await page.click('button[type="submit"]');
+      await expect(page.locator('.v-card')).toContainText('Test suite rota', { timeout: 5000 });
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Support: tickets, assignment, blockers
+  // ═══════════════════════════════════════════════════════════════════
+  test.describe('Support manages tickets', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/login');
+      await page.fill('input[name="email"]', users.support.email);
+      await page.fill('input[name="password"]', users.support.password);
+      await page.click('button[type="submit"]');
+      await expect(page).toHaveURL(/dashboard/, { timeout: 10000 });
+    });
+
+    test('Support creates and views tickets, sees blockers', async ({ page }) => {
+      await page.click('text=Proyectos');
+      await page.click(`text=${projectCode}`);
+
+      // ── Create ticket ──
+      await page.click('text=Tickets');
+      await page.click('text=Nuevo ticket');
+      await page.fill('input[name="subject"]', 'Support: Usuario no puede resetear contraseña');
+      await page.click('button[type="submit"]');
+      await expect(page.locator('.v-card')).toContainText('resetear contraseña', { timeout: 5000 });
+
+      // ── View blockers (support can view) ──
+      await page.click('text=Bloqueadores');
+      await expect(page.locator('.v-card')).toBeVisible({ timeout: 5000 });
+
+      // ── Cannot see admin ──
+      await expect(page.locator('text=Administración')).not.toBeVisible({ timeout: 2000 });
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Client: view-only + tickets
+  // ═══════════════════════════════════════════════════════════════════
+  test.describe('Client views project and creates tickets', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/login');
+      await page.fill('input[name="email"]', users.client.email);
+      await page.fill('input[name="password"]', users.client.password);
+      await page.click('button[type="submit"]');
+      await expect(page).toHaveURL(/dashboard/, { timeout: 10000 });
+    });
+
+    test('Client creates ticket, views milestones, deliverables, objectives, metrics', async ({ page }) => {
+      await page.click('text=Proyectos');
+      await page.click(`text=${projectCode}`);
+
+      // ── Create ticket ──
+      await page.click('text=Tickets');
+      await page.click('text=Nuevo ticket');
+      await page.fill('input[name="subject"]', 'Cliente: Solicitud de nueva funcionalidad');
+      await page.click('button[type="submit"]');
+      await expect(page.locator('.v-card')).toContainText('Solicitud de nueva', { timeout: 5000 });
+
+      // ── View milestones ──
+      await page.click('text=Hitos');
+      await expect(page.locator('.v-card')).toContainText('MVP Release', { timeout: 5000 });
+
+      // ── View deliverables ──
+      await page.click('text=Entregables');
+      await expect(page.locator('.v-card')).toContainText('Manual de Usuario', { timeout: 5000 });
+
+      // ── View objectives ──
+      await page.click('text=Objetivos');
+      await expect(page.locator('.v-card')).toContainText('Aumentar ROI', { timeout: 5000 });
+
+      // ── View metrics ──
+      await page.click('text=Métricas');
+      await expect(page.locator('.v-card')).toBeVisible({ timeout: 5000 });
+
+      // ── Cannot create tasks (no button) ──
+      await page.click('text=Tareas');
+      await expect(page.locator('text=Nueva Tarea')).not.toBeVisible({ timeout: 2000 });
+
+      // ── Cannot create risks ──
+      await page.click('text=Riesgos');
+      await expect(page.locator('text=Nuevo riesgo')).not.toBeVisible({ timeout: 2000 });
+
+      // ── Cannot see admin ──
+      await expect(page.locator('text=Administración')).not.toBeVisible({ timeout: 2000 });
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Super-Admin: user management + roles
+  // ═══════════════════════════════════════════════════════════════════
+  test.describe('Super-Admin manages users and roles', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.goto('/login');
+      await page.fill('input[name="email"]', ADMIN_EMAIL);
+      await page.fill('input[name="password"]', ADMIN_PASSWORD);
+      await page.click('button[type="submit"]');
+      await expect(page).toHaveURL(/dashboard/, { timeout: 10000 });
+    });
+
+    test('Admin can see admin menu, list users, and view roles', async ({ page }) => {
+      // Admin menu should be visible
+      await expect(page.locator('text=Administración')).toBeVisible({ timeout: 5000 });
+
+      // Navigate to users list
+      await page.click('text=Usuarios');
+      await expect(page).toHaveURL(/\/admin\/users/, { timeout: 5000 });
+
+      // Verify PM user is in the list
+      await expect(page.locator('.v-card')).toContainText(users.pm.name, { timeout: 5000 });
+
+      // Navigate to roles
+      await page.click('text=Roles');
+      await expect(page).toHaveURL(/\/roles/, { timeout: 5000 });
+
+      // Should show role list
+      await expect(page.locator('.v-card')).toBeVisible({ timeout: 5000 });
+    });
+  });
+});
