@@ -5,6 +5,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { useThemeStore } from '@/store/useThemeStore';
 import { useNotificationStore } from '@/store/useNotificationStore';
 import { usePermissionStore } from '@/store/usePermissionStore';
+import RoleMismatchDialog from '@/components/common/RoleMismatchDialog.vue';
 import type { NotificationI } from '@/interfaces/NotificationI';
 
 const appStore = useAppStore();
@@ -69,7 +70,7 @@ onUnmounted(() => {
 <template>
     <VApp>
         <!-- ── Snackbar global ─────────────────────────────────────────── -->
-        <VSnackbar v-model="snackbar.show" :color="snackbar.color" location="bottom right" :timeout="3500">
+        <VSnackbar v-model="snackbar.show" :color="snackbar.color" location="top right" :timeout="1500">
             {{ snackbar.text }}
             <template #actions>
                 <VBtn icon="ri-close-line" variant="text" @click="snackbar.show = false" />
@@ -82,5 +83,8 @@ onUnmounted(() => {
         </VOverlay>
 
         <RouterView />
+
+        <!-- ── Role mismatch reload dialog ────────────────────────────── -->
+        <RoleMismatchDialog />
     </VApp>
 </template>

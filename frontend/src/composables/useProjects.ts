@@ -45,6 +45,8 @@ export function useProjects() {
         const response = await projectsService.update(form.value.id, payload);
         if (response.status) {
             snackbar.value = { show: true, text: 'Proyecto actualizado', color: 'success' };
+            router.push({ name: 'project-detail', params: { projectId: form.value.id } })
+
         } else {
             if ('errors' in response && response.errors) errores.value = response.errors as ProjectErroresFormI;
             snackbar.value = { show: true, text: response.message, color: 'error' };

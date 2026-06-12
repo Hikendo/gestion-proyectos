@@ -58,8 +58,17 @@ class AttachmentController extends Controller
             ], Response::HTTP_NOT_FOUND);
         }
 
-        return Storage::disk('local')->download(
-            $attachment->disk_path,
+        $absolutePath = Storage::disk('local')->path($attachment->disk_path);
+
+        if (!file_exists($absolutePath)) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'El archivo físico no se encuentra en el sistema.',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        return response()->download(
+            $absolutePath,
             $attachment->original_name,
             ['Content-Type' => $attachment->mime_type ?? 'application/octet-stream']
         );

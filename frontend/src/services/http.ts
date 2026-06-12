@@ -13,6 +13,21 @@ apiWithToken.interceptors.request.use((config) => {
     return config;
 });
 
+// ── Response interceptor: detect ROLE_MISMATCH (409) ─────────────────────────
+apiWithToken.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (
+            error?.response?.status === 409
+            && error?.response?.data?.code === 'ROLE_MISMATCH'
+        ) {
+            // Emitir evento global para que App.vue muestre el diálogo de recarga
+            window.dispatchEvent(new CustomEvent('auth:role-mismatch'));
+        }
+        return Promise.reject(error);
+    },
+);
+
 export type QueryValue = string | number | boolean | null | undefined;
 export type QueryParams = Record<string, QueryValue>;
 export type FieldErrors<TField extends string = string> = Partial<Record<TField, string[]>>;

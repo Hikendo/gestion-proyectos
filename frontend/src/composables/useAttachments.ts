@@ -14,17 +14,49 @@ export function useAttachments() {
 
   /**
    * Descarga un archivo adjunto usando su UUID.
-   * Abre directamente el stream de descarga en otra pestaña/navegador.
+   *
+   * Usa apiWithToken (axios) para que el interceptor de peticiones
+   * inyecte el header Authorization: Bearer automáticamente.
+   * Esto es necesario porque la ruta /attachments/download/{uuid}
+   * está protegida con el middleware auth:sanctum.
    */
-  function download(attachment: AttachmentI): void {
-    const url = attachment.download_url;
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('target', '_blank');
-    link.setAttribute('rel', 'noopener noreferrer');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  async function download(attachment: AttachmentI): Promise<void> {
+    try {
+      // download_url es absoluto (http://nginx/api/v1/attachments/...)
+      // Extraemos solo el path y removemos /api/v1 para que axios
+      // use su baseURL configurado (/api/v1).
+      const absoluteUrl = attachment.download_url;
+      let path = absoluteUrl;
+      try {
+        path = new URL(absoluteUrl).pathname;
+      } catch { /* si no es parseable, lo usamos tal cual */ }
+      const relativePath = path.replace(/^\/api\/v1/, '') || path;
+      const response = await apiWithToken.get(relativePath, { responseType: 'blob' });
+
+      // Extraer el nombre de archivo del Content-Disposition o usar el original
+      const disposition = (response.headers['content-disposition'] ?? '') as string;
+      const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+      const filename = match
+        ? match[1].replace(/['"]/g, '')
+        : (attachment.original_name || 'archivo');
+
+      // Crear blob URL y disparar descarga
+      const blob = new Blob([response.data]);
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = decodeURIComponent(filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Liberar memoria del blob URL después de un momento
+      setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Error al descargar el archivo.';
+      error.value = message;
+    }
   }
 
   /**

@@ -1,6 +1,86 @@
 # Changes.md — Contexto para sesiones futuras
 
-**Última actualización:** 2026-06-09
+**Última actualización:** 2026-06-12
+
+---
+
+## [2026-06-12] Menú lateral, shortcuts, permisos de proyecto y sincronización de roles
+
+### ✅ Menú lateral con persistencia localStorage + FAB
+
+- `frontend/src/layouts/MainLayout.vue`: estado `drawer`/`rail` guardado en `localStorage` (`gestion_proyectos_sidebar`).
+- FAB (`VBtn` flotante `ri-menu-line`) visible solo cuando el drawer está cerrado y no en modo rail. Al hacer clic, reabre el drawer.
+- Watch reactivo actualiza localStorage en cada cambio.
+
+### ✅ Dashboard shortcuts
+
+- `frontend/src/pages/DashboardPage.vue`: sección de atajos (`shortcuts` computed) con tarjetas enlace a Proyectos, Tareas, Tickets, Miembros y Métricas.
+- Las tarjetas usan `VCard` con `hover`, `ripple`, `VAvatar` con icono de color y navegan con `router.push`.
+
+### ✅ Permiso de edición de proyecto — endpoint + composable
+
+**Backend:**
+
+- `backend/app/Http/Controllers/Api/ProjectController.php`: método `permissions()` — `GET /api/v1/projects/{project}/permissions`.
+- Usa `Gate::check()` para devolver `{ can_edit, can_delete, can_assign_members, can_manage_attachments, is_owner, project_role }`.
+- `backend/routes/api/projects.php`: ruta registrada.
+
+**Frontend:**
+
+- `frontend/src/composables/useProjectPermission.ts`: composable que acepta `Ref<number | null>` (ID del proyecto), hace la petición y expone `canEdit`, `canDelete`, `canAssignMembers`, `canManageAttachments`, `isOwner`, `projectRole`, `loading`, `error`.
+- Reactivo: se vuelve a consultar automáticamente si cambia el `projectId`.
+
+### ✅ Sincronización de permisos al cambiar roles (ROLE_MISMATCH)
+
+**Backend — Migración:**
+
+- `backend/database/migrations/2026_06_12_000001_add_role_changed_at_to_users_table.php`: columna `role_changed_at TIMESTAMP NULL` en `users`.
+
+**Backend — Modelo:**
+
+- `backend/app/Models/User.php`: `role_changed_at` agregado a `$fillable` y `$casts` como `datetime`.
+
+**Backend — Evento:**
+
+- `backend/app/Events/RoleChanged.php`: evento con `$user`, `$oldRole`, `$newRole`. Se dispara desde `UserController::update()`.
+
+**Backend — Listener:**
+
+- `backend/app/Listeners/InvalidateUserSession.php`: al recibir `RoleChanged`, actualiza `role_changed_at`, limpia caché Spatie y despacha `SendPermissionsUpdatedNotificationJob` (FCM).
+
+**Backend — Middleware:**
+
+- `backend/app/Http/Middleware/CheckRoleChanged.php`: middleware registrado en el grupo `api`. Compara `user.role_changed_at` con `token.created_at`. Si el rol cambió después de emitir el token, responde **HTTP 409** con `{ code: 'ROLE_MISMATCH' }`.
+
+**Backend — Registro:**
+
+- `backend/app/Providers/EventServiceProvider.php`: `RoleChanged::class => [InvalidateUserSession::class]`.
+- `backend/bootstrap/app.php`: middleware `check.role.changed` registrado como alias y agregado al grupo `api`.
+
+**Backend — Controller:**
+
+- `backend/app/Http/Controllers/Api/UserController.php`: al cambiar rol, dispara `event(new RoleChanged(...))` en lugar de solo limpiar caché. Si solo cambian permisos (sin cambio de rol), mantiene el comportamiento anterior.
+
+**Frontend — Axios interceptor:**
+
+- `frontend/src/services/http.ts`: response interceptor que detecta `409 + code === 'ROLE_MISMATCH'` y emite `window.dispatchEvent(new CustomEvent('auth:role-mismatch'))`.
+
+**Frontend — Diálogo:**
+
+- `frontend/src/components/common/RoleMismatchDialog.vue`: `VDialog` persistente con mensaje "Tus permisos han sido actualizados..." y botón "Recargar ahora" (`window.location.reload()`). Escucha evento `auth:role-mismatch`.
+
+**Frontend — Integración:**
+
+- `frontend/src/App.vue`: importa y renderiza `<RoleMismatchDialog />` al final del template.
+
+**Flujo completo:**
+
+1. Admin cambia rol → `UserController` dispara `RoleChanged`
+2. `InvalidateUserSession` actualiza `role_changed_at`, limpia caché Spatie, envía FCM `permissions_updated`
+3. Usuario afectado recibe FCM → `refreshPermissions()` (ya implementado)
+4. Si el usuario hace petición API antes del FCM, middleware devuelve 409
+5. Interceptor axios emite `auth:role-mismatch` → diálogo pide recargar
+6. Al recargar, `router.beforeEach` → `me()` → `setSession()` → `permissionStore.setPermissions()` con permisos frescos
 
 ---
 

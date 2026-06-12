@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\StoreUserRequest;
 use App\Http\Requests\User\UpdateUserRequest;
+use App\Events\RoleChanged;
 use App\Models\User;
 use App\Jobs\SendPermissionsUpdatedNotificationJob;
 
@@ -108,8 +109,10 @@ class UserController extends Controller
                 'items'   => array_merge(
                     $user->toArray(),
                     [
-                        'roles'       => $user->getRoleNames(),
-                        'permissions' => $user->getAllPermissions()->pluck('name'),
+                        'roles'              => $user->getRoleNames(),
+                        'permissions'        => $user->getAllPermissions()->pluck('name'),
+                        'role_permissions'   => $user->getPermissionsViaRoles()->pluck('name'),
+                        'direct_permissions' => $user->getDirectPermissions()->pluck('name'),
                     ]
                 ),
                 'message' => 'Usuario encontrado.',
@@ -140,7 +143,11 @@ class UserController extends Controller
 
             $user->update($data);
 
+            $oldRole = null;
             if ($isAdmin && $roleIsSet) {
+                // Guardar el rol anterior para el evento
+                $oldRole = $user->getRoleNames()->first();
+
                 $globalRoles = ['super-admin', 'project-manager'];
                 $user->removeRole($globalRoles);
                 if ($role) {
@@ -148,16 +155,35 @@ class UserController extends Controller
                 }
             }
 
-            // Sincronizar permisos directos (solo super-admin)
-            if ($isAdmin && array_key_exists('permissions', $data)) {
+            // ── Permisos directos ────────────────────────────────────────────────
+            // Si se cambió el rol, NO sincronizamos permisos manuales:
+            // el nuevo rol debe definir sus propios permisos vía Spatie.
+            // Esto evita que los permisos del rol anterior (pre-seleccionados
+            // en el formulario del frontend) se filtren al payload y persistan.
+            if ($isAdmin && array_key_exists('permissions', $data) && !$roleIsSet) {
                 $permissions = $data['permissions'] ?? [];
                 $user->syncPermissions($permissions);
-            }
 
-            // Invalidate permission cache for the affected user and notify via FCM asynchronously
-            if (($isAdmin && $roleIsSet) || ($isAdmin && array_key_exists('permissions', $data))) {
+                // Invalidate cache + notificar
                 app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
                 SendPermissionsUpdatedNotificationJob::dispatch($user);
+            }
+
+            // ── Cambio de rol ────────────────────────────────────────────────────
+            if ($isAdmin && $roleIsSet) {
+                // Si también venían permisos en el payload, los ignoramos
+                // y removemos cualquier permiso directo asignado al usuario
+                // para que solo apliquen los permisos del nuevo rol.
+                if (array_key_exists('permissions', $data)) {
+                    $user->syncPermissions([]);
+                }
+
+                // Dispatch the RoleChanged event — the listener handles:
+                // - updating role_changed_at
+                // - forgetting Spatie cache
+                // - sending FCM notification
+                $newRole = $user->getRoleNames()->first();
+                event(new RoleChanged($user, $oldRole, $newRole));
             }
 
             $user->refresh();

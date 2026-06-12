@@ -30,8 +30,7 @@ async function confirmAction() {
   pendingAction.value = null;
 }
 
-onMounted(async () => {
-  loader.value = true;
+async function loadBlocker() {
   const projectId = Number(route.params.projectId);
   const id = Number(route.params.id);
   const response = await blockersService.show(projectId, id);
@@ -41,6 +40,11 @@ onMounted(async () => {
     snackbar.value = { show: true, text: 'Bloqueador no encontrado', color: 'error' };
     router.push({ name: 'blockers', params: { projectId } });
   }
+}
+
+onMounted(async () => {
+  loader.value = true;
+  await loadBlocker();
   loader.value = false;
 });
 </script>
@@ -65,7 +69,7 @@ onMounted(async () => {
     </VCol>
     <VCol cols="12">
       <DocumentManager parent-type="blockers" :parent-id="form.id" :attachments="form.attachments ?? []"
-        :can-manage="canAction('blocker.edit')" @refresh="onMounted(() => { })" />
+        :can-manage="canAction('blocker.edit')" @refresh="loadBlocker" />
     </VCol>
 
     <VDialog v-model="confirmVisible" persistent max-width="400">

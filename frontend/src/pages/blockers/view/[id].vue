@@ -19,12 +19,16 @@ const id = Number(route.params.id);
 const severityLabels: Record<string, string> = { low: 'Baja', medium: 'Media', high: 'Alta', critical: 'Crítica' };
 const severityColors: Record<string, string> = { low: 'success', medium: 'info', high: 'warning', critical: 'error' };
 
-onMounted(async () => {
-    loader.value = true;
+async function loadBlocker() {
     const response = await blockersService.show(projectId, id);
     if (response.status && response.items) {
         blocker.value = response.items as BlockerI;
     }
+}
+
+onMounted(async () => {
+    loader.value = true;
+    await loadBlocker();
     loader.value = false;
 });
 </script>
@@ -77,7 +81,7 @@ onMounted(async () => {
         </VCol>
         <VCol cols="12">
             <DocumentManager parent-type="blockers" :parent-id="blocker.id" :attachments="blocker.attachments ?? []"
-                :can-manage="canAction('blocker.edit')" @refresh="onMounted(() => { })" />
+                :can-manage="canAction('blocker.edit')" @refresh="loadBlocker" />
         </VCol>
     </VRow>
     <VRow v-else>

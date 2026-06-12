@@ -13,6 +13,9 @@ export function useUserUpdate() {
     // Lista de todos los permisos disponibles cargados del backend
     const availablePermissions = ref<{ id: number; name: string }[]>([]);
 
+    /** Permisos que vienen del rol (no asignados directamente). */
+    const rolePermissions = ref<Set<string>>(new Set());
+
     async function fetchPermissions(): Promise<void> {
         try {
             const { data } = await apiWithToken.get<{ status: boolean; items: { id: number; name: string }[] }>('/permissions');
@@ -93,6 +96,8 @@ export function useUserUpdate() {
             form.email = response.items?.email || '';
             form.role = response.items?.roles?.[0] || '';
             form.permissions = response.items?.permissions || [];
+            // Distinguir permisos del rol vs directos
+            rolePermissions.value = new Set(response.items?.role_permissions ?? []);
             form.password = '';
             form.password_confirmation = '';
             return true;
@@ -108,6 +113,7 @@ export function useUserUpdate() {
         successMessage,
         usersService,
         availablePermissions,
+        rolePermissions,
         handleUpdate,
         loadUser,
         fetchPermissions,

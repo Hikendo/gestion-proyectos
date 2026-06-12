@@ -20,12 +20,16 @@ const statusLabels: Record<string, string> = { open: 'Abierto', in_progress: 'En
 const statusColors: Record<string, string> = { open: 'error', in_progress: 'warning', resolved: 'success', closed: 'grey' };
 const priorityLabels: Record<string, string> = { low: 'Baja', medium: 'Media', high: 'Alta', critical: 'Crítica' };
 
-onMounted(async () => {
-    loader.value = true;
+async function loadTicket() {
     const response = await ticketsService.show(projectId, id);
     if (response.status && response.items) {
         ticket.value = response.items as TicketI;
     }
+}
+
+onMounted(async () => {
+    loader.value = true;
+    await loadTicket();
     loader.value = false;
 });
 </script>
@@ -43,8 +47,9 @@ onMounted(async () => {
                         <div class="d-flex gap-2">
                             <VBtn variant="outlined" prepend-icon="ri-arrow-left-line"
                                 :to="{ name: 'tickets', params: { projectId } }">Volver</VBtn>
-                            <VBtn v-if="canAction(['ticket.edit-any', 'ticket.edit-own'])" variant="tonal" color="warning"
-                                :to="{ name: 'tickets-id', params: { projectId, id } }" prepend-icon="ri-pencil-line">Editar
+                            <VBtn v-if="canAction(['ticket.edit-any', 'ticket.edit-own'])" variant="tonal"
+                                color="warning" :to="{ name: 'tickets-id', params: { projectId, id } }"
+                                prepend-icon="ri-pencil-line">Editar
                             </VBtn>
                         </div>
                     </VCardTitle>
@@ -77,7 +82,7 @@ onMounted(async () => {
         </VCol>
         <VCol cols="12">
             <DocumentManager parent-type="tickets" :parent-id="ticket.id" :attachments="ticket.attachments ?? []"
-                :can-manage="canAction(['ticket.edit-any', 'ticket.edit-own'])" @refresh="onMounted(() => { })" />
+                :can-manage="canAction(['ticket.edit-any', 'ticket.edit-own'])" @refresh="loadTicket" />
         </VCol>
     </VRow>
     <VRow v-else>

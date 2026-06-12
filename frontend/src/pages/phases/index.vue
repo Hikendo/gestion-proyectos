@@ -142,9 +142,17 @@ const goToPhaseTasks = (phaseId: number) => {
 watch(() => isDialogVisible.value, v => { if (!v) itemDestroy.value = null; });
 onMounted(handleGetData);
 </script>
-
 <template>
-  <!-- Template con colores más sutiles -->
+  <!-- Cabecera -->
+  <div class="d-flex justify-space-between align-center mb-4">
+    <h2 class="text-h5 font-weight-bold">Fases del proyecto</h2>
+    <VBtn color="primary" prepend-icon="ri-add-line"
+      @click="router.push({ name: 'phases-new', params: { projectId: projectId() } })" v-if="canAction('phase.create')">
+      Nueva Fase
+    </VBtn>
+  </div>
+
+  <!-- Tabla de fases -->
   <VTable height="500" fixed-header>
     <thead>
       <tr>
@@ -169,15 +177,11 @@ onMounted(handleGetData);
           <div class="d-flex align-center gap-2">
             <VProgressLinear :model-value="item.progress || 0" :color="getProgressColor(item)" height="8" rounded
               class="flex-grow-1" />
-            <span class="text-body-2 font-weight-medium ml-1">
-              {{ item.progress || 0 }}%
-            </span>
+            <span class="text-body-2 font-weight-medium ml-1">{{ item.progress || 0 }}%</span>
           </div>
         </td>
         <td>
-          <VChip :color="getPhaseColor(item)" size="small" variant="flat">
-            {{ getStatusText(item) }}
-          </VChip>
+          <VChip :color="getPhaseColor(item)" size="small" variant="flat">{{ getStatusText(item) }}</VChip>
         </td>
         <td>{{ formatDate(item.start_date!) ?? '—' }}</td>
         <td>{{ formatDate(item.end_date!) ?? '—' }}</td>
@@ -214,12 +218,8 @@ onMounted(handleGetData);
         Esta acción no se puede deshacer.
       </VCardText>
       <VCardActions class="justify-end gap-2 pb-4 px-4">
-        <VBtn variant="outlined" @click="isDialogVisible = false; itemDestroy = null">
-          Cancelar
-        </VBtn>
-        <VBtn color="error" variant="flat" :loading="loader" @click="handleDestroy">
-          Eliminar
-        </VBtn>
+        <VBtn variant="outlined" @click="isDialogVisible = false; itemDestroy = null">Cancelar</VBtn>
+        <VBtn color="error" variant="flat" :loading="loader" @click="handleDestroy">Eliminar</VBtn>
       </VCardActions>
     </VCard>
   </VDialog>

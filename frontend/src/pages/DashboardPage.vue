@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
@@ -20,7 +20,30 @@ const router = useRouter();
 const appStore = useAppStore();
 const authStore = useAuthStore();
 const { loader } = storeToRefs(appStore);
-const { authUser } = storeToRefs(authStore);
+const { authUser, currentProject } = storeToRefs(authStore);
+
+// ── Shortcuts ─────────────────────────────────────────────────────────────────
+const shortcuts = computed(() => {
+  const items: { title: string; subtitle: string; icon: string; color: string; route: { name: string; params?: Record<string, any> } }[] = [
+    { title: 'Proyectos', subtitle: 'Gestionar proyectos', icon: 'ri-folders-line', color: 'primary', route: { name: 'projects' } },
+  ];
+
+  if (currentProject.value) {
+    const pid = currentProject.value.id;
+    items.push(
+      { title: 'Tareas', subtitle: 'Ver y gestionar tareas', icon: 'ri-checkbox-circle-line', color: 'info', route: { name: 'tasks', params: { projectId: pid } } },
+      { title: 'Tickets', subtitle: 'Soporte y reportes', icon: 'ri-coupon-line', color: 'warning', route: { name: 'tickets', params: { projectId: pid } } },
+      { title: 'Miembros', subtitle: 'Equipo del proyecto', icon: 'ri-group-line', color: 'teal', route: { name: 'members', params: { projectId: pid } } },
+      { title: 'Métricas', subtitle: 'Estadísticas y progreso', icon: 'ri-bar-chart-line', color: 'deep-purple', route: { name: 'metrics', params: { projectId: pid } } },
+    );
+  }
+
+  return items;
+});
+
+function navigateShortcut(route: { name: string; params?: Record<string, any> }) {
+  router.push(route);
+}
 
 const summary = ref({ total_projects: 0, my_pending_tasks: 0, open_tickets: 0, active_blockers_count: 0, active_risks_count: 0 });
 const projects = ref<DashboardProjectItem[]>([]);
@@ -128,6 +151,22 @@ const objectiveTypeColor: Record<string, string> = {
         </p>
       </div>
     </div>
+
+    <!-- ── Atajos (shortcuts) ───────────────────────────────────── -->
+    <VRow class="mb-6">
+      <VCol v-for="shortcut in shortcuts" :key="shortcut.title" cols="6" sm="4" md="3" lg="2">
+        <VCard class="shortcut-card cursor-pointer" elevation="2" rounded="lg" hover :ripple="true"
+          @click="navigateShortcut(shortcut.route)">
+          <VCardText class="d-flex flex-column align-center text-center pa-5">
+            <VAvatar :color="shortcut.color" variant="tonal" size="48" rounded="lg" class="mb-3">
+              <VIcon :icon="shortcut.icon" size="24" />
+            </VAvatar>
+            <div class="text-subtitle-2 font-weight-bold">{{ shortcut.title }}</div>
+            <div class="text-caption text-medium-emphasis mt-1">{{ shortcut.subtitle }}</div>
+          </VCardText>
+        </VCard>
+      </VCol>
+    </VRow>
 
     <!-- ── Métricas resumen ────────────────────────────────── -->
     <VRow class="mb-6">

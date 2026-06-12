@@ -25,12 +25,16 @@ const priorityLabels: Record<string, string> = {
     low: 'Baja', medium: 'Media', high: 'Alta', critical: 'Crítica',
 };
 
-onMounted(async () => {
-    loader.value = true;
+async function loadTask() {
     const response = await tasksService.show(projectId, id);
     if (response.status && response.items) {
         task.value = response.items as TaskI;
     }
+}
+
+onMounted(async () => {
+    loader.value = true;
+    await loadTask();
     loader.value = false;
 });
 </script>
@@ -48,8 +52,9 @@ onMounted(async () => {
                         <div class="d-flex gap-2">
                             <VBtn variant="outlined" prepend-icon="ri-arrow-left-line"
                                 :to="{ name: 'tasks', params: { projectId } }">Volver</VBtn>
-                            <VBtn v-if="canAction(['task.edit-content', 'task.edit-own'])" variant="tonal" color="warning"
-                                :to="{ name: 'tasks-id', params: { projectId, id } }" prepend-icon="ri-pencil-line">
+                            <VBtn v-if="canAction(['task.edit-content', 'task.edit-own'])" variant="tonal"
+                                color="warning" :to="{ name: 'tasks-id', params: { projectId, id } }"
+                                prepend-icon="ri-pencil-line">
                                 Editar
                             </VBtn>
                         </div>
@@ -69,7 +74,7 @@ onMounted(async () => {
                         <VCol cols="12" md="4">
                             <div class="text-caption text-medium-emphasis">Prioridad</div>
                             <div class="text-body-1 mt-1">{{ priorityLabels[task.priority ?? ''] ?? task.priority ?? '—'
-                            }}</div>
+                                }}</div>
                         </VCol>
                         <VCol cols="12" md="4">
                             <div class="text-caption text-medium-emphasis">Fecha límite</div>
@@ -100,7 +105,7 @@ onMounted(async () => {
         </VCol>
         <VCol cols="12">
             <DocumentManager parent-type="tasks" :parent-id="task.id" :attachments="task.attachments ?? []"
-                :can-manage="canAction(['task.edit-content', 'task.edit-own'])" @refresh="onMounted(() => { })" />
+                :can-manage="canAction(['task.edit-content', 'task.edit-own'])" @refresh="loadTask" />
         </VCol>
     </VRow>
     <VRow v-else>

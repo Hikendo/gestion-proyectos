@@ -10,6 +10,7 @@ use App\Services\AttachmentService;
 use App\Services\ProjectService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class ProjectController extends Controller
 {
@@ -154,6 +155,42 @@ class ProjectController extends Controller
         } catch (\Throwable $th) {
             return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
         }
+    }
+
+    /**
+     * GET /api/projects/{project}/permissions
+     *
+     * Devuelve los permisos del usuario autenticado sobre el proyecto.
+     * Usado por el composable useProjectPermission en el frontend.
+     */
+    public function permissions(Request $request, Project $project): JsonResponse
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['status' => false, 'items' => null, 'message' => 'No autenticado.'], 401);
+        }
+
+        // Verificar acceso básico de vista (sin lanzar excepción)
+        $canView = Gate::check('view', $project);
+
+        if (!$canView) {
+            return response()->json(['status' => false, 'items' => null, 'message' => 'No tienes acceso a este proyecto.'], 403);
+        }
+
+        return response()->json([
+            'status' => true,
+            'items' => [
+                'can_view'            => true,
+                'can_edit'            => Gate::check('update', $project),
+                'can_delete'          => Gate::check('delete', $project),
+                'can_assign_members'  => Gate::check('assignMembers', $project),
+                'can_manage_attachments' => Gate::check('manageAttachments', $project),
+                'is_owner'            => $project->owner_id === $user->id,
+                'project_role'        => $user->projectMembershipRole($project),
+            ],
+            'message' => 'Permisos del proyecto.',
+        ]);
     }
 
     /**

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserUpdate } from '@/composables/useUserUpdate';
 
@@ -7,17 +7,38 @@ const route = useRoute();
 const router = useRouter();
 const userId = Number(route.params.id);
 
-const { form, errors, isLoading, loadUser, handleUpdate, availablePermissions, fetchPermissions, togglePermission } = useUserUpdate();
+const { form, errors, isLoading, loadUser, handleUpdate, availablePermissions, rolePermissions, fetchPermissions, togglePermission } = useUserUpdate();
 
 const confirmVisible = ref(false);
 const pendingAction = ref<(() => Promise<void>) | null>(null);
 const notFound = ref(false);
 
+/** Rol original al cargar la página, para detectar cambios en el dropdown. */
+const originalRole = ref('');
+/** Se activa después de que loadUser terminó de hidratar el formulario. */
+const initialLoadDone = ref(false);
+
 onMounted(async () => {
   const ok = await loadUser(userId);
   if (!ok) notFound.value = true;
+  originalRole.value = form.role;
+  initialLoadDone.value = true;
   await fetchPermissions();
 });
+
+/**
+ * Cuando el admin cambia el rol en el dropdown, limpiamos los permisos
+ * directos seleccionados. El nuevo rol debe definir sus propios permisos.
+ * Así se evita que los permisos del rol anterior se filtren al payload.
+ */
+watch(
+  () => form.role,
+  (newRole, oldRole) => {
+    if (initialLoadDone.value && oldRole !== undefined && newRole !== originalRole.value) {
+      form.permissions = [];
+    }
+  },
+);
 
 function requestSave(action: () => Promise<void>) {
   pendingAction.value = action;
@@ -73,12 +94,19 @@ async function confirmAction() {
 
             <!-- Selector de permisos directos -->
             <div v-if="availablePermissions.length > 0" class="mb-4">
-              <p class="text-subtitle-2 font-weight-bold mb-2">Permisos directos</p>
+              <p class="text-subtitle-2 font-weight-bold mb-2">Permisos</p>
+              <p class="text-caption text-medium-emphasis mb-2">
+                <VIcon icon="ri-information-line" size="14" color="info" class="me-1" />
+                <span class="me-3">
+                  <VChip color="info" variant="flat" size="x-small" class="me-1" /> Rol
+                </span>
+                <VChip color="warning" variant="flat" size="x-small" class="me-1" /> Directo
+              </p>
               <div class="d-flex flex-wrap gap-2">
-                <VChip v-for="perm in availablePermissions" :key="perm.id"
-                  :color="form.permissions.includes(perm.name) ? 'primary' : 'grey-lighten-1'"
-                  :variant="form.permissions.includes(perm.name) ? 'flat' : 'tonal'" class="cursor-pointer"
-                  @click="togglePermission(perm.name)">
+                <VChip v-for="perm in availablePermissions" :key="perm.id" :color="form.permissions.includes(perm.name)
+                  ? (rolePermissions.has(perm.name) ? 'info' : 'warning')
+                  : 'grey-lighten-1'" :variant="form.permissions.includes(perm.name) ? 'flat' : 'tonal'"
+                  class="cursor-pointer" @click="togglePermission(perm.name)">
                   {{ perm.name }}
                 </VChip>
               </div>

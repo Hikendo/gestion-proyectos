@@ -30,8 +30,7 @@ async function confirmAction() {
   pendingAction.value = null;
 }
 
-onMounted(async () => {
-  loader.value = true;
+async function loadTicket() {
   const projectId = Number(route.params.projectId);
   const id = Number(route.params.id);
   const response = await ticketsService.show(projectId, id);
@@ -41,6 +40,11 @@ onMounted(async () => {
     snackbar.value = { show: true, text: 'Ticket no encontrado', color: 'error' };
     router.push({ name: 'tickets', params: { projectId } });
   }
+}
+
+onMounted(async () => {
+  loader.value = true;
+  await loadTicket();
   loader.value = false;
 });
 </script>
@@ -65,7 +69,7 @@ onMounted(async () => {
     </VCol>
     <VCol cols="12">
       <DocumentManager parent-type="tickets" :parent-id="form.id" :attachments="form.attachments ?? []"
-        :can-manage="canAction(['ticket.edit-any', 'ticket.edit-own'])" @refresh="onMounted(() => { })" />
+        :can-manage="canAction(['ticket.edit-any', 'ticket.edit-own'])" @refresh="loadTicket" />
     </VCol>
 
     <VDialog v-model="confirmVisible" persistent max-width="400">

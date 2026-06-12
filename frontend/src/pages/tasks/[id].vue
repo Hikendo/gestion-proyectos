@@ -31,8 +31,7 @@ async function confirmAction() {
   pendingAction.value = null;
 }
 
-onMounted(async () => {
-  loader.value = true;
+async function loadTask() {
   const projectId = Number(route.params.projectId);
   const id = Number(route.params.id);
   const response = await tasksService.show(projectId, id);
@@ -41,9 +40,14 @@ onMounted(async () => {
     item.due_date = toDateInput(item.due_date);
     form.value = item;
   } else {
-    snackbar.value = { show: true, text: 'Tarea no encontrado', color: 'error' };
+    snackbar.value = { show: true, text: 'Tarea no encontrada', color: 'error' };
     router.push({ name: 'tasks', params: { projectId } });
   }
+}
+
+onMounted(async () => {
+  loader.value = true;
+  await loadTask();
   loader.value = false;
 });
 </script>
@@ -68,7 +72,7 @@ onMounted(async () => {
     </VCol>
     <VCol cols="12">
       <DocumentManager parent-type="tasks" :parent-id="form.id" :attachments="form.attachments ?? []"
-        :can-manage="canAction(['task.edit-content', 'task.edit-own'])" @refresh="onMounted(() => { })" />
+        :can-manage="canAction(['task.edit-content', 'task.edit-own'])" @refresh="loadTask" />
     </VCol>
 
     <VDialog v-model="confirmVisible" persistent max-width="400">

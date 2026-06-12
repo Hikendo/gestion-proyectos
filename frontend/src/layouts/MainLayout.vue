@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
@@ -16,16 +16,52 @@ const authStore = useAuthStore();
 const { loader } = storeToRefs(appStore);
 const { authUser, currentProject, isSuperAdmin } = storeToRefs(authStore);
 
-const drawer = ref(true);
-const rail = ref(false);
+// ── Sidebar state with localStorage persistence ──────────────────────────────
+const SIDEBAR_STORAGE_KEY = 'gestion_proyectos_sidebar';
+
+function loadSidebarState(): { drawer: boolean; rail: boolean } {
+  try {
+    const raw = localStorage.getItem(SIDEBAR_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return {
+        drawer: typeof parsed.drawer === 'boolean' ? parsed.drawer : true,
+        rail: typeof parsed.rail === 'boolean' ? parsed.rail : false,
+      };
+    }
+  } catch { /* corrupted data — use defaults */ }
+  return { drawer: true, rail: false };
+}
+
+function saveSidebarState(drawer: boolean, rail: boolean) {
+  try {
+    localStorage.setItem(SIDEBAR_STORAGE_KEY, JSON.stringify({ drawer, rail }));
+  } catch { /* storage full or unavailable */ }
+}
+
+const initialState = loadSidebarState();
+const drawer = ref(initialState.drawer);
+const rail = ref(initialState.rail);
+
+onMounted(() => saveSidebarState(drawer.value, rail.value));
+
+watch([drawer, rail], ([d, r]) => saveSidebarState(d, r));
 
 function toggleDrawer() {
   if (rail.value) {
     rail.value = false;
+    drawer.value = true;
   } else {
     drawer.value = !drawer.value;
   }
 }
+
+function openDrawer() {
+  drawer.value = true;
+  rail.value = false;
+}
+
+const showFab = computed(() => !drawer.value && !rail.value);
 
 // ── Menú base (siempre visible) ──────────────────────────────────────────────
 const baseMenu = [
@@ -126,25 +162,50 @@ async function handleLogout() {
   <!-- ── Sidebar ────────────────────────────────────────────────── -->
   <VNavigationDrawer v-model="drawer" :rail="rail">
 
-    <!-- Header -->
-    <VListItem prepend-icon="ri-bar-chart-horizontal-line" title="Gestión de Proyectos" nav>
-      <template #append>
-        <VBtn :icon="rail ? 'ri-arrow-right-s-line' : 'ri-arrow-left-s-line'" variant="text" @click="rail = !rail" />
+    <!-- Header con botón de colapsar/expandir -->
+    <VListItem nav @click="rail = !rail">
+      <template #prepend>
+        <VTooltip :text="rail ? 'Expandir' : 'Colapsar'" location="right">
+          <template #activator="{ props: tooltipProps }">
+            <VIcon v-bind="tooltipProps" icon="ri-bar-chart-horizontal-line" />
+          </template>
+        </VTooltip>
       </template>
+      <VListItemTitle v-if="!rail">Gestión de Proyectos</VListItemTitle>
     </VListItem>
 
     <VDivider />
 
-    <!-- Usuario -->
-    <VListItem :prepend-icon="'ri-user-3-line'" :title="authUser?.name ?? 'Usuario'" :subtitle="authUser?.email" nav
-      class="my-1" />
+    <!-- Usuario (con tooltip en modo rail) -->
+    <VListItem nav class="my-1">
+      <template #prepend>
+        <VTooltip v-if="rail" :text="authUser?.name ?? 'Usuario'" location="right">
+          <template #activator="{ props: tooltipProps }">
+            <VIcon v-bind="tooltipProps" icon="ri-user-3-line" />
+          </template>
+        </VTooltip>
+        <VIcon v-else icon="ri-user-3-line" />
+      </template>
+      <VListItemTitle v-if="!rail">{{ authUser?.name ?? 'Usuario' }}</VListItemTitle>
+      <VListItemSubtitle v-if="!rail">{{ authUser?.email }}</VListItemSubtitle>
+    </VListItem>
 
     <VDivider />
 
-    <!-- Menú base -->
+    <!-- Menú base con tooltips -->
     <VList density="compact" nav>
-      <VListItem v-for="item in baseMenu" :key="item.name" :prepend-icon="item.icon" :title="item.title"
-        :active="isActive(item.name)" @click="navigate(item.name)" active-color="primary" />
+      <VListItem v-for="item in baseMenu" :key="item.name" :active="isActive(item.name)" @click="navigate(item.name)"
+        active-color="primary">
+        <template #prepend>
+          <VTooltip v-if="rail" :text="item.title" location="right">
+            <template #activator="{ props: tooltipProps }">
+              <VIcon v-bind="tooltipProps" :icon="item.icon" />
+            </template>
+          </VTooltip>
+          <VIcon v-else :icon="item.icon" />
+        </template>
+        <VListItemTitle v-if="!rail">{{ item.title }}</VListItemTitle>
+      </VListItem>
     </VList>
 
     <!-- Proyecto activo -->
@@ -155,32 +216,82 @@ async function handleLogout() {
         {{ currentProject.name }}
       </VListSubheader>
       <VList density="compact" nav>
-        <VListItem v-for="item in projectMenu" :key="item.name" :prepend-icon="item.icon" :title="item.title"
-          :active="isActive(item.name)" @click="navigate(item.name, item.params)" active-color="primary" />
+        <VListItem v-for="item in projectMenu" :key="item.name" :active="isActive(item.name)"
+          @click="navigate(item.name, item.params)" active-color="primary">
+          <template #prepend>
+            <VTooltip v-if="rail" :text="item.title" location="right">
+              <template #activator="{ props: tooltipProps }">
+                <VIcon v-bind="tooltipProps" :icon="item.icon" />
+              </template>
+            </VTooltip>
+            <VIcon v-else :icon="item.icon" />
+          </template>
+          <VListItemTitle v-if="!rail">{{ item.title }}</VListItemTitle>
+        </VListItem>
       </VList>
     </template>
 
-    <!-- Admin -->
+    <!-- Menú Admin -->
     <template v-if="adminMenu.length">
       <VDivider />
       <VListSubheader v-if="!rail" class="text-caption font-weight-bold px-4 pt-2">
         Administración
       </VListSubheader>
       <VList density="compact" nav>
-        <VListItem v-for="item in adminMenu" :key="item.name" :prepend-icon="item.icon" :title="item.title"
-          :active="isActive(item.name)" @click="navigate(item.name)" active-color="primary" />
+        <VListItem v-for="item in adminMenu" :key="item.name" :active="isActive(item.name)" @click="navigate(item.name)"
+          active-color="primary">
+          <template #prepend>
+            <VTooltip v-if="rail" :text="item.title" location="right">
+              <template #activator="{ props: tooltipProps }">
+                <VIcon v-bind="tooltipProps" :icon="item.icon" />
+              </template>
+            </VTooltip>
+            <VIcon v-else :icon="item.icon" />
+          </template>
+          <VListItemTitle v-if="!rail">{{ item.title }}</VListItemTitle>
+        </VListItem>
       </VList>
     </template>
 
-    <!-- Spacer + Logout -->
+    <!-- Spacer + elementos extra con tooltip -->
     <template #append>
       <VDivider />
       <VList density="compact" nav class="pb-2">
-        <VListItem prepend-icon="ri-user-line" title="Mi perfil" :active="isActive('profile')"
-          @click="navigate('profile')" active-color="primary" />
-        <VListItem prepend-icon="ri-palette-line" title="Apariencia" @click="themeDialogOpen = true"
-          active-color="primary" />
-        <VListItem prepend-icon="ri-logout-box-line" title="Cerrar sesión" @click="handleLogout" base-color="error" />
+        <VListItem :active="isActive('profile')" @click="navigate('profile')" active-color="primary">
+          <template #prepend>
+            <VTooltip v-if="rail" text="Mi perfil" location="right">
+              <template #activator="{ props: tooltipProps }">
+                <VIcon v-bind="tooltipProps" icon="ri-user-line" />
+              </template>
+            </VTooltip>
+            <VIcon v-else icon="ri-user-line" />
+          </template>
+          <VListItemTitle v-if="!rail">Mi perfil</VListItemTitle>
+        </VListItem>
+
+        <VListItem @click="themeDialogOpen = true" active-color="primary">
+          <template #prepend>
+            <VTooltip v-if="rail" text="Apariencia" location="right">
+              <template #activator="{ props: tooltipProps }">
+                <VIcon v-bind="tooltipProps" icon="ri-palette-line" />
+              </template>
+            </VTooltip>
+            <VIcon v-else icon="ri-palette-line" />
+          </template>
+          <VListItemTitle v-if="!rail">Apariencia</VListItemTitle>
+        </VListItem>
+
+        <VListItem @click="handleLogout" base-color="error">
+          <template #prepend>
+            <VTooltip v-if="rail" text="Cerrar sesión" location="right">
+              <template #activator="{ props: tooltipProps }">
+                <VIcon v-bind="tooltipProps" icon="ri-logout-box-line" />
+              </template>
+            </VTooltip>
+            <VIcon v-else icon="ri-logout-box-line" />
+          </template>
+          <VListItemTitle v-if="!rail">Cerrar sesión</VListItemTitle>
+        </VListItem>
       </VList>
     </template>
 
@@ -212,7 +323,34 @@ async function handleLogout() {
     </VContainer>
   </VMain>
 
-  <!-- Bandeja de notificaciones (teleport al body) -->
-  <NotificationTray />
+  <!-- ── FAB flotante para reabrir sidebar cuando está cerrado ─── -->
+  <VBtn v-if="!drawer" icon="ri-menu-line" color="primary" size="large" elevation="4" class="fab-reopen-sidebar"
+    @click="openDrawer" />
 
+  <!-- Bandeja de notificaciones -->
+  <NotificationTray />
 </template>
+
+<style scoped>
+/* ── FAB flotante para reabrir sidebar ─────────────────────────── */
+.fab-reopen-sidebar {
+  position: fixed;
+  top: 72px;
+  left: 16px;
+  z-index: 1000;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  animation: fab-in 0.25s ease;
+}
+
+@keyframes fab-in {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+</style>

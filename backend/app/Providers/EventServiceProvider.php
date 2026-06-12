@@ -11,6 +11,7 @@ use App\Events\ProjectCreated;
 use App\Events\ProjectMemberAdded;
 use App\Events\ProjectUpdated;
 use App\Events\RiskDetected;
+use App\Events\RoleChanged;
 use App\Events\TaskAssigned;
 use App\Events\TaskCompleted;
 use App\Events\TaskCreated;
@@ -34,6 +35,7 @@ use App\Listeners\HandleTaskStatusChanged;
 use App\Listeners\HandleTicketAssigned;
 use App\Listeners\HandleTicketClosed;
 use App\Listeners\HandleTicketCreated;
+use App\Listeners\InvalidateUserSession;
 use App\Models\Blocker;
 use App\Models\Deliverable;
 use App\Models\Milestone;
@@ -78,6 +80,9 @@ class EventServiceProvider extends ServiceProvider
 
         // ── Comentarios ───────────────────────────────────────────────────────
         CommentCreated::class      => [HandleCommentCreated::class],
+
+        // ── Roles ─────────────────────────────────────────────────────────────
+        RoleChanged::class         => [InvalidateUserSession::class],
     ];
 
     public function boot(): void
