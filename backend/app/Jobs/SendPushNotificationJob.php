@@ -66,8 +66,12 @@ class SendPushNotificationJob implements ShouldQueue
         $tokens = $user->fcmTokens()->pluck('token')->toArray();
 
         if (empty($tokens)) {
-            $this->notification->update(['status' => 'failed']);
-            Log::channel('notifications')->warning("El usuario ID {$user->id} no tiene tokens FCM activos registrados.");
+            // No marcamos como fallida: el usuario simplemente no tiene sesión activa.
+            // La notificación ya está persistida en BD y el usuario la verá al iniciar sesión.
+            // Se reintentará cuando registre sus tokens FCM (ver FcmTokenController::register).
+            Log::channel('notifications')->info(
+                "Usuario ID {$user->id} sin tokens FCM. Notificación ID {$this->notification->id} queda como 'pending'."
+            );
             return;
         }
 

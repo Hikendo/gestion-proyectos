@@ -11,10 +11,27 @@ class UserPolicy
         return $user->hasRole('super-admin') ? true : null;
     }
 
-    // Listar usuarios
+    /**
+     * Listar usuarios (id, name, email).
+     *
+     * Acceso para cualquier rol que necesite asignar usuarios a tareas,
+     * tickets u otros recursos.
+     */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('super-admin');
+        if ($user->hasRole('super-admin')) {
+            return true;
+        }
+
+        if ($user->hasRole('project-manager')) {
+            return true;
+        }
+
+        if ($user->can('task.assign') || $user->can('ticket.assign')) {
+            return true;
+        }
+
+        return false;
     }
 
     // Ver un usuario
