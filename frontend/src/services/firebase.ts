@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getMessaging, getToken, onMessage, Messaging } from 'firebase/messaging';
+import { getMessaging, getToken, onMessage, deleteToken, Messaging } from 'firebase/messaging';
 import { apiWithToken } from '@/services/http';
 
 const firebaseConfig = {
@@ -74,6 +74,32 @@ async function saveTokenToBackend(token: string): Promise<void> {
   }
 }
 
+/**
+ * Destruye el token FCM del navegador y lo elimina del backend.
+ * Debe llamarse al cerrar sesión para evitar que otro usuario herede el mismo token.
+ */
+export async function deleteFcmToken(): Promise<void> {
+  try {
+    // 1. Obtener el token actual para eliminarlo del backend
+    const currentToken = await getToken(messaging, {
+      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY || 'BAPVoVnTQTp6rdXziUjTQrxt5oYZ7DKvxldXtjs9clVvwswJ_ZEiVYHhx6XHULirB7P_JNNhF1z3sI_tpxEmzmU',
+    }).catch(() => null);
+
+    // 2. Destruir el token en Firebase (invalida la suscripción push)
+    await deleteToken(messaging);
+    console.log('Token FCM destruido del navegador.');
+
+    // 3. Eliminar del backend si teníamos un token
+    if (currentToken) {
+      await apiWithToken.post('/fcm/remove-token', { token: currentToken }).catch((err) => {
+        console.warn('No se pudo eliminar el token FCM del backend:', err);
+      });
+    }
+  } catch (error) {
+    console.error('Error al destruir el token FCM:', error);
+  }
+}
+
 export function listenForegroundNotifications(): void {
   onMessage(messaging, (payload: any) => {
     console.log('Mensaje recibido en primer plano: ', payload);
@@ -84,6 +110,7 @@ export function listenForegroundNotifications(): void {
           body: payload.notification.body,
           icon: payload.data?.icon || '/images/default-icon.png',
           image: payload.data?.image,
+          tag: payload.messageId || payload.data?.message_id || 'gestion-proyectos-fcm',
           data: {
             ...payload.data,
             click_action: payload.data?.click_action || '/',

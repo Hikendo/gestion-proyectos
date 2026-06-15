@@ -112,8 +112,10 @@ const themeDialogOpen = ref(false);
 
 async function handleLogout() {
   loader.value = true;
+  // 1. Primero destruimos el token FCM del navegador (requiere auth token aún válido)
+  await authStore.clearSession();
+  // 2. Luego cerramos sesión en el servidor y limpiamos localStorage
   await authService.logout();
-  authStore.clearSession();
   loader.value = false;
   router.push({ name: 'login' });
 }

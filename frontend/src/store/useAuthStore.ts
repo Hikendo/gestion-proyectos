@@ -5,7 +5,7 @@ import type { UserI } from '@/interfaces/UserI';
 import type { ProjectI } from '@/interfaces/ProjectI';
 import type { ProjectMemberRole } from '@/interfaces/enums';
 // 🔔 Importamos las utilidades de Firebase de forma asíncrona
-import { requestNotificationPermission, listenForegroundNotifications } from '@/services/firebase';
+import { requestNotificationPermission, listenForegroundNotifications, deleteFcmToken } from '@/services/firebase';
 import { usePermissionStore } from '@/store/usePermissionStore';
 
 export const useAuthStore = defineStore('auth', () => {
@@ -58,7 +58,12 @@ export const useAuthStore = defineStore('auth', () => {
         currentProjectRole.value = null;
     }
 
-    function clearSession() {
+    async function clearSession() {
+        // Destruir el token FCM del navegador para evitar conflictos.
+        // Si otro usuario inicia sesión en el mismo navegador, Firebase
+        // generará un token nuevo para esa cuenta.
+        await deleteFcmToken();
+
         clearAuthToken();
         authUser.value = null;
         currentProject.value = null;
