@@ -35,4 +35,14 @@ class ProjectException extends DomainException
     {
         return new static('No se puede remover al owner del proyecto.', Response::HTTP_UNPROCESSABLE_ENTITY);
     }
+
+    public static function memberNotFound(): static
+    {
+        return new static('El usuario no es miembro del proyecto.', Response::HTTP_NOT_FOUND);
+    }
+
+    public static function cannotChangeOwnerRole(): static
+    {
+        return new static('No se puede cambiar el rol del owner del proyecto.', Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
 }

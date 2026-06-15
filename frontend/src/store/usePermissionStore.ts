@@ -9,9 +9,13 @@ export interface FieldPermissions {
 
 export const usePermissionStore = defineStore('permissions', () => {
   const permissions = ref<string[]>([]);
+  /** Permisos específicos del proyecto actual (ProjectMemberRole::permissionsFor) */
+  const projectPermissions = ref<string[]>([]);
   const loaded = ref(false);
 
-  const hasPermission = computed(() => (name: string) => permissions.value.includes(name));
+  const hasPermission = computed(() => (name: string) => {
+    return permissions.value.includes(name) || projectPermissions.value.includes(name);
+  });
 
   /**
    * Initialize permissions from the auth user object (during login/me).
@@ -19,6 +23,21 @@ export const usePermissionStore = defineStore('permissions', () => {
   function setPermissions(perms: string[]) {
     permissions.value = [...perms];
     loaded.value = true;
+  }
+
+  /**
+   * Inyecta los permisos planos del proyecto actual.
+   * Se llama desde useEnsureCurrentProject o router.beforeEach.
+   */
+  function setProjectPermissions(perms: string[]) {
+    projectPermissions.value = [...perms];
+  }
+
+  /**
+   * Limpia los permisos del proyecto al salir del mismo.
+   */
+  function clearProjectPermissions() {
+    projectPermissions.value = [];
   }
 
   /**
@@ -41,14 +60,18 @@ export const usePermissionStore = defineStore('permissions', () => {
    */
   function clearPermissions() {
     permissions.value = [];
+    projectPermissions.value = [];
     loaded.value = false;
   }
 
   return {
     permissions,
+    projectPermissions,
     loaded,
     hasPermission,
     setPermissions,
+    setProjectPermissions,
+    clearProjectPermissions,
     refreshPermissions,
     clearPermissions,
   };

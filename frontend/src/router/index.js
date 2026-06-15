@@ -189,6 +189,16 @@ router.beforeEach(async (to) => {
                 const response = await projectsService.show(projectId);
                 if (response.status && response.items) {
                     authStore.setCurrentProject(response.items);
+                    // Cargar permisos del proyecto para el usuario actual
+                    const { usePermissionStore } = await import('../store/usePermissionStore');
+                    const permissionStore = usePermissionStore();
+                    try {
+                        const { default: http } = await import('../services/http');
+                        const { data } = await http.apiWithToken.get(`/projects/${projectId}/permissions`);
+                        if (data.status && data.items?.permissions) {
+                            permissionStore.setProjectPermissions(data.items.permissions);
+                        }
+                    } catch { /* fallback: backend policies */ }
                 }
             } finally {
                 appStore.loader = false;

@@ -239,7 +239,7 @@ const viewOptions = [
                     </VBtn>
                     <VBtn icon size="small" variant="text"
                       :to="{ name: 'tickets-id', params: { projectId: projectId(), id: item.id } }"
-                      v-if="canAction(['ticket.edit-any', 'ticket.edit-own'])">
+                      v-if="canAction(['ticket.edit-any', 'ticket.edit-own'], item.created_by)">
                       <VIcon icon="ri-pencil-line" color="warning" size="small" />
                     </VBtn>
                     <VBtn icon size="small" variant="text" v-if="canAction('ticket.delete')"
@@ -317,11 +317,11 @@ const viewOptions = [
                       <div class="d-flex justify-space-between align-center">
                         <VBtn size="x-small" variant="text" :color="col.color"
                           :to="{ name: 'tickets-id', params: { projectId: ticket.project_id, id: ticket.id } }"
-                          v-if="canAction(['ticket.edit-any', 'ticket.edit-own'])">
+                          v-if="canAction(['ticket.edit-any', 'ticket.edit-own'], ticket.created_by)">
                           <VIcon size="14">ri-pencil-line</VIcon>
                         </VBtn>
 
-                        <VMenu v-if="canAction(['ticket.edit-any', 'ticket.edit-own'])">
+                        <VMenu v-if="canAction(['ticket.edit-any', 'ticket.edit-own'], ticket.created_by)">
                           <template #activator="{ props: mp }">
                             <VBtn size="x-small" variant="text" v-bind="mp" @click.stop>
                               <VIcon size="14">ri-more-fill</VIcon>

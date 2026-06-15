@@ -34,7 +34,7 @@ class TaskService
             throw TaskException::invalidStatusTransition($task->status, $newStatus);
         }
 
-        $task->update(['status' => $newStatus]);
+        $task->update(['status' => $newStatus->value]);
     }
 
     public function canEdit(User $user, Task $task): bool

@@ -11,6 +11,12 @@ Route::middleware('auth:sanctum')->prefix('projects/{project}')->group(function 
     Route::post('members', [ProjectMemberController::class, 'store'])
         ->name('projects.members.store');
 
+    Route::get('members/users', [ProjectMemberController::class, 'users'])
+        ->name('projects.members.users');
+
+    Route::put('members/{user}', [ProjectMemberController::class, 'update'])
+        ->name('projects.members.update');
+
     Route::delete('members/{user}', [ProjectMemberController::class, 'destroy'])
         ->name('projects.members.destroy');
     Route::get('members/{member}', [ProjectMemberController::class, 'show'])

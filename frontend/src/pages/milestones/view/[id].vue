@@ -4,9 +4,12 @@ import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
 import { canAction } from '@/helpers/canAction';
+import { useEnsureCurrentProject } from '@/composables/useEnsureCurrentProject';
 import * as service from '@/services/project-milestones.service';
 import type { MilestoneI } from '@/interfaces/MilestoneI';
 import { formatDate } from '@/utils/util';
+
+useEnsureCurrentProject();
 
 const route = useRoute();
 const appStore = useAppStore();

@@ -51,7 +51,8 @@ async function onSubmit(): Promise<void> {
     </VCol>
     <VCol cols="12">
       <VForm @submit.prevent="requestSave(onSubmit)">
-        <TicketForm :form="form" :errores="errores" @update:attachments="onAttachmentsChanged" />
+        <TicketForm :form="form" :errores="errores" :project-id="Number(route.params.projectId)"
+          @update:attachments="onAttachmentsChanged" />
       </VForm>
     </VCol>
 

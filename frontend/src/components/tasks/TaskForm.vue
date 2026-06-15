@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, toRef } from 'vue';
 import type { TaskI, TaskErroresFormI } from '@/interfaces/TaskI';
 import type { TaskStatus, TaskPriority } from '@/interfaces/enums';
-import * as usersService from '@/services/users.service';
+import { membersAsUsers } from '@/services/project-members.service';
 import * as phasesService from '@/services/project-phases.service';
+import { useFieldLock } from '@/composables/useFieldLock';
 
 const props = defineProps<{
   form: TaskI;
@@ -11,12 +12,15 @@ const props = defineProps<{
   projectId: number;
 }>();
 
+const fieldPermissions = toRef(() => (props.form as any).field_permissions ?? {});
+const fl = useFieldLock(fieldPermissions);
+
 const users = ref<{ id: number; name: string; email: string }[]>([]);
 const phases = ref<{ id: number; name: string }[]>([]);
 
 onMounted(async () => {
   const [usersRes, phasesRes] = await Promise.all([
-    usersService.all(),
+    membersAsUsers(props.projectId),
     phasesService.index(props.projectId),
   ]);
   if (usersRes.status && usersRes.items) {
@@ -53,51 +57,53 @@ const priorities: { title: string; value: TaskPriority }[] = [
       <VRow>
         <VCol cols="12">
           <VTextField v-model="form.title" :error-messages="errores.title" name="title" label="Título"
-            variant="outlined" density="comfortable" placeholder="Título de la tarea" />
+            variant="outlined" density="comfortable" placeholder="Título de la tarea" :disabled="!fl.title.value" />
         </VCol>
 
         <VCol cols="12">
           <VTextarea v-model="form.description" :error-messages="errores.description" name="description"
-            label="Descripción" placeholder="Descripción de la tarea" rows="3" variant="outlined"
-            density="comfortable" />
+            label="Descripción" placeholder="Descripción de la tarea" rows="3" variant="outlined" density="comfortable"
+            :disabled="!fl.description.value" />
         </VCol>
 
         <VCol cols="12" md="4">
           <VSelect v-model="form.status" :error-messages="errores.status" name="status" :items="statuses"
-            item-title="title" item-value="value" label="Estado" variant="outlined" density="comfortable" eager />
+            item-title="title" item-value="value" label="Estado" variant="outlined" density="comfortable" eager
+            :disabled="!fl.status.value" />
         </VCol>
 
         <VCol cols="12" md="4">
           <VSelect v-model="form.priority" :error-messages="errores.priority" name="priority" :items="priorities"
-            item-title="title" item-value="value" label="Prioridad" variant="outlined" density="comfortable" eager />
+            item-title="title" item-value="value" label="Prioridad" variant="outlined" density="comfortable" eager
+            :disabled="!fl.priority.value" />
         </VCol>
 
         <VCol cols="12" md="4">
           <VTextField v-model="form.due_date" :error-messages="errores.due_date" name="due_date" type="date"
-            label="Fecha límite" />
+            label="Fecha límite" :disabled="!fl.due_date.value" />
         </VCol>
 
         <VCol cols="12" md="4">
           <VTextField v-model="form.estimated_hours" :error-messages="errores.estimated_hours" name="estimated_hours"
             type="number" label="Horas estimadas" placeholder="0" min="0" step="0.5" variant="outlined"
-            density="comfortable" />
+            density="comfortable" :disabled="!fl.estimated_hours.value" />
         </VCol>
 
         <VCol cols="12" md="4">
           <VTextField v-model="form.progress" :error-messages="errores.progress" name="progress" type="number"
-            label="Progreso (%)" placeholder="0" min="0" max="100" />
+            label="Progreso (%)" placeholder="0" min="0" max="100" :disabled="!fl.progress.value" />
         </VCol>
 
         <VCol cols="12" md="4">
           <VSelect v-model="form.phase_id" :error-messages="errores.phase_id" :items="phases" item-title="name"
             item-value="id" name="phase_id" label="Fase" placeholder="Selecciona una fase" variant="outlined"
-            density="comfortable" clearable eager />
+            density="comfortable" clearable eager :disabled="!fl.phase_id.value" />
         </VCol>
 
         <VCol cols="12" md="4">
           <VSelect v-model="form.assigned_to" :error-messages="errores.assigned_to" :items="users" item-title="name"
             item-value="id" name="assigned_to" label="Asignado a" placeholder="Selecciona un usuario" variant="outlined"
-            density="comfortable" clearable eager>
+            density="comfortable" clearable eager :disabled="!fl.assigned_to.value">
             <template #item="{ item, props: ip }">
               <VListItem v-bind="ip">
                 <template #prepend>

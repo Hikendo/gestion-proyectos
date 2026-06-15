@@ -203,6 +203,10 @@ const viewOptions = [
                       v-if="canAction('blocker.edit')">
                       <VIcon icon="ri-pencil-line" color="warning" size="small" />
                     </VBtn>
+                    <VBtn icon size="small" variant="text" v-if="canAction('blocker.resolve') && !item.resolved"
+                      @click="toggleResolved(item)">
+                      <VIcon icon="ri-verified-badge-line" color="success" size="small" />
+                    </VBtn>
                   </div>
                 </td>
               </tr>

@@ -4,7 +4,10 @@ import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
 import { canAction } from '@/helpers/canAction';
+import { useEnsureCurrentProject } from '@/composables/useEnsureCurrentProject';
 import * as objectivesService from '@/services/project-objectives.service';
+
+useEnsureCurrentProject();
 import type { ObjectiveI } from '@/interfaces/ObjectiveI';
 import type { PaginacionYQueryI } from '@/interfaces/PaginacionScoutI';
 

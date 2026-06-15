@@ -4,9 +4,12 @@ import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
 import { canAction } from '@/helpers/canAction';
+import { useEnsureCurrentProject } from '@/composables/useEnsureCurrentProject';
 import * as ticketsService from '@/services/tickets.service';
 import type { TicketI } from '@/interfaces/TicketI';
 import DocumentManager from '@/components/common/DocumentManager.vue';
+
+useEnsureCurrentProject();
 
 const route = useRoute();
 const appStore = useAppStore();
@@ -47,8 +50,8 @@ onMounted(async () => {
                         <div class="d-flex gap-2">
                             <VBtn variant="outlined" prepend-icon="ri-arrow-left-line"
                                 :to="{ name: 'tickets', params: { projectId } }">Volver</VBtn>
-                            <VBtn v-if="canAction(['ticket.edit-any', 'ticket.edit-own'])" variant="tonal"
-                                color="warning" :to="{ name: 'tickets-id', params: { projectId, id } }"
+                            <VBtn v-if="canAction(['ticket.edit-any', 'ticket.edit-own'], ticket.created_by)"
+                                variant="tonal" color="warning" :to="{ name: 'tickets-id', params: { projectId, id } }"
                                 prepend-icon="ri-pencil-line">Editar
                             </VBtn>
                         </div>
@@ -82,7 +85,7 @@ onMounted(async () => {
         </VCol>
         <VCol cols="12">
             <DocumentManager parent-type="tickets" :parent-id="ticket.id" :attachments="ticket.attachments ?? []"
-                :can-manage="canAction(['ticket.edit-any', 'ticket.edit-own'])" @refresh="loadTicket" />
+                :can-manage="canAction('ticket.manage-attachments')" @refresh="loadTicket" />
         </VCol>
     </VRow>
     <VRow v-else>

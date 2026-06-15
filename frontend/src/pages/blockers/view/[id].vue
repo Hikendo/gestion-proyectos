@@ -4,13 +4,16 @@ import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
 import { canAction } from '@/helpers/canAction';
+import { useEnsureCurrentProject } from '@/composables/useEnsureCurrentProject';
 import * as blockersService from '@/services/project-blockers.service';
 import type { BlockerI } from '@/interfaces/BlockerI';
 import DocumentManager from '@/components/common/DocumentManager.vue';
 
+useEnsureCurrentProject();
+
 const route = useRoute();
 const appStore = useAppStore();
-const { loader } = storeToRefs(appStore);
+const { loader, snackbar } = storeToRefs(appStore);
 
 const blocker = ref<BlockerI | null>(null);
 const projectId = Number(route.params.projectId);
@@ -18,6 +21,19 @@ const id = Number(route.params.id);
 
 const severityLabels: Record<string, string> = { low: 'Baja', medium: 'Media', high: 'Alta', critical: 'Crítica' };
 const severityColors: Record<string, string> = { low: 'success', medium: 'info', high: 'warning', critical: 'error' };
+
+async function resolveBlocker() {
+    if (!blocker.value) return;
+    loader.value = true;
+    const response = await blockersService.resolve(blocker.value.project_id, blocker.value.id);
+    if (response.status) {
+        blocker.value.resolved = true;
+        snackbar.value = { show: true, text: 'Bloqueador resuelto', color: 'success' };
+    } else {
+        snackbar.value = { show: true, text: 'Error al resolver', color: 'error' };
+    }
+    loader.value = false;
+}
 
 async function loadBlocker() {
     const response = await blockersService.show(projectId, id);
@@ -46,6 +62,9 @@ onMounted(async () => {
                         <div class="d-flex gap-2">
                             <VBtn variant="outlined" prepend-icon="ri-arrow-left-line"
                                 :to="{ name: 'blockers', params: { projectId } }">Volver</VBtn>
+                            <VBtn v-if="canAction('blocker.resolve') && !blocker.resolved" variant="tonal"
+                                color="success" prepend-icon="ri-verified-badge-line" @click="resolveBlocker">
+                                Resolver</VBtn>
                             <VBtn v-if="canAction('blocker.edit')" variant="tonal" color="warning"
                                 :to="{ name: 'blockers-id', params: { projectId, id } }" prepend-icon="ri-pencil-line">
                                 Editar</VBtn>

@@ -56,6 +56,8 @@ export const useAuthStore = defineStore('auth', () => {
     function clearCurrentProject() {
         currentProject.value = null;
         currentProjectRole.value = null;
+        const permissionStore = usePermissionStore();
+        permissionStore.clearProjectPermissions();
     }
 
     async function clearSession() {

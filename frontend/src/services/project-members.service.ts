@@ -52,6 +52,40 @@ export const store = async (projectId: number, payload: ProjectMemberPayload) =>
   }
 };
 
+// ─── Update (cambiar rol de miembro) ──────────────────────────────────────────
+
+export const update = async (projectId: number, userId: number, role: string) => {
+  try {
+    const { data } = await apiWithToken.put<MemberResponseI>(`/projects/${projectId}/members/${userId}`, { role });
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    return { status: false, message: "Error en el servidor" };
+  }
+};
+
+// ─── Users (miembros como usuarios planos [{id, name, email}]) ────────────────
+
+interface MembersUsersResponseI extends ResponseBaseI {
+  items: { id: number; name: string; email: string }[];
+}
+
+export const membersAsUsers = async (projectId: number) => {
+  try {
+    const { data } = await apiWithToken.get<MembersUsersResponseI>(`/projects/${projectId}/members/users`);
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    return { status: false, message: "Error en el servidor", items: [] as { id: number; name: string; email: string }[] };
+  }
+};
+
 // ─── Destroy ──────────────────────────────────────────────────────────────────
 
 export const destroy = async (projectId: number, userId: number) => {

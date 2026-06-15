@@ -4,7 +4,10 @@ import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
 import { canAction } from '@/helpers/canAction';
+import { useEnsureCurrentProject } from '@/composables/useEnsureCurrentProject';
 import * as milestonesService from '@/services/project-milestones.service';
+
+useEnsureCurrentProject();
 import type { MilestoneI } from '@/interfaces/MilestoneI';
 import type { PaginacionYQueryI } from '@/interfaces/PaginacionScoutI';
 import { formatDate } from '@/utils/util';
@@ -191,7 +194,7 @@ onMounted(handleGetData);
                   <td>{{ formatDate(item.target_date!) ?? '—' }}</td>
                   <td>
                     <VSwitch :model-value="item.completed" color="success" hide-details density="compact"
-                      :label="item.completed ? 'Completado' : 'Pendiente'"
+                      :label="item.completed ? 'Completado' : 'Pendiente'" :disabled="!canAction('milestone.edit')"
                       @update:model-value="toggleCompleted(item)" />
                   </td>
                   <td>

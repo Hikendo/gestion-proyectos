@@ -2,11 +2,12 @@
 import { ref, onMounted } from 'vue';
 import type { TicketI, TicketErroresFormI } from '@/interfaces/TicketI';
 import type { TicketStatus, TicketPriority } from '@/interfaces/enums';
-import * as usersService from '@/services/users.service';
+import { membersAsUsers } from '@/services/project-members.service';
 
-defineProps<{
+const props = defineProps<{
   form: TicketI;
   errores: TicketErroresFormI;
+  projectId: number;
 }>();
 
 const emit = defineEmits<{
@@ -23,7 +24,7 @@ function onFilesChanged(event: Event): void {
 const users = ref<{ id: number; name: string; email: string }[]>([]);
 
 onMounted(async () => {
-  const response = await usersService.all();
+  const response = await membersAsUsers(props.projectId);
   if (response.status && response.items) {
     users.value = response.items;
   }

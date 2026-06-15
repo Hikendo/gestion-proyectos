@@ -4,16 +4,32 @@ import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
 import { canAction } from '@/helpers/canAction';
+import { useEnsureCurrentProject } from '@/composables/useEnsureCurrentProject';
 import * as service from '@/services/project-deliverables.service';
 import type { DeliverableI } from '@/interfaces/DeliverableI';
 import { formatDate } from '@/utils/util';
 
+useEnsureCurrentProject();
+
 const route = useRoute();
 const appStore = useAppStore();
-const { loader } = storeToRefs(appStore);
+const { loader, snackbar } = storeToRefs(appStore);
 const item = ref<DeliverableI | null>(null);
 const projectId = Number(route.params.projectId);
 const id = Number(route.params.id);
+
+async function approveDeliverable() {
+    if (!item.value) return;
+    loader.value = true;
+    const response = await service.approve(item.value.project_id, item.value.id);
+    if (response.status) {
+        item.value.approved = true;
+        snackbar.value = { show: true, text: 'Entregable aprobado', color: 'success' };
+    } else {
+        snackbar.value = { show: true, text: 'Error al aprobar', color: 'error' };
+    }
+    loader.value = false;
+}
 
 onMounted(async () => {
     loader.value = true;
@@ -38,6 +54,9 @@ onMounted(async () => {
                         <div class="d-flex gap-2">
                             <VBtn variant="outlined" prepend-icon="ri-arrow-left-line"
                                 :to="{ name: 'deliverables', params: { projectId } }">Volver</VBtn>
+                            <VBtn v-if="canAction('deliverable.approve') && !item.approved" variant="tonal"
+                                color="success" prepend-icon="ri-verified-badge-line" @click="approveDeliverable">
+                                Aprobar</VBtn>
                             <VBtn v-if="canAction('deliverable.edit')" variant="tonal" color="warning"
                                 :to="{ name: 'deliverables-id', params: { projectId, id } }"
                                 prepend-icon="ri-pencil-line">

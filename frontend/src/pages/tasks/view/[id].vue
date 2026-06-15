@@ -4,11 +4,13 @@ import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
 import { canAction } from '@/helpers/canAction';
+import { useEnsureCurrentProject } from '@/composables/useEnsureCurrentProject';
 import * as tasksService from '@/services/project-tasks.service';
 import type { TaskI } from '@/interfaces/TaskI';
 import { formatDate } from '@/utils/util';
 import DocumentManager from '@/components/common/DocumentManager.vue';
 
+useEnsureCurrentProject();
 const route = useRoute();
 const router = useRouter();
 const appStore = useAppStore();
@@ -52,8 +54,8 @@ onMounted(async () => {
                         <div class="d-flex gap-2">
                             <VBtn variant="outlined" prepend-icon="ri-arrow-left-line"
                                 :to="{ name: 'tasks', params: { projectId } }">Volver</VBtn>
-                            <VBtn v-if="canAction(['task.edit-content', 'task.edit-own'])" variant="tonal"
-                                color="warning" :to="{ name: 'tasks-id', params: { projectId, id } }"
+                            <VBtn v-if="canAction(['task.edit-content', 'task.edit-own'], task.assigned_to)"
+                                variant="tonal" color="warning" :to="{ name: 'tasks-id', params: { projectId, id } }"
                                 prepend-icon="ri-pencil-line">
                                 Editar
                             </VBtn>
@@ -74,7 +76,7 @@ onMounted(async () => {
                         <VCol cols="12" md="4">
                             <div class="text-caption text-medium-emphasis">Prioridad</div>
                             <div class="text-body-1 mt-1">{{ priorityLabels[task.priority ?? ''] ?? task.priority ?? '—'
-                                }}</div>
+                            }}</div>
                         </VCol>
                         <VCol cols="12" md="4">
                             <div class="text-caption text-medium-emphasis">Fecha límite</div>
@@ -105,7 +107,7 @@ onMounted(async () => {
         </VCol>
         <VCol cols="12">
             <DocumentManager parent-type="tasks" :parent-id="task.id" :attachments="task.attachments ?? []"
-                :can-manage="canAction(['task.edit-content', 'task.edit-own'])" @refresh="loadTask" />
+                :can-manage="canAction('task.manage-attachments')" @refresh="loadTask" />
         </VCol>
     </VRow>
     <VRow v-else>

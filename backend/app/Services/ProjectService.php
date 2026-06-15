@@ -52,6 +52,23 @@ class ProjectService
         ]);
     }
 
+    public function updateMember(Project $project, int $userId, string $role): ProjectMember
+    {
+        $member = $project->members()->where('user_id', $userId)->first();
+
+        if (! $member) {
+            throw ProjectException::memberNotFound();
+        }
+
+        if ($project->owner_id === $userId) {
+            throw ProjectException::cannotChangeOwnerRole();
+        }
+
+        $member->update(['role' => $role]);
+
+        return $member;
+    }
+
     public function removeMember(Project $project, int $userId): void
     {
         if ($project->owner_id === $userId) {

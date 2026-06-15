@@ -178,6 +178,23 @@ class ProjectController extends Controller
             return response()->json(['status' => false, 'items' => null, 'message' => 'No tienes acceso a este proyecto.'], 403);
         }
 
+        // Super-admin tiene todos los permisos vía gate-before, pero no es miembro
+        if ($user->isSuperAdmin()) {
+            $flatPermissions = \App\Enums\ProjectMemberRole::permissionsFor(\App\Enums\ProjectMemberRole::Manager);
+            $membershipRole = 'manager';
+        } else {
+            $membershipRole = $user->projectMembershipRole($project);
+            $flatPermissions = $membershipRole
+                ? \App\Enums\ProjectMemberRole::permissionsFor($membershipRole)
+                : [];
+
+            // Owner sin membresía explícita: permisos de manager
+            if ($project->owner_id === $user->id) {
+                $flatPermissions = \App\Enums\ProjectMemberRole::permissionsFor(\App\Enums\ProjectMemberRole::Manager);
+                $membershipRole = 'manager';
+            }
+        }
+
         return response()->json([
             'status' => true,
             'items' => [
@@ -187,7 +204,8 @@ class ProjectController extends Controller
                 'can_assign_members'  => Gate::check('assignMembers', $project),
                 'can_manage_attachments' => Gate::check('manageAttachments', $project),
                 'is_owner'            => $project->owner_id === $user->id,
-                'project_role'        => $user->projectMembershipRole($project),
+                'project_role'        => $membershipRole,
+                'permissions'         => $flatPermissions,
             ],
             'message' => 'Permisos del proyecto.',
         ]);

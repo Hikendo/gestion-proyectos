@@ -4,6 +4,219 @@
 
 ---
 
+## [2026-06-15] Notificaciones FCM, permisos de tareas/tickets y field_permissions
+
+### ✅ Notificación nativa del navegador en primer plano
+
+**Causa:** `listenForegroundNotifications()` en `frontend/src/services/firebase.ts` solo despachaba un `CustomEvent` (`fcm:foreground-notification`) pero nunca llamaba a `new Notification()`. En primer plano, el Service Worker no interviene (Firebase SDK lo enruta al handler `onMessage`).
+
+**Solución:** Agregado `new Notification()` con `tag: payload.messageId` para evitar duplicados entre pestañas.
+
+**Archivos modificados:**
+
+- `frontend/src/services/firebase.ts`
+
+### ✅ Destrucción del token FCM al cerrar sesión (evita conflicto multi-usuario)
+
+**Causa:** Al cerrar sesión, el token FCM sobrevivía en el navegador y en la BD. Si otro usuario iniciaba sesión en el mismo navegador, `getToken()` devolvía el mismo token → conflicto.
+
+**Solución:**
+
+1. Nueva función `deleteFcmToken()` en `frontend/src/services/firebase.ts`: ejecuta `deleteToken(messaging)` (SDK Firebase) + `POST /fcm/remove-token` (backend).
+2. `clearSession()` en `useAuthStore.ts` ahora es `async` y llama `await deleteFcmToken()` **antes** de limpiar el auth token.
+3. `MainLayout.vue::handleLogout()` reordenado: primero `clearSession()` (FCM + permisos), luego `logout()` (servidor).
+
+**Archivos modificados:**
+
+- `frontend/src/services/firebase.ts`
+- `frontend/src/store/useAuthStore.ts`
+- `frontend/src/layouts/MainLayout.vue`
+
+### 🔴 Permiso fantasma `task.edit` en `UpdateTaskRequest`
+
+**Causa:** `UpdateTaskRequest::authorize()` usaba `task.edit`, un permiso que nunca se creó en el seeder. Los permisos reales son `task.edit-content` (PM/owner) y `task.edit-own` (developer/QA).
+
+**Solución:** Reemplazado `task.edit` → `task.edit-content`, y agregado `task.edit-own` al OR de `authorize()`.
+
+**Archivos modificados:**
+
+- `backend/app/Http/Requests/Task/UpdateTaskRequest.php`
+
+### 🔴 Índices de tareas y tickets: `canAction` sin `resourceOwnerId` ocultaba el botón de editar
+
+**Causa:** Los índices usaban `canAction(['task.edit-content', 'task.edit-own'])` sin `resourceOwnerId`. `canAction()` explícitamente retorna `false` para permisos `-own` en contexto de lista sin owner. Resultado: developers/QA nunca veían el botón de editar en sus propias tareas.
+
+**Solución:**
+
+- `frontend/src/pages/tasks/index.vue`: `canAction(['task.edit-content', 'task.edit-own'], item.assigned_to)`
+- `frontend/src/pages/tickets/index.vue`: `canAction(['ticket.edit-any', 'ticket.edit-own'], item.created_by)` (3 ubicaciones: lista, kanban cards, kanban menu)
+
+**Archivos modificados:**
+
+- `frontend/src/pages/tasks/index.vue`
+- `frontend/src/pages/tickets/index.vue`
+
+### 🔴 `TaskForm.vue` no implementaba `field_permissions`
+
+**Causa:** El backend calcula correctamente `field_permissions` en `FieldPermissionsService` y los retorna en el endpoint `GET /tasks/{id}`, pero el `TaskForm.vue` nunca los consumía. Todos los campos aparecían editables, el usuario intentaba editar, el backend rechazaba con 403.
+
+**Solución:** Integrado `useFieldLock` en `TaskForm.vue`. Cada campo (`title`, `description`, `status`, `priority`, `due_date`, `estimated_hours`, `progress`, `phase_id`, `assigned_to`) ahora tiene `:disabled="!fl.<campo>.value"`. El developer ve `status` y `progress` habilitados (según `TaskPolicy::updateStatus` y `FieldPermissionsService::forTask`), y el resto deshabilitados.
+
+**Archivos modificados:**
+
+- `frontend/src/components/tasks/TaskForm.vue`
+
+### 🔴 Acciones de resolución/aprobación faltantes en blockers, deliverables y milestones
+
+**Causa:** El backend tiene endpoints y permisos correctos para resolver blockers (`blocker.resolve`), aprobar deliverables (`deliverable.approve`), y marcar milestones completados (`milestone.edit`). Pero el frontend no exponía estas acciones correctamente:
+
+- **Blockers vista detalle:** Sin botón "Resolver" (solo editar)
+- **Blockers vista lista:** Sin botón rápido "Resolver"
+- **Deliverables vista detalle:** Sin botón "Aprobar"
+- **Deliverables vista lista:** El `VSwitch` de aprobado no respetaba permisos (cualquiera podía togglear)
+- **Milestones vista lista:** El `VSwitch` de completado no respetaba permisos
+
+**Solución:**
+
+- `frontend/src/pages/blockers/view/[id].vue`: + botón "Resolver" (`canAction('blocker.resolve') && !blocker.resolved`) + función `resolveBlocker()`
+- `frontend/src/pages/blockers/index.vue`: + botón "Resolver" en la lista
+- `frontend/src/pages/deliverables/view/[id].vue`: + botón "Aprobar" (`canAction('deliverable.approve') && !item.approved`) + función `approveDeliverable()`
+- `frontend/src/pages/deliverables/index.vue`: `VSwitch` de aprobado ahora con `:disabled="!canAction('deliverable.approve')"`
+- `frontend/src/pages/milestones/index.vue`: `VSwitch` de completado ahora con `:disabled="!canAction('milestone.edit')"`
+
+**Archivos modificados:**
+
+- `frontend/src/pages/blockers/view/[id].vue`
+- `frontend/src/pages/blockers/index.vue`
+- `frontend/src/pages/deliverables/view/[id].vue`
+- `frontend/src/pages/deliverables/index.vue`
+- `frontend/src/pages/milestones/index.vue`
+
+### 🔴 `DocumentManager` usaba permisos incorrectos para adjuntos
+
+**Causa:** Las vistas de tasks y tickets pasaban `canAction(['task.edit-content', 'task.edit-own'])` y `canAction(['ticket.edit-any', 'ticket.edit-own'])` a `DocumentManager`, en lugar del permiso real de adjuntos (`task.manage-attachments`, `ticket.manage-attachments`).
+
+**Solución:** Corregido en 4 archivos.
+
+**Archivos modificados:**
+
+- `frontend/src/pages/tasks/[id].vue`
+- `frontend/src/pages/tasks/view/[id].vue`
+- `frontend/src/pages/tickets/[id].vue`
+- `frontend/src/pages/tickets/view/[id].vue`
+
+### 🔴 Permisos de proyecto nunca llegaban al frontend (roles sin rol global)
+
+**Causa:** `AuthController` usa `$user->getAllPermissions()` (Spatie), que solo devuelve permisos **globales**. Usuarios sin rol global (dev, qa, support, client) recibían `permissions: []`. Sus permisos reales (por `ProjectMemberRole`) nunca se enviaban. El `PermissionStore` arrancaba vacío y `canAction()` siempre retornaba `false`.
+
+**Solución:**
+
+1. `backend/.../ProjectController.php`: `permissions()` ahora incluye `permissions: [...]` planos del rol del usuario en el proyecto (usando `ProjectMemberRole::permissionsFor()`).
+2. `frontend/src/store/usePermissionStore.ts`: nuevo array `projectPermissions` + `setProjectPermissions()`; `hasPermission` consulta ambos.
+3. `frontend/src/composables/useEnsureCurrentProject.ts`: tras cargar proyecto, llama `GET /projects/{id}/permissions`.
+4. `frontend/src/router/index.js`: `beforeEach` también inyecta permisos al precachear proyecto.
+5. `useEnsureCurrentProject()` agregado en **13 archivos** (7 vistas de detalle + 6 índices que no lo tenían).
+
+**Archivos modificados:**
+
+- `backend/app/Http/Controllers/Api/ProjectController.php`
+- `frontend/src/store/usePermissionStore.ts`
+- `frontend/src/store/useAuthStore.ts`
+- `frontend/src/composables/useEnsureCurrentProject.ts`
+- `frontend/src/router/index.js`
+- `frontend/src/pages/tasks/index.vue`, `tasks/view/[id].vue`
+- `frontend/src/pages/tickets/index.vue`, `tickets/view/[id].vue`
+- `frontend/src/pages/blockers/index.vue`, `blockers/view/[id].vue`
+- `frontend/src/pages/risks/index.vue`, `risks/view/[id].vue`
+- `frontend/src/pages/milestones/index.vue`, `milestones/view/[id].vue`
+- `frontend/src/pages/deliverables/index.vue`, `deliverables/view/[id].vue`
+- `frontend/src/pages/objectives/index.vue`, `objectives/view/[id].vue`
+- `frontend/src/pages/members/index.vue`
+- `frontend/src/pages/plans/index.vue`
+
+### ✅ Selector "Asignado a" solo muestra miembros del proyecto
+
+**Causa:** `TaskForm.vue` y `TicketForm.vue` usaban `usersService.all()` (todos los usuarios del sistema), permitiendo asignar tareas/tickets a usuarios que no son miembros del proyecto.
+
+**Solución:**
+
+1. Nuevo endpoint `GET /projects/{project}/members/users` en `ProjectMemberController`.
+2. Nuevo método `membersAsUsers()` en `project-members.service.ts`.
+3. `TaskForm.vue` y `TicketForm.vue` usan `membersAsUsers(props.projectId)` en vez de `usersService.all()`.
+
+**Archivos modificados:**
+
+- `backend/app/Http/Controllers/Api/ProjectMemberController.php`
+- `backend/routes/api/members.php`
+- `frontend/src/services/project-members.service.ts`
+- `frontend/src/components/tasks/TaskForm.vue`
+- `frontend/src/components/tickets/TicketForm.vue`
+- `frontend/src/pages/tickets/[id].vue`, `tickets/new.vue`
+
+### ✅ Endpoint para cambiar rol de miembro (antes no existía)
+
+**Causa:** `ProjectMemberController` solo tenía `store` (crear, falla si ya existe) y `destroy`. No había forma de cambiar el rol de un miembro existente (ej. developer → QA).
+
+**Solución:**
+
+1. `ProjectService::updateMember()` — actualiza el rol si el miembro existe.
+2. `ProjectException`: + `memberNotFound()`, `cannotChangeOwnerRole()`.
+3. `ProjectMemberController::update()` — `PUT /projects/{project}/members/{user}`.
+4. `members/[id].vue`: `membersService.store()` → `membersService.update()`; roles: `'support'` → `'analyst'`.
+
+**Archivos modificados:**
+
+- `backend/app/Services/ProjectService.php`
+- `backend/app/Exceptions/ProjectException.php`
+- `backend/app/Http/Controllers/Api/ProjectMemberController.php`
+- `backend/routes/api/members.php`
+- `frontend/src/services/project-members.service.ts`
+- `frontend/src/pages/members/[id].vue`
+
+### ✅ Notificaciones al agregar/cambiar rol de miembro
+
+**Causa:** `store()` y `update()` en `ProjectMemberController` no disparaban notificaciones. El servicio `ProjectMemberAddedNotificationService` ya existía pero nunca se llamaba.
+
+**Solución:**
+
+1. Inyectados `ProjectMemberAddedNotificationService` y nuevo `ProjectMemberRoleChangedNotificationService` en el controller.
+2. `store()`: notifica al nuevo miembro ("Fuiste añadido a un proyecto") y al owner.
+3. `update()`: notifica al usuario cuyo rol cambió ("Tu rol ahora es X").
+
+**Archivos creados:**
+
+- `backend/app/Services/Notifications/Domain/ProjectMemberRoleChangedNotificationService.php`
+
+**Archivos modificados:**
+
+- `backend/app/Http/Controllers/Api/ProjectMemberController.php`
+
+### 🔴 Transición de estado inválida (X → X) y error `TaskStatus::tryFrom()`
+
+**Causa:** Al actualizar solo `progress` sin cambiar `status`, el frontend enviaba `status: "review"` y el backend intentaba `changeStatus(Review → Review)`. `TaskStatus::canTransitionTo()` rechaza la transición. Además, `TaskService::changeStatus()` pasaba `$newStatus` (enum) a `$task->update(['status' => ...])` y el cast `TaskStatus::class` llamaba `tryFrom()` sobre un enum.
+
+**Solución:**
+
+- `TaskController::update()`: verifica `$task->status !== $newStatus` antes de `changeStatus()`.
+- `TaskService::changeStatus()`: `$newStatus` → `$newStatus->value`.
+
+**Archivos modificados:**
+
+- `backend/app/Http/Controllers/Api/TaskController.php`
+- `backend/app/Services/TaskService.php`
+
+### 🔴 `UpdateTaskRequest::authorize()` no permitía al asignado editar
+
+**Causa:** `authorize()` usaba solo `canForProject()` que requiere membresía explícita. Si el developer era miembro con rol "developer", `canForProject('task.edit-own')` retornaba `true`. Pero si el rol en la membresía era otro (ej. "qa"), fallaba aunque el usuario estuviera asignado a la tarea.
+
+**Solución:** El FormRequest ahora también verifica `$task->assigned_to === $user->id` en combinación con `canForProject('task.edit-own')` o `'task.update-status'`.
+
+**Archivos modificados:**
+
+- `backend/app/Http/Requests/Task/UpdateTaskRequest.php`
+
+---
+
 ## [2026-06-15] Corrección de notificaciones internas
 
 ### 🔴 Notificaciones nunca llegaban al crear tareas con assigned_to

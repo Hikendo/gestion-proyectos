@@ -4,8 +4,11 @@ import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
 import { canAction } from '@/helpers/canAction';
+import { useEnsureCurrentProject } from '@/composables/useEnsureCurrentProject';
 import * as service from '@/services/project-risks.service';
 import type { RiskI } from '@/interfaces/RiskI';
+
+useEnsureCurrentProject();
 
 const route = useRoute();
 const appStore = useAppStore();
@@ -39,7 +42,8 @@ onMounted(async () => {
                             <VBtn variant="outlined" prepend-icon="ri-arrow-left-line"
                                 :to="{ name: 'risks', params: { projectId } }">Volver</VBtn>
                             <VBtn v-if="canAction('risk.edit')" variant="tonal" color="warning"
-                                :to="{ name: 'risks-id', params: { projectId, id } }" prepend-icon="ri-pencil-line">Editar
+                                :to="{ name: 'risks-id', params: { projectId, id } }" prepend-icon="ri-pencil-line">
+                                Editar
                             </VBtn>
                         </div>
                     </VCardTitle>

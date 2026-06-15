@@ -4,7 +4,10 @@ import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
 import { canAction } from '@/helpers/canAction';
+import { useEnsureCurrentProject } from '@/composables/useEnsureCurrentProject';
 import * as deliverablesService from '@/services/project-deliverables.service';
+
+useEnsureCurrentProject();
 import type { DeliverableI } from '@/interfaces/DeliverableI';
 import type { PaginacionYQueryI } from '@/interfaces/PaginacionScoutI';
 import { formatDate } from '@/utils/util';
@@ -180,7 +183,8 @@ onMounted(handleGetData);
                   <td>{{ formatDate(item.delivery_date!) ?? '—' }}</td>
                   <td>
                     <VSwitch :model-value="item.approved" color="success" hide-details density="compact"
-                      :label="item.approved ? 'Aprobado' : 'Pendiente'" @update:model-value="toggleApproved(item)" />
+                      :label="item.approved ? 'Aprobado' : 'Pendiente'" :disabled="!canAction('deliverable.approve')"
+                      @update:model-value="toggleApproved(item)" />
                   </td>
                   <td>
                     <div class="d-flex gap-1">
@@ -238,7 +242,7 @@ onMounted(handleGetData);
                       <VIcon size="14" :color="col.color">ri-archive-line</VIcon>
                       <span class="text-body-2 font-weight-medium"
                         style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" :title="deliverable.name">{{
-                        deliverable.name }}</span>
+                          deliverable.name }}</span>
                     </div>
 
                     <!-- Fecha de entrega -->

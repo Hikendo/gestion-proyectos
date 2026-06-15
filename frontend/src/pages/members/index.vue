@@ -4,7 +4,10 @@ import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
 import { canAction } from '@/helpers/canAction';
+import { useEnsureCurrentProject } from '@/composables/useEnsureCurrentProject';
 import * as membersService from '@/services/project-members.service';
+
+useEnsureCurrentProject();
 import type { PaginacionYQueryI } from '@/interfaces/PaginacionScoutI';
 
 const route = useRoute();
@@ -53,7 +56,8 @@ onMounted(handleGetData);
               <h4 class="text-h4 text-wrap me-3"><strong>Miembros del proyecto</strong></h4>
               <div class="d-flex gap-2">
                 <VBtn variant="outlined" size="small"
-                  :to="{ name: 'project-detail', params: { projectId: projectId() } }" prepend-icon="ri-arrow-left-line">
+                  :to="{ name: 'project-detail', params: { projectId: projectId() } }"
+                  prepend-icon="ri-arrow-left-line">
                   Proyecto
                 </VBtn>
                 <VBtn variant="flat" :to="{ name: 'members-new', params: { projectId: projectId() } }"

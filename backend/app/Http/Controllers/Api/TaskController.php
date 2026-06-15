@@ -144,12 +144,18 @@ class TaskController extends Controller
             $data = $request->validated();
 
             if (isset($data['status'])) {
-                $this->authorize('updateStatus', $task);
-                $this->service->changeStatus(
-                    $task,
-                    TaskStatus::from($data['status']),
-                    $request->user()
-                );
+                $newStatus = TaskStatus::from($data['status']);
+                // Solo intentamos cambiar estado si es diferente al actual.
+                // Si el frontend envía el mismo status (ej. solo adjuntó evidencia),
+                // no forzamos una transición inválida (X → X).
+                if ($task->status !== $newStatus) {
+                    $this->authorize('updateStatus', $task);
+                    $this->service->changeStatus(
+                        $task,
+                        $newStatus,
+                        $request->user()
+                    );
+                }
                 unset($data['status']);
             }
 

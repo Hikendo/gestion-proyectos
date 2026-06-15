@@ -4,46 +4,49 @@ import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
 import { canAction } from '@/helpers/canAction';
+import { useEnsureCurrentProject } from '@/composables/useEnsureCurrentProject';
 import * as plansService from '@/services/project-plans.service';
+
+useEnsureCurrentProject();
 import type { ProjectPlanI } from '@/interfaces/ProjectPlanI';
 
-const route    = useRoute();
+const route = useRoute();
 const appStore = useAppStore();
 const { loader, snackbar } = storeToRefs(appStore);
 const projectId = () => Number(route.params.projectId);
 
-const plan    = ref<ProjectPlanI | null>(null);
-const form    = ref({ scope: '', requirements: '', technical_notes: '' });
+const plan = ref<ProjectPlanI | null>(null);
+const form = ref({ scope: '', requirements: '', technical_notes: '' });
 const editing = ref(false);
-const errors  = ref<any>({});
+const errors = ref<any>({});
 
 const handleGetData = async () => {
-    loader.value = true;
-    const response = await plansService.show(projectId());
-    if (response.status && response.items) {
-        plan.value = response.items;
-        form.value = {
-            scope:           response.items.scope           ?? '',
-            requirements:    response.items.requirements    ?? '',
-            technical_notes: response.items.technical_notes ?? '',
-        };
-    }
-    loader.value = false;
+  loader.value = true;
+  const response = await plansService.show(projectId());
+  if (response.status && response.items) {
+    plan.value = response.items;
+    form.value = {
+      scope: response.items.scope ?? '',
+      requirements: response.items.requirements ?? '',
+      technical_notes: response.items.technical_notes ?? '',
+    };
+  }
+  loader.value = false;
 };
 
 const handleSave = async () => {
-    errors.value = {};
-    loader.value = true;
-    const response = await plansService.save(projectId(), form.value as any);
-    if (response.status) {
-        snackbar.value = { show: true, text: 'Plan guardado', color: 'success' };
-        plan.value = response.items ?? null;
-        editing.value = false;
-    } else {
-        if ('errors' in response && response.errors) errors.value = response.errors;
-        snackbar.value = { show: true, text: response.message, color: 'error' };
-    }
-    loader.value = false;
+  errors.value = {};
+  loader.value = true;
+  const response = await plansService.save(projectId(), form.value as any);
+  if (response.status) {
+    snackbar.value = { show: true, text: 'Plan guardado', color: 'success' };
+    plan.value = response.items ?? null;
+    editing.value = false;
+  } else {
+    if ('errors' in response && response.errors) errors.value = response.errors;
+    snackbar.value = { show: true, text: response.message, color: 'error' };
+  }
+  loader.value = false;
 };
 
 onMounted(handleGetData);
@@ -63,9 +66,8 @@ onMounted(handleGetData);
                   prepend-icon="ri-arrow-left-line">
                   Proyecto
                 </VBtn>
-                <VBtn v-if="!editing && canAction('project.edit')"
-                  variant="flat" size="small" prepend-icon="ri-pencil-line"
-                  @click="editing = true">
+                <VBtn v-if="!editing && canAction('project.edit')" variant="flat" size="small"
+                  prepend-icon="ri-pencil-line" @click="editing = true">
                   Editar plan
                 </VBtn>
               </div>
@@ -100,8 +102,8 @@ onMounted(handleGetData);
       <VCard>
         <VCardText>
           <VForm @submit.prevent="handleSave">
-            <VTextarea v-model="form.scope" label="Alcance" variant="outlined" rows="4"
-              :error-messages="errors.scope" class="mb-3" />
+            <VTextarea v-model="form.scope" label="Alcance" variant="outlined" rows="4" :error-messages="errors.scope"
+              class="mb-3" />
             <VTextarea v-model="form.requirements" label="Requerimientos" variant="outlined" rows="4"
               :error-messages="errors.requirements" class="mb-3" />
             <VTextarea v-model="form.technical_notes" label="Notas técnicas" variant="outlined" rows="4"

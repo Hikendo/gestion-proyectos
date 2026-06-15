@@ -64,12 +64,12 @@ onMounted(async () => {
     </VCol>
     <VCol cols="12">
       <VForm @submit.prevent="requestSave(handleUpdate)">
-        <TicketForm :form="form" :errores="errores" />
+        <TicketForm :form="form" :errores="errores" :project-id="Number(route.params.projectId)" />
       </VForm>
     </VCol>
     <VCol cols="12">
       <DocumentManager parent-type="tickets" :parent-id="form.id" :attachments="form.attachments ?? []"
-        :can-manage="canAction(['ticket.edit-any', 'ticket.edit-own'])" @refresh="loadTicket" />
+        :can-manage="canAction('ticket.manage-attachments')" @refresh="loadTicket" />
     </VCol>
 
     <VDialog v-model="confirmVisible" persistent max-width="400">

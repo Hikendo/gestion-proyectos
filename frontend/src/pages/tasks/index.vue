@@ -4,7 +4,10 @@ import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
 import { canAction } from '@/helpers/canAction';
+import { useEnsureCurrentProject } from '@/composables/useEnsureCurrentProject';
 import * as tasksService from '@/services/project-tasks.service';
+
+useEnsureCurrentProject();
 import type { TaskI } from '@/interfaces/TaskI';
 import type { PaginacionYQueryI } from '@/interfaces/PaginacionScoutI';
 import { formatDate } from '@/utils/util';
@@ -200,7 +203,7 @@ onMounted(handleGetData);
                     </VBtn>
                     <VBtn icon size="small" variant="text"
                       :to="{ name: 'tasks-id', params: { projectId: projectId(), id: item.id } }"
-                      v-if="canAction(['task.edit-content', 'task.edit-own'])">
+                      v-if="canAction(['task.edit-content', 'task.edit-own'], item.assigned_to)">
                       <VIcon icon="ri-pencil-line" color="warning" size="small" />
                     </VBtn>
                     <VBtn icon size="small" variant="text" v-if="canAction('task.delete')"
