@@ -78,8 +78,29 @@ export function listenForegroundNotifications(): void {
   onMessage(messaging, (payload: any) => {
     console.log('Mensaje recibido en primer plano: ', payload);
     if (payload.notification?.title && payload.notification?.body) {
+      // Mostrar notificación nativa del navegador en primer plano
+      if (Notification.permission === 'granted') {
+        const notificationOptions = {
+          body: payload.notification.body,
+          icon: payload.data?.icon || '/images/default-icon.png',
+          image: payload.data?.image,
+          data: {
+            ...payload.data,
+            click_action: payload.data?.click_action || '/',
+          },
+          requireInteraction: true,
+        } as NotificationOptions & { image?: string };
+        const nativeNotification = new Notification(payload.notification.title, notificationOptions);
+
+        nativeNotification.onclick = () => {
+          nativeNotification.close();
+          const url = payload.data?.click_action || '/';
+          window.focus();
+          window.location.href = url;
+        };
+      }
+
       // Emitimos un evento global para que la capa de UI (store/componente Toast) lo capture
-      // sin bloquear la interfaz con alert()
       window.dispatchEvent(
         new CustomEvent('fcm:foreground-notification', {
           detail: {

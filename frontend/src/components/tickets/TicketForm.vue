@@ -59,7 +59,7 @@ const priorities: { title: string; value: TicketPriority }[] = [
 
         <VCol cols="12">
           <VTextarea v-model="form.description" :error-messages="errores.description" name="description"
-            label="Descripción" placeholder="Descripción detallada" rows="4" variant="outlined" density="comfortable" />
+            label="Descripción" placeholder="Descripción detallada" rows="4" />
         </VCol>
 
         <VCol cols="12" md="4">

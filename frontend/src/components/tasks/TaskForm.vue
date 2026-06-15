@@ -52,8 +52,8 @@ const priorities: { title: string; value: TaskPriority }[] = [
     <VCardText class="px-8 pb-8">
       <VRow>
         <VCol cols="12">
-          <VTextField v-model="form.title" :error-messages="errores.title" name="title" label="Título" variant="outlined" density="comfortable"
-            placeholder="Título de la tarea" variant="outlined" density="comfortable" />
+          <VTextField v-model="form.title" :error-messages="errores.title" name="title" label="Título"
+            variant="outlined" density="comfortable" placeholder="Título de la tarea" />
         </VCol>
 
         <VCol cols="12">
@@ -74,7 +74,7 @@ const priorities: { title: string; value: TaskPriority }[] = [
 
         <VCol cols="12" md="4">
           <VTextField v-model="form.due_date" :error-messages="errores.due_date" name="due_date" type="date"
-            label="Fecha límite" variant="outlined" density="comfortable" />
+            label="Fecha límite" />
         </VCol>
 
         <VCol cols="12" md="4">
@@ -85,7 +85,7 @@ const priorities: { title: string; value: TaskPriority }[] = [
 
         <VCol cols="12" md="4">
           <VTextField v-model="form.progress" :error-messages="errores.progress" name="progress" type="number"
-            label="Progreso (%)" placeholder="0" min="0" max="100" variant="outlined" density="comfortable" />
+            label="Progreso (%)" placeholder="0" min="0" max="100" />
         </VCol>
 
         <VCol cols="12" md="4">

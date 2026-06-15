@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useNotificationStore } from '@/store/useNotificationStore';
 import { storeToRefs } from 'pinia';
 import type { NotificationI } from '@/interfaces/NotificationI';
+
+const router = useRouter();
 
 const store = useNotificationStore();
 const { notifications, loading, currentPage, lastPage, total, unreadCount } = storeToRefs(store);
@@ -23,6 +26,32 @@ onMounted(async () => {
 
 function handlePageChange(page: number) {
     store.fetchNotifications(page);
+}
+
+function handleNotificationClick(notification: NotificationI) {
+    // Marcar como leída si no lo está
+    if (notification.read_at === null) {
+        store.markAsRead(notification.id);
+    }
+
+    // Navegar según data.url
+    const fullUrl = notification.data?.url as string | undefined;
+    if (fullUrl) {
+        let path: string;
+        try {
+            const urlObj = new URL(fullUrl);
+            path = urlObj.pathname.replace(/^\/api\/v[0-9]+/, '');
+        } catch {
+            path = fullUrl.replace(/^https?:\/\/[^/]+/, '').replace(/^\/api\/v[0-9]+/, '');
+        }
+        if (path && path !== '/') {
+            router.push(path);
+            return;
+        }
+    }
+
+    // Fallback: quedarse en la página
+    showMessage('Notificación marcada como leída');
 }
 
 function handleMarkAsRead(notification: NotificationI) {
@@ -135,7 +164,8 @@ function getNotificationColor(type: string): string {
             <VCard v-else>
                 <VList lines="two" class="pa-0">
                     <VListItem v-for="notification in notifications" :key="notification.id" class="notification-row"
-                        :class="{ 'notification-row--unread': notification.read_at === null }">
+                        :class="{ 'notification-row--unread': notification.read_at === null }"
+                        @click="handleNotificationClick(notification)">
                         <template #prepend>
                             <VAvatar :color="getNotificationColor(notification.type)" variant="tonal" size="40">
                                 <VIcon :icon="getNotificationIcon(notification.type)" size="20" />

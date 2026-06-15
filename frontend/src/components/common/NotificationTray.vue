@@ -19,20 +19,29 @@ function handleNotificationClick(notification: NotificationI) {
         store.markAsRead(notification.id);
     }
 
-    // Navegar según el tipo de notificación
-    if (notification.data?.click_action) {
-        const action = notification.data.click_action as string;
-        if (action.startsWith('/')) {
-            router.push(action);
-        } else if (action.includes('projectId') && notification.data.projectId) {
-            router.push({
-                name: action,
-                params: { projectId: notification.data.projectId as string | number },
-            });
+    store.closeTray();
+
+    // Navegar según el tipo de notificación usando data.url
+    const fullUrl = notification.data?.url as string | undefined;
+    if (fullUrl) {
+        // Convertir URL absoluta (http://nginx/api/v1/... o http://localhost:8000/...)
+        // a ruta relativa del frontend
+        let path: string;
+        try {
+            const urlObj = new URL(fullUrl);
+            path = urlObj.pathname.replace(/^\/api\/v[0-9]+/, '');
+        } catch {
+            // Si no es parseable, intentar extraer ruta directamente
+            path = fullUrl.replace(/^https?:\/\/[^/]+/, '').replace(/^\/api\/v[0-9]+/, '');
+        }
+        if (path && path !== '/') {
+            router.push(path);
+            return;
         }
     }
 
-    store.closeTray();
+    // Fallback: Si no hay url, ir a la página de notificaciones
+    router.push({ name: 'notifications' });
 }
 
 function handleMarkAllRead() {

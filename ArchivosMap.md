@@ -91,7 +91,10 @@ Todas las policies usan `$user->canForProject($project, 'permiso')` y `$user->ha
 | `TicketService.php` | Lógica de negocio de tickets (crear, cambio de estado) |
 | `ProjectDashboardReportService.php` | Generación de reportes XLSX de proyecto |
 | `ProjectExecutiveReportService.php` | Generación de reportes DOCX ejecutivos |
-| `Notifications/` | Servicios de notificación por dominio (TaskAssigned, TicketCreated, etc.) con resolución de destinatarios y filtro por policy |
+| `Notifications/AbstractNotificationService.php` | Clase base: resuelve destinatarios, filtra por policy, persiste en BD y despacha `SendPushNotificationJob` en chunks de 50 |
+| `Notifications/NotificationRecipientResolver.php` | Resuelve destinatarios por rol, permiso, membresía de proyecto o asignado de tarea/ticket |
+| `Notifications/PolicyAwareRecipientFilter.php` | Filtra usuarios por policy (`Gate::forUser()->check()`) dejando solo autorizados |
+| `Notifications/Domain/TaskAssignedNotificationService.php` | Notificación de tarea asignada: destinatario = asignado, filtro `task.view` |
 
 ### Traits (`backend/app/Traits/`)
 
@@ -240,3 +243,4 @@ Vistas organizadas por módulo: `projects/`, `tasks/`, `tickets/`, `blockers/`, 
 | `ARCHITECTURAL_AUDIT.md` | Auditoría arquitectónica previa |
 | `ARCHITECTURE_V2.md` | Documento de arquitectura V2 |
 | `checklist.md` | Checklist de tareas pendientes |
+| `backend/bootstrap/providers.php` | Registro de Service Providers (Laravel 11+) — incluye `EventServiceProvider` que mapea eventos→listeners |

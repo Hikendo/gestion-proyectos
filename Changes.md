@@ -1,6 +1,30 @@
 # Changes.md — Contexto para sesiones futuras
 
-**Última actualización:** 2026-06-12
+**Última actualización:** 2026-06-15
+
+---
+
+## [2026-06-15] Corrección de notificaciones internas
+
+### 🔴 Notificaciones nunca llegaban al crear tareas con assigned_to
+
+**Causa:** Triple bug:
+
+1. **`APP_ENV` no definido en `docker-compose.yml`** → Laravel usa `production` por defecto. En `production`, `shouldDiscoverEvents()` retorna `false` y se requiere cache de eventos. El entrypoint ejecutaba `optimize:clear` sin regenerarlo → eventos sin listeners.
+2. **`EventServiceProvider` no registrado en `bootstrap/providers.php`** → En Laravel 11+, los providers deben estar explícitamente en `bootstrap/providers.php`. Sin él, el array `$listen` nunca se cargaba → eventos sin listeners.
+3. **`$task->priority?->value` en `TaskAssignedNotificationService`** → `priority` es `string` en el modelo `Task`, no un enum. Causaba "Attempt to read property value on string" al intentar notificar.
+
+**Soluciones:**
+
+1. `docker-compose.yml`: Agregado `APP_ENV: local` y `APP_DEBUG: "true"` al environment `&laravel-env`.
+2. `bootstrap/providers.php`: Agregado `App\Providers\EventServiceProvider::class`.
+3. `app/Services/Notifications/Domain/TaskAssignedNotificationService.php`: Cambiado `$task->priority?->value` → `$task->priority`.
+
+**Archivos modificados:**
+
+- `docker-compose.yml`
+- `backend/bootstrap/providers.php`
+- `backend/app/Services/Notifications/Domain/TaskAssignedNotificationService.php`
 
 ---
 

@@ -44,7 +44,7 @@ final class TaskAssignedNotificationService extends AbstractNotificationService
                 'task_title' => $task->title,
                 'project_id' => $task->project_id,
                 'due_date'   => $task->due_date?->toDateString(),
-                'priority'   => $task->priority?->value,
+                'priority'   => $task->priority,
                 'url'        => config('app.url') . "/projects/{$task->project_id}/tasks/{$task->id}",
             ],
             clickAction: config('app.url') . "/projects/{$task->project_id}/tasks/{$task->id}",
