@@ -21,6 +21,9 @@ class TaskService
         $data['status']     = $data['status'] ?? TaskStatus::Pending->value;
         $data['priority']   = $data['priority'] ?? 'medium';
 
+        // Campos derivados automáticamente — nunca del input
+        unset($data['progress'], $data['worked_hours']);
+
         return Task::create($data);
     }
 

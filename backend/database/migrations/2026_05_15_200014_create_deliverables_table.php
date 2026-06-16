@@ -13,23 +13,38 @@ return new class extends Migration
     {
         Schema::create('deliverables', function (Blueprint $table) {
 
-    $table->id();
+            $table->id();
 
-    $table->foreignId('project_id')
-        ->constrained()
-        ->cascadeOnDelete();
+            $table->foreignId('project_id')
+                ->constrained()
+                ->cascadeOnDelete();
 
-    $table->string('name');
+            $table->foreignId('phase_id')
+                ->nullable()
+                ->constrained('project_phases')
+                ->nullOnDelete();
 
-    $table->text('description')->nullable();
+            $table->foreignId('parent_id')
+                ->nullable()
+                ->constrained('deliverables')
+                ->nullOnDelete();
 
-    $table->date('delivery_date')->nullable();
+            $table->string('name');
 
-    $table->boolean('approved')
-        ->default(false);
+            $table->text('description')->nullable();
 
-    $table->timestamps();
-});
+            $table->date('delivery_date')->nullable();
+
+            $table->boolean('approved')
+                ->default(false);
+
+            $table->foreignId('approved_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            $table->timestamps();
+        });
     }
 
     /**

@@ -110,8 +110,19 @@ class DeliverableController extends Controller
 
         $this->authorize('approve', $deliverable);
 
+        // Validar dependencia: no aprobar si el padre no está aprobado
+        if ($deliverable->parent_id) {
+            $parent = Deliverable::find($deliverable->parent_id);
+            if ($parent && ! $parent->approved) {
+                throw DeliverableException::parentNotApproved();
+            }
+        }
+
         try {
-            $deliverable->update(['approved' => true]);
+            $deliverable->update([
+                'approved'    => true,
+                'approved_by' => $request->user()->id,
+            ]);
 
             return response()->json([
                 'status'  => true,

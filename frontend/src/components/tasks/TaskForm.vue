@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, toRef } from 'vue';
+import { ref, onMounted, toRef, computed } from 'vue';
 import type { TaskI, TaskErroresFormI } from '@/interfaces/TaskI';
 import type { TaskStatus, TaskPriority } from '@/interfaces/enums';
 import { membersAsUsers } from '@/services/project-members.service';
@@ -12,7 +12,19 @@ const props = defineProps<{
   projectId: number;
 }>();
 
-const fieldPermissions = toRef(() => (props.form as any).field_permissions ?? {});
+// When creating a new task (id === 0), there are no field_permissions from the backend.
+// The user already passed StoreTaskRequest::authorize() (task.create), so all fields are editable.
+const isNewTask = computed(() => !props.form.id || props.form.id === 0);
+const fieldPermissions = toRef(() => {
+  if (isNewTask.value) {
+    return {
+      title: true, description: true, status: true, priority: true,
+      due_date: true, estimated_hours: true, progress: true,
+      phase_id: true, assigned_to: true,
+    };
+  }
+  return (props.form as any).field_permissions ?? {};
+});
 const fl = useFieldLock(fieldPermissions);
 
 const users = ref<{ id: number; name: string; email: string }[]>([]);

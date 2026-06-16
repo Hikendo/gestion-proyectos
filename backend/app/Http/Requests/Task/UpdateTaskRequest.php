@@ -30,9 +30,11 @@ class UpdateTaskRequest extends FormRequest
         // aunque su rol no tenga el permiso global — la policy verifica
         // assigned_to y estado Done.
         if ($task instanceof \App\Models\Task) {
-            if ($task->assigned_to === $user->id
+            if (
+                $task->assigned_to === $user->id
                 && ($user->canForProject($project, 'task.edit-own')
-                    || $user->canForProject($project, 'task.update-status'))) {
+                    || $user->canForProject($project, 'task.update-status'))
+            ) {
                 return true;
             }
         }
@@ -52,7 +54,6 @@ class UpdateTaskRequest extends FormRequest
             'status'          => ['nullable', 'in:pending,in_progress,review,done,blocked'],
             'due_date'        => ['nullable', 'date'],
             'estimated_hours' => ['nullable', 'numeric', 'min:0'],
-            'progress'        => ['nullable', 'integer', 'min:0', 'max:100'],
         ];
     }
 }

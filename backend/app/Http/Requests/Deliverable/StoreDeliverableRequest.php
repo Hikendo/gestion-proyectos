@@ -24,6 +24,8 @@ class StoreDeliverableRequest extends FormRequest
             'name'          => ['required', 'string', 'max:255'],
             'description'   => ['nullable', 'string'],
             'delivery_date' => ['required', 'date'],
+            'phase_id'      => ['nullable', 'exists:project_phases,id'],
+            'parent_id'     => ['nullable', 'exists:deliverables,id'],
         ];
     }
 }

@@ -24,6 +24,8 @@ class UpdateDeliverableRequest extends FormRequest
             'name'          => ['sometimes', 'string', 'max:255'],
             'description'   => ['nullable', 'string'],
             'delivery_date' => ['nullable', 'date'],
+            'phase_id'      => ['nullable', 'exists:project_phases,id'],
+            'parent_id'     => ['nullable', 'exists:deliverables,id'],
         ];
     }
 }

@@ -40,11 +40,21 @@ class DeliverablePolicy
 
     /**
      * Un entregable aprobado no puede ser aprobado de nuevo.
+     * Un entregable con dependencia (parent_id) no puede aprobarse
+     * hasta que su padre esté aprobado.
      */
     public function approve(User $user, Deliverable $deliverable): bool
     {
         if ($deliverable->approved) {
             return false;
+        }
+
+        // Validar dependencia: no aprobar si el padre no está aprobado
+        if ($deliverable->parent_id) {
+            $parent = Deliverable::find($deliverable->parent_id);
+            if ($parent && ! $parent->approved) {
+                return false;
+            }
         }
 
         return $user->canForProject($deliverable->project, 'deliverable.approve')

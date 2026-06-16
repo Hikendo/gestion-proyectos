@@ -13,22 +13,23 @@ return new class extends Migration
     {
         Schema::create('project_phases', function (Blueprint $table) {
 
-    $table->id();
+            $table->id();
 
-    $table->foreignId('project_id')
-        ->constrained()
-        ->cascadeOnDelete();
+            $table->foreignId('project_id')
+                ->constrained()
+                ->cascadeOnDelete();
 
-    $table->string('name');
+            $table->string('name');
 
-    $table->date('start_date')->nullable();
-    $table->date('end_date')->nullable();
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
 
-    $table->unsignedTinyInteger('progress')
-        ->default(0);
+            $table->unsignedTinyInteger('progress')->default(0);
+            $table->string('status')->default('planned');
+            $table->timestamp('completed_at')->nullable();
 
-    $table->timestamps();
-});
+            $table->timestamps();
+        });
     }
 
     /**

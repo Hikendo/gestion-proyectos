@@ -10,6 +10,7 @@ Route::prefix('v1')->group(function () {
     require __DIR__ . '/api/projects.php';
     require __DIR__ . '/api/members.php';
     require __DIR__ . '/api/phases.php';
+    require __DIR__ . '/api/criteria.php';
     require __DIR__ . '/api/plans.php';
     require __DIR__ . '/api/objectives.php';
     require __DIR__ . '/api/milestones.php';

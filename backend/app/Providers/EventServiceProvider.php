@@ -2,11 +2,14 @@
 
 namespace App\Providers;
 
+use App\Events\AcceptanceCriterionCompleted;
 use App\Events\BlockerCreated;
 use App\Events\BlockerResolved;
 use App\Events\CommentCreated;
 use App\Events\DeliverableApproved;
 use App\Events\MilestoneCompleted;
+use App\Events\PhaseCompleted;
+use App\Events\PhaseProgressUpdated;
 use App\Events\ProjectCreated;
 use App\Events\ProjectMemberAdded;
 use App\Events\ProjectUpdated;
@@ -15,10 +18,12 @@ use App\Events\RoleChanged;
 use App\Events\TaskAssigned;
 use App\Events\TaskCompleted;
 use App\Events\TaskCreated;
+use App\Events\TaskProgressUpdated;
 use App\Events\TaskStatusChanged;
 use App\Events\TicketAssigned;
 use App\Events\TicketClosed;
 use App\Events\TicketCreated;
+use App\Listeners\CheckPhaseCompletion;
 use App\Listeners\HandleBlockerCreated;
 use App\Listeners\HandleBlockerResolved;
 use App\Listeners\HandleCommentCreated;
@@ -36,19 +41,25 @@ use App\Listeners\HandleTicketAssigned;
 use App\Listeners\HandleTicketClosed;
 use App\Listeners\HandleTicketCreated;
 use App\Listeners\InvalidateUserSession;
+use App\Listeners\RecalculatePhaseProgress;
+use App\Listeners\RecalculateProjectProgress;
+use App\Models\AcceptanceCriterion;
 use App\Models\Blocker;
 use App\Models\Deliverable;
 use App\Models\Milestone;
 use App\Models\Project;
 use App\Models\Risk;
 use App\Models\Task;
+use App\Models\TaskTimeLog;
 use App\Models\Ticket;
+use App\Observers\AcceptanceCriterionObserver;
 use App\Observers\BlockerObserver;
 use App\Observers\DeliverableObserver;
 use App\Observers\MilestoneObserver;
 use App\Observers\ProjectObserver;
 use App\Observers\RiskObserver;
 use App\Observers\TaskObserver;
+use App\Observers\TaskTimeLogObserver;
 use App\Observers\TicketObserver;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
@@ -64,7 +75,17 @@ class EventServiceProvider extends ServiceProvider
         TaskCreated::class         => [HandleTaskCreated::class],
         TaskAssigned::class        => [HandleTaskAssigned::class],
         TaskStatusChanged::class   => [HandleTaskStatusChanged::class],
-        TaskCompleted::class       => [HandleTaskCompleted::class],
+        TaskCompleted::class       => [
+            HandleTaskCompleted::class,
+            RecalculatePhaseProgress::class,
+            CheckPhaseCompletion::class,
+        ],
+
+        // ── Progreso automático ────────────────────────────────────────────────
+        TaskProgressUpdated::class        => [RecalculatePhaseProgress::class],
+        PhaseProgressUpdated::class       => [RecalculateProjectProgress::class],
+        PhaseCompleted::class             => [],
+        AcceptanceCriterionCompleted::class => [CheckPhaseCompletion::class],
 
         // ── Ticket ────────────────────────────────────────────────────────────
         TicketCreated::class       => [HandleTicketCreated::class],
@@ -89,6 +110,8 @@ class EventServiceProvider extends ServiceProvider
     {
         Project::observe(ProjectObserver::class);
         Task::observe(TaskObserver::class);
+        TaskTimeLog::observe(TaskTimeLogObserver::class);
+        AcceptanceCriterion::observe(AcceptanceCriterionObserver::class);
         Ticket::observe(TicketObserver::class);
         Blocker::observe(BlockerObserver::class);
         Milestone::observe(MilestoneObserver::class);

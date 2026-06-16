@@ -16,12 +16,14 @@ class Risk extends Model
 
     protected $fillable = [
         'project_id',
+        'phase_id',
         'title',
         'description',
         'impact',
         'probability',
         'mitigation_plan',
         'status',
+        'reported_by',
     ];
     protected $casts = [
         'impact'      => RiskImpact::class,
@@ -38,5 +40,14 @@ class Risk extends Model
     {
         return $this->belongsTo(Project::class);
     }
-}
 
+    public function phase()
+    {
+        return $this->belongsTo(ProjectPhase::class, 'phase_id');
+    }
+
+    public function reporter()
+    {
+        return $this->belongsTo(User::class, 'reported_by');
+    }
+}

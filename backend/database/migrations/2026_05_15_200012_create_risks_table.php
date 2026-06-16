@@ -13,33 +13,45 @@ return new class extends Migration
     {
         Schema::create('risks', function (Blueprint $table) {
 
-    $table->id();
+            $table->id();
 
-    $table->foreignId('project_id')
-        ->constrained()
-        ->cascadeOnDelete();
+            $table->foreignId('project_id')
+                ->constrained()
+                ->cascadeOnDelete();
 
-    $table->string('title');
+            $table->foreignId('phase_id')
+                ->nullable()
+                ->constrained('project_phases')
+                ->nullOnDelete();
 
-    $table->text('description');
+            $table->string('title');
 
-    $table->enum('impact', [
-        'low',
-        'medium',
-        'high'
-    ]);
+            $table->text('description');
 
-    $table->enum('probability', [
-        'low',
-        'medium',
-        'high'
-    ]);
+            $table->enum('impact', [
+                'low',
+                'medium',
+                'high'
+            ]);
 
-    $table->text('mitigation_plan')
-        ->nullable();
+            $table->enum('probability', [
+                'low',
+                'medium',
+                'high'
+            ]);
 
-    $table->timestamps();
-});
+            $table->text('mitigation_plan')
+                ->nullable();
+
+            $table->string('status')->default('active');
+
+            $table->foreignId('reported_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            $table->timestamps();
+        });
     }
 
     /**

@@ -24,6 +24,7 @@ class UpdateObjectiveRequest extends FormRequest
             'title'       => ['sometimes', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'completed'   => ['nullable', 'boolean'],
+            'phase_id'    => ['nullable', 'exists:project_phases,id'],
         ];
     }
 }

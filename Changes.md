@@ -1,6 +1,27 @@
 # Changes.md — Contexto para sesiones futuras
 
-**Última actualización:** 2026-06-15
+**Última actualización:** 2026-06-16
+
+---
+
+## [2026-06-16] TaskForm.vue: campos deshabilitados al crear tarea nueva
+
+### 🔴 PM no podía agregar tareas (todos los campos aparecían deshabilitados en el frontend)
+
+**Causa:** `TaskForm.vue` usa `useFieldLock(fieldPermissions)` para habilitar/deshabilitar campos. `fieldPermissions` se extrae de `props.form.field_permissions`. El backend solo retorna `field_permissions` en `GET /tasks/{id}` (show), no durante la creación. Al crear una tarea nueva, `form` se inicializa con `emptyForm()` que no tiene `field_permissions` → `{}`. `useFieldLock` devuelve `false` para todos los campos → todo aparece disabled.
+
+**Solución:** Agregada detección de modo creación en `TaskForm.vue`: si `form.id === 0`, se inyecta un `field_permissions` sintético con todos los campos en `true`, ya que el usuario ya fue autorizado por `StoreTaskRequest::authorize()` (permiso `task.create`).
+
+**Revisión de otros formularios:** Ninguno de los otros 7 formularios (`TicketForm`, `BlockerForm`, `DeliverableForm`, `MilestoneForm`, `ObjectiveForm`, `RiskForm`, `ProjectForm`) usa `useFieldLock` ni `field_permissions` para bloquear campos — no son vulnerables al mismo bug.
+
+**Archivos modificados:**
+
+- `frontend/src/components/tasks/TaskForm.vue`
+
+### Verificación
+
+- Backend tests: 5/5 pasan (`TaskTest`)
+- Frontend build: exitoso (`vite build`)
 
 ---
 

@@ -127,8 +127,6 @@ class BlockerController extends Controller
         try {
             $blocker->update([
                 'resolved'    => true,
-                'resolved_at' => now(),
-                'resolved_by' => $request->user()->id,
             ]);
 
             return response()->json([

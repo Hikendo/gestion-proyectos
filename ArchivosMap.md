@@ -200,7 +200,22 @@ Rutas lazy-loading con guard `beforeEach`: restaura sesión desde token, carga `
 
 ### Components (`frontend/src/components/`)
 
-Formularios por recurso (TaskForm, TicketForm, ProjectForm, etc.), KanbanBoard, GanttChart, DocumentManager (adjuntos con drag & drop), NotificationBell, NotificationTray.
+| Archivo | Responsabilidad |
+|---------|----------------|
+| `tasks/TaskForm.vue` | Formulario de creación/edición de tareas. En **creación** (`id===0`) inyecta `field_permissions` sintéticos (todo `true`) porque el backend solo retorna `field_permissions` en `show()`. En **edición** usa `useFieldLock` con `field_permissions` reales del backend para bloquear campos según el rol. |
+| `tickets/TicketForm.vue` | Formulario de creación/edición de tickets. Sin bloqueo de campos por permisos. |
+| `blockers/BlockerForm.vue` | Formulario de creación/edición de bloqueadores. |
+| `deliverables/DeliverableForm.vue` | Formulario de creación/edición de entregables. |
+| `milestones/MilestoneForm.vue` | Formulario de creación/edición de hitos. |
+| `objectives/ObjectiveForm.vue` | Formulario de creación/edición de objetivos. |
+| `risks/RiskForm.vue` | Formulario de creación/edición de riesgos. |
+| `projects/ProjectForm.vue` | Formulario de creación/edición de proyectos. |
+| `users/UserForm.vue` | Formulario de creación/edición de usuarios (admin). |
+| `KanbanBoard.vue` | Tablero Kanban para tickets. |
+| `GanttChart.vue` | Gráfico Gantt para tareas. |
+| `common/DocumentManager.vue` | Gestión de adjuntos con drag & drop. |
+| `common/NotificationBell.vue` | Campana de notificaciones con contador no leídas. |
+| `common/NotificationTray.vue` | Bandeja desplegable de notificaciones. |
 
 ### Pages (`frontend/src/pages/`)
 

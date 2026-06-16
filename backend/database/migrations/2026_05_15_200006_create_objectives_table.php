@@ -13,26 +13,31 @@ return new class extends Migration
     {
         Schema::create('objectives', function (Blueprint $table) {
 
-    $table->id();
+            $table->id();
 
-    $table->foreignId('project_id')
-        ->constrained()
-        ->cascadeOnDelete();
+            $table->foreignId('project_id')
+                ->constrained()
+                ->cascadeOnDelete();
 
-    $table->enum('type', [
-        'general',
-        'specific'
-    ]);
+            $table->foreignId('phase_id')
+                ->nullable()
+                ->constrained('project_phases')
+                ->nullOnDelete();
 
-    $table->string('title');
+            $table->enum('type', [
+                'general',
+                'specific'
+            ]);
 
-    $table->text('description');
+            $table->string('title');
 
-    $table->boolean('completed')
-        ->default(false);
+            $table->text('description');
 
-    $table->timestamps();
-});
+            $table->boolean('completed')
+                ->default(false);
+
+            $table->timestamps();
+        });
     }
 
     /**

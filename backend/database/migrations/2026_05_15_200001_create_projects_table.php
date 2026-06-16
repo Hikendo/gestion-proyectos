@@ -10,9 +10,10 @@ return new class extends Migration
     {
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uuid')->nullable()->unique();
 
             $table->string('name');
-            $table->string('code')->unique();           // ← agregado
+            $table->string('code')->unique();
             $table->text('description')->nullable();
 
             $table->enum('status', [
@@ -30,10 +31,10 @@ return new class extends Migration
 
             $table->unsignedTinyInteger('progress')->default(0);
 
-            $table->foreignId('owner_id')              // ← era created_by
+            $table->foreignId('owner_id')
                 ->constrained('users');
 
-            $table->softDeletes();                     // ← agregado
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -26,6 +26,7 @@ class StoreRiskRequest extends FormRequest
             'impact'          => ['required', 'in:low,medium,high,critical'],
             'probability'     => ['required', 'in:low,medium,high'],
             'mitigation_plan' => ['nullable', 'string'],
+            'phase_id'        => ['nullable', 'exists:project_phases,id'],
         ];
     }
 }

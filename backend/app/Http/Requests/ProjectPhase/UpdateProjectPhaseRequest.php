@@ -17,7 +17,7 @@ class UpdateProjectPhaseRequest extends FormRequest
             'name'       => ['sometimes', 'string', 'max:255'],
             'start_date' => ['nullable', 'date'],
             'end_date'   => ['nullable', 'date'],
-            'progress'   => ['nullable', 'integer', 'min:0', 'max:100'],
+            'status'     => ['nullable', 'in:planned,in_progress'],
         ];
     }
 }

@@ -14,6 +14,7 @@ class Objective extends Model
 
     protected $fillable = [
         'project_id',
+        'phase_id',
         'type',
         'title',
         'description',
@@ -28,5 +29,10 @@ class Objective extends Model
     public function project()
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function phase()
+    {
+        return $this->belongsTo(ProjectPhase::class, 'phase_id');
     }
 }

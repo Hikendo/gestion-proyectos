@@ -38,6 +38,11 @@ return new class extends Migration
             $table->boolean('resolved')
                 ->default(false);
 
+            $table->foreignId('created_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
             $table->timestamps();
         });
     }
