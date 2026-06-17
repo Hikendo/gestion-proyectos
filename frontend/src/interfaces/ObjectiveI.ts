@@ -4,6 +4,7 @@ import { ProjectI } from "@/interfaces/ProjectI";
 
 export interface ObjectiveI extends ModelBaseI {
   project_id: number; // Required en Laravel
+  phase_id?: number | null; // Nullable en Laravel
 
   type: ObjectiveType; // Enum Laravel
   title: string; // Required en Laravel
@@ -12,6 +13,7 @@ export interface ObjectiveI extends ModelBaseI {
   completed: boolean; // Required en Laravel
 
   project?: ProjectI;
+  phase?: { id: number; name: string } | null;
 }
 
 export interface ObjectiveErroresFormI {

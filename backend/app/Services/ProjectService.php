@@ -69,6 +69,40 @@ class ProjectService
         return $member;
     }
 
+    public function suspendMember(Project $project, int $userId): ProjectMember
+    {
+        $member = $project->members()->where('user_id', $userId)->first();
+
+        if (! $member) {
+            throw ProjectException::memberNotFound();
+        }
+
+        if ($member->suspended_at) {
+            throw ProjectException::memberAlreadySuspended();
+        }
+
+        $member->update(['suspended_at' => now()]);
+
+        return $member;
+    }
+
+    public function unsuspendMember(Project $project, int $userId): ProjectMember
+    {
+        $member = $project->members()->where('user_id', $userId)->first();
+
+        if (! $member) {
+            throw ProjectException::memberNotFound();
+        }
+
+        if (! $member->suspended_at) {
+            throw ProjectException::memberNotSuspended();
+        }
+
+        $member->update(['suspended_at' => null]);
+
+        return $member;
+    }
+
     public function removeMember(Project $project, int $userId): void
     {
         if ($project->owner_id === $userId) {

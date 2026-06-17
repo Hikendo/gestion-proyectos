@@ -6,6 +6,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { canAction } from '@/helpers/canAction';
 import { useEnsureCurrentProject } from '@/composables/useEnsureCurrentProject';
 import * as plansService from '@/services/project-plans.service';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 
 useEnsureCurrentProject();
 import type { ProjectPlanI } from '@/interfaces/ProjectPlanI';
@@ -82,11 +83,14 @@ onMounted(handleGetData);
       <VCard>
         <VCardText v-if="plan">
           <p class="text-overline text-medium-emphasis mb-1">Alcance</p>
-          <p class="mb-4">{{ plan.scope ?? '—' }}</p>
+          <div v-if="plan.scope" v-html="plan.scope" class="mb-4 rich-view"></div>
+          <p v-else class="mb-4 text-medium-emphasis">—</p>
           <p class="text-overline text-medium-emphasis mb-1">Requerimientos</p>
-          <p class="mb-4">{{ plan.requirements ?? '—' }}</p>
+          <div v-if="plan.requirements" v-html="plan.requirements" class="mb-4 rich-view"></div>
+          <p v-else class="mb-4 text-medium-emphasis">—</p>
           <p class="text-overline text-medium-emphasis mb-1">Notas técnicas</p>
-          <p>{{ plan.technical_notes ?? '—' }}</p>
+          <div v-if="plan.technical_notes" v-html="plan.technical_notes" class="rich-view"></div>
+          <p v-else class="text-medium-emphasis">—</p>
         </VCardText>
         <VCardText v-else class="text-medium-emphasis">
           No hay plan definido aún.
@@ -102,12 +106,19 @@ onMounted(handleGetData);
       <VCard>
         <VCardText>
           <VForm @submit.prevent="handleSave">
-            <VTextarea v-model="form.scope" label="Alcance" variant="outlined" rows="4" :error-messages="errors.scope"
-              class="mb-3" />
-            <VTextarea v-model="form.requirements" label="Requerimientos" variant="outlined" rows="4"
-              :error-messages="errors.requirements" class="mb-3" />
-            <VTextarea v-model="form.technical_notes" label="Notas técnicas" variant="outlined" rows="4"
-              :error-messages="errors.technical_notes" class="mb-4" />
+            <label class="v-label text-body-2 mb-1 d-block">Alcance</label>
+            <RichTextEditor v-model="form.scope" class="mb-3" />
+            <div v-if="errors.scope?.length" class="v-messages text-error mb-3 mt-1">{{ errors.scope[0] }}</div>
+
+            <label class="v-label text-body-2 mb-1 d-block">Requerimientos</label>
+            <RichTextEditor v-model="form.requirements" class="mb-3" />
+            <div v-if="errors.requirements?.length" class="v-messages text-error mb-3 mt-1">{{ errors.requirements[0] }}
+            </div>
+
+            <label class="v-label text-body-2 mb-1 d-block">Notas técnicas</label>
+            <RichTextEditor v-model="form.technical_notes" class="mb-4" />
+            <div v-if="errors.technical_notes?.length" class="v-messages text-error mb-4 mt-1">{{
+              errors.technical_notes[0] }}</div>
             <div class="d-flex gap-2 justify-end">
               <VBtn variant="outlined" @click="editing = false">Cancelar</VBtn>
               <VBtn type="submit" color="primary" :loading="loader">Guardar</VBtn>

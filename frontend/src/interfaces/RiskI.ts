@@ -9,6 +9,7 @@ import { ProjectI } from "@/interfaces/ProjectI";
 
 export interface RiskI extends ModelBaseI {
   project_id: number; // Required en Laravel
+  phase_id?: number | null; // Nullable en Laravel
 
   title: string; // Required en Laravel
   description?: string | null; // Nullable en Laravel
@@ -20,6 +21,7 @@ export interface RiskI extends ModelBaseI {
   mitigation_plan?: string | null; // Nullable en Laravel
 
   project?: ProjectI;
+  phase?: { id: number; name: string } | null;
 }
 
 export interface RiskErroresFormI {

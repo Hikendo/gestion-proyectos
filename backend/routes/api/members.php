@@ -17,6 +17,12 @@ Route::middleware('auth:sanctum')->prefix('projects/{project}')->group(function 
     Route::put('members/{user}', [ProjectMemberController::class, 'update'])
         ->name('projects.members.update');
 
+    Route::patch('members/{user}/suspend', [ProjectMemberController::class, 'suspend'])
+        ->name('projects.members.suspend');
+
+    Route::patch('members/{user}/unsuspend', [ProjectMemberController::class, 'unsuspend'])
+        ->name('projects.members.unsuspend');
+
     Route::delete('members/{user}', [ProjectMemberController::class, 'destroy'])
         ->name('projects.members.destroy');
     Route::get('members/{member}', [ProjectMemberController::class, 'show'])

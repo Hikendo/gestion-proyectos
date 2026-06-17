@@ -91,7 +91,10 @@ class ProjectMemberController extends Controller
             $memberUser = User::find($userId);
             if ($memberUser) {
                 $this->memberRoleChangedNotification->notify(
-                    $project, $memberUser, $newRole, $request->user()
+                    $project,
+                    $memberUser,
+                    $newRole,
+                    $request->user()
                 );
             }
 
@@ -144,6 +147,50 @@ class ProjectMemberController extends Controller
             'items'   => $users,
             'message' => 'Usuarios miembros encontrados.',
         ]);
+    }
+
+    /**
+     * PATCH /api/projects/{project}/members/{user}/suspend
+     */
+    public function suspend(Request $request, Project $project, int $userId): JsonResponse
+    {
+        $this->authorize('assignMembers', $project);
+
+        try {
+            $item = $this->service->suspendMember($project, $userId);
+
+            return response()->json([
+                'status'  => true,
+                'items'   => $item->load('user:id,name,email'),
+                'message' => 'Miembro suspendido.',
+            ]);
+        } catch (\App\Exceptions\DomainException $e) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $e->getMessage()], $e->getStatusCode());
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
+    }
+
+    /**
+     * PATCH /api/projects/{project}/members/{user}/unsuspend
+     */
+    public function unsuspend(Request $request, Project $project, int $userId): JsonResponse
+    {
+        $this->authorize('assignMembers', $project);
+
+        try {
+            $item = $this->service->unsuspendMember($project, $userId);
+
+            return response()->json([
+                'status'  => true,
+                'items'   => $item->load('user:id,name,email'),
+                'message' => 'Miembro reactivado.',
+            ]);
+        } catch (\App\Exceptions\DomainException $e) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $e->getMessage()], $e->getStatusCode());
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false, 'items' => null, 'message' => $th->getMessage()], 500);
+        }
     }
 
     /**

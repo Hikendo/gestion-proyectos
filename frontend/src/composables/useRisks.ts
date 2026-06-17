@@ -6,8 +6,8 @@ import * as risksService from '@/services/project-risks.service';
 import type { RiskI, RiskErroresFormI } from '@/interfaces/RiskI';
 
 const emptyForm = (): RiskI => ({
-    id: 0, project_id: 0, title: '', impact: 'medium', probability: 'medium',
-    description: null, mitigation_plan: null,
+    id: 0, project_id: 0, phase_id: null, title: '', impact: 'medium', probability: 'medium',
+    status: 'active', description: null, mitigation_plan: null,
 });
 const emptyErrors = (): RiskErroresFormI => ({
     project_id: [], title: [], impact: [], probability: [],

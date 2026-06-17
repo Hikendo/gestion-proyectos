@@ -43,6 +43,31 @@ const handleDestroy = async () => {
   isDialogVisible.value = false;
 };
 watch(() => isDialogVisible.value, v => { if (!v) itemDestroy.value = null; });
+
+const handleSuspend = async (item: any) => {
+  loader.value = true;
+  const response = await membersService.suspend(projectId(), item.id);
+  if (response.status) {
+    snackbar.value = { show: true, text: 'Miembro suspendido', color: 'success' };
+    handleGetData();
+  } else {
+    snackbar.value = { show: true, text: response.message, color: 'error' };
+  }
+  loader.value = false;
+};
+
+const handleUnsuspend = async (item: any) => {
+  loader.value = true;
+  const response = await membersService.unsuspend(projectId(), item.id);
+  if (response.status) {
+    snackbar.value = { show: true, text: 'Miembro reactivado', color: 'success' };
+    handleGetData();
+  } else {
+    snackbar.value = { show: true, text: response.message, color: 'error' };
+  }
+  loader.value = false;
+};
+
 onMounted(handleGetData);
 </script>
 
@@ -79,6 +104,7 @@ onMounted(handleGetData);
               <tr>
                 <th class="text-uppercase">Usuario</th>
                 <th class="text-uppercase">Rol</th>
+                <th class="text-uppercase">Estado</th>
                 <th class="text-uppercase">Acciones</th>
               </tr>
             </thead>
@@ -86,6 +112,14 @@ onMounted(handleGetData);
               <tr v-for="item in data" :key="item.id">
                 <td>{{ item.user?.name ?? item.user_id }}</td>
                 <td>{{ item.role }}</td>
+                <td>
+                  <VChip v-if="item.suspended_at" color="warning" size="small" label>
+                    Suspendido
+                  </VChip>
+                  <VChip v-else color="success" size="small" label>
+                    Activo
+                  </VChip>
+                </td>
                 <td>
                   <div class="d-flex gap-1">
                     <VBtn icon size="small" variant="text"
@@ -96,6 +130,14 @@ onMounted(handleGetData);
                       :to="{ name: 'members-id', params: { projectId: projectId(), id: item.id } }"
                       v-if="canAction('project.assign-members')">
                       <VIcon icon="ri-pencil-line" color="warning" />
+                    </VBtn>
+                    <VBtn v-if="canAction('project.assign-members') && !item.suspended_at" icon size="small"
+                      variant="flat" @click="handleSuspend(item)">
+                      <VIcon icon="ri-pause-circle-line" color="warning" />
+                    </VBtn>
+                    <VBtn v-if="canAction('project.assign-members') && item.suspended_at" icon size="small"
+                      variant="flat" @click="handleUnsuspend(item)">
+                      <VIcon icon="ri-play-circle-line" color="success" />
                     </VBtn>
                     <VBtn icon size="small" variant="flat"
                       @click="() => { itemDestroy.value = item; isDialogVisible = true; }">

@@ -5,6 +5,7 @@ import type { TaskStatus, TaskPriority } from '@/interfaces/enums';
 import { membersAsUsers } from '@/services/project-members.service';
 import * as phasesService from '@/services/project-phases.service';
 import { useFieldLock } from '@/composables/useFieldLock';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 
 const props = defineProps<{
   form: TaskI;
@@ -73,9 +74,11 @@ const priorities: { title: string; value: TaskPriority }[] = [
         </VCol>
 
         <VCol cols="12">
-          <VTextarea v-model="form.description" :error-messages="errores.description" name="description"
-            label="Descripción" placeholder="Descripción de la tarea" rows="3" variant="outlined" density="comfortable"
-            :disabled="!fl.description.value" />
+          <label class="v-label text-body-2 mb-1 d-block">Descripción</label>
+          <RichTextEditor v-model="form.description" :disabled="!fl.description.value" />
+          <div v-if="errores.description?.length" class="v-messages text-error mt-1">
+            {{ errores.description[0] }}
+          </div>
         </VCol>
 
         <VCol cols="12" md="4">

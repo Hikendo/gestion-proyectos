@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import type { TicketI, TicketErroresFormI } from '@/interfaces/TicketI';
 import type { TicketStatus, TicketPriority } from '@/interfaces/enums';
 import { membersAsUsers } from '@/services/project-members.service';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 
 const props = defineProps<{
   form: TicketI;
@@ -59,8 +60,11 @@ const priorities: { title: string; value: TicketPriority }[] = [
         </VCol>
 
         <VCol cols="12">
-          <VTextarea v-model="form.description" :error-messages="errores.description" name="description"
-            label="Descripción" placeholder="Descripción detallada" rows="4" />
+          <label class="v-label text-body-2 mb-1 d-block">Descripción</label>
+          <RichTextEditor v-model="form.description" />
+          <div v-if="errores.description?.length" class="v-messages text-error mt-1">
+            {{ errores.description[0] }}
+          </div>
         </VCol>
 
         <VCol cols="12" md="4">

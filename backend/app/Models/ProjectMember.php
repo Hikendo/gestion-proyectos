@@ -19,6 +19,11 @@ class ProjectMember extends Model
         'project_id',
         'user_id',
         'role',
+        'suspended_at',
+    ];
+
+    protected $casts = [
+        'suspended_at' => 'datetime',
     ];
 
 

@@ -25,12 +25,50 @@ async function triggerDownload(projectId: number, endpoint: string, period: Repo
     URL.revokeObjectURL(url);
 }
 
+async function triggerDocDownload(projectId: number, endpoint: string, filename: string): Promise<void> {
+    const response = await apiWithToken.get(`/projects/${projectId}/reports/${endpoint}`, {
+        responseType: 'blob',
+    });
+
+    const contentType: string = response.headers['content-type'] ?? '';
+    if (contentType.includes('application/json')) {
+        const text = await (response.data as Blob).text();
+        throw new Error(JSON.parse(text)?.message ?? 'Error al generar el reporte');
+    }
+
+    const url = URL.createObjectURL(response.data as Blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    URL.revokeObjectURL(url);
+}
+
 export function downloadExecutiveReport(projectId: number, period: ReportPeriod = 'full'): Promise<void> {
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     return triggerDownload(projectId, 'executive', period, `reporte_ejecutivo_${date}.docx`);
 }
 
+export function downloadExecutiveOdtReport(projectId: number, period: ReportPeriod = 'full'): Promise<void> {
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    return triggerDownload(projectId, 'executive-odt', period, `reporte_ejecutivo_${date}.odt`);
+}
+
 export function downloadDashboardReport(projectId: number, period: ReportPeriod = 'full'): Promise<void> {
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     return triggerDownload(projectId, 'dashboard', period, `dashboard_${date}.xlsx`);
+}
+
+// ─── Documentation report (full project doc, no period filter) ──────────────
+
+export function downloadDocumentationReport(projectId: number): Promise<void> {
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    return triggerDocDownload(projectId, 'documentation', `documentacion_proyecto_${date}.docx`);
+}
+
+export function downloadDocumentationOdtReport(projectId: number): Promise<void> {
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    return triggerDocDownload(projectId, 'documentation-odt', `documentacion_proyecto_${date}.odt`);
 }

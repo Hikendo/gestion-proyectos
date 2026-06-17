@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import type { BlockerI, BlockerErroresFormI } from '@/interfaces/BlockerI';
 import type { BlockerSeverity } from '@/interfaces/enums';
 import * as tasksService from '@/services/project-tasks.service';
+import RichTextEditor from '@/components/common/RichTextEditor.vue';
 
 const props = defineProps<{
   form: BlockerI;
@@ -57,8 +58,8 @@ const TASK_STATUS_LABELS: Record<string, string> = {
     <VCardText class="px-8 pb-8">
       <VRow>
         <VCol cols="12" md="8">
-          <VTextField v-model="form.title" :error-messages="errores.title" name="title" label="Título" variant="outlined" density="comfortable"
-            placeholder="Título del bloqueador" />
+          <VTextField v-model="form.title" :error-messages="errores.title" name="title" label="Título"
+            variant="outlined" density="comfortable" placeholder="Título del bloqueador" />
         </VCol>
 
         <VCol cols="12" md="4">
@@ -67,8 +68,11 @@ const TASK_STATUS_LABELS: Record<string, string> = {
         </VCol>
 
         <VCol cols="12">
-          <VTextarea v-model="form.description" :error-messages="errores.description" name="description"
-            label="Descripción" placeholder="Descripción del bloqueador" rows="3" />
+          <label class="v-label text-body-2 mb-1 d-block">Descripción</label>
+          <RichTextEditor v-model="form.description" />
+          <div v-if="errores.description?.length" class="v-messages text-error mt-1">
+            {{ errores.description[0] }}
+          </div>
         </VCol>
 
         <VCol cols="12" md="6">
@@ -78,9 +82,9 @@ const TASK_STATUS_LABELS: Record<string, string> = {
         </VCol>
 
         <VCol cols="12">
-          <VFileInput label="Archivos adjuntos (PDF, imágenes, ZIP, DOCX)" variant="outlined" density="comfortable" multiple
-            accept=".pdf,.jpeg,.jpg,.png,.zip,.docx,.xlsx" :max-file-size="10240" prepend-icon="ri-attachment-2"
-            @change="onFilesChanged" />
+          <VFileInput label="Archivos adjuntos (PDF, imágenes, ZIP, DOCX)" variant="outlined" density="comfortable"
+            multiple accept=".pdf,.jpeg,.jpg,.png,.zip,.docx,.xlsx" :max-file-size="10240"
+            prepend-icon="ri-attachment-2" @change="onFilesChanged" />
         </VCol>
 
         <VCol cols="12" class="d-flex gap-4">

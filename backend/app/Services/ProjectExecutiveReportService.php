@@ -42,6 +42,19 @@ class ProjectExecutiveReportService
         return $tempFile;
     }
 
+    /** Generate ODT (LibreOffice Writer) and return temporary file path. */
+    public function generateOdt(Project $project, ReportPeriodDTO $period): string
+    {
+        $data    = $this->loadData($project, $period);
+        $phpWord = $this->buildDocument($project, $data, $period);
+
+        $tempFile = tempnam(sys_get_temp_dir(), 'exec_report_') . '.odt';
+        $writer   = IOFactory::createWriter($phpWord, 'ODText');
+        $writer->save($tempFile);
+
+        return $tempFile;
+    }
+
     // ── Data loading ─────────────────────────────────────────────────────────
 
     private function loadData(Project $project, ReportPeriodDTO $period): array

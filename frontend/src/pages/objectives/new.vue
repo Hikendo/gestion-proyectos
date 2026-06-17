@@ -8,17 +8,17 @@ const route = useRoute();
 const { errores, form, handleStore } = useObjectives();
 
 const confirmVisible = ref(false);
-const pendingAction   = ref<(() => Promise<void>) | null>(null);
+const pendingAction = ref<(() => Promise<void>) | null>(null);
 
 function requestSave(action: () => Promise<void>) {
-    pendingAction.value = action;
-    confirmVisible.value = true;
+  pendingAction.value = action;
+  confirmVisible.value = true;
 }
 
 async function confirmAction() {
-    confirmVisible.value = false;
-    if (pendingAction.value) await pendingAction.value();
-    pendingAction.value = null;
+  confirmVisible.value = false;
+  if (pendingAction.value) await pendingAction.value();
+  pendingAction.value = null;
 }
 </script>
 
@@ -32,8 +32,7 @@ async function confirmAction() {
               <h4 class="text-h4 text-wrap">
                 Agregar <strong>Objetivo</strong>
               </h4>
-              <VBtn variant="outlined"
-                :to="{ name: 'objectives', params: { projectId: route.params.projectId } }">
+              <VBtn variant="outlined" :to="{ name: 'objectives', params: { projectId: route.params.projectId } }">
                 Volver
               </VBtn>
             </div>
@@ -43,10 +42,10 @@ async function confirmAction() {
     </VCol>
     <VCol cols="12">
       <VForm @submit.prevent="requestSave(handleStore)">
-        <ObjectiveForm :form="form" :errores="errores" />
+        <ObjectiveForm :form="form" :errores="errores" :project-id="Number(route.params.projectId)" />
       </VForm>
     </VCol>
-  
+
     <VDialog v-model="confirmVisible" persistent max-width="400">
       <VCard>
         <VCardTitle class="text-h6">Confirmar acción</VCardTitle>

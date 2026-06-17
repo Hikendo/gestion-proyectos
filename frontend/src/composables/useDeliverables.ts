@@ -6,7 +6,7 @@ import * as deliverablesService from '@/services/project-deliverables.service';
 import type { DeliverableI, DeliverableErroresFormI } from '@/interfaces/DeliverableI';
 
 const emptyForm = (): DeliverableI => ({
-    id: 0, project_id: 0, name: '', approved: false,
+    id: 0, project_id: 0, phase_id: null, name: '', approved: false,
     description: null, delivery_date: null,
 });
 const emptyErrors = (): DeliverableErroresFormI => ({

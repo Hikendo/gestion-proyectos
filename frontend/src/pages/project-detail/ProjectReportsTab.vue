@@ -16,7 +16,10 @@ const periodOptions = [
 ];
 
 const loadingExec = ref(false);
+const loadingExecOdt = ref(false);
 const loadingDash = ref(false);
+const loadingDoc = ref(false);
+const loadingDocOdt = ref(false);
 const snackbar = ref(false);
 const snackMsg = ref('');
 const snackColor = ref<'error' | 'success'>('success');
@@ -33,6 +36,18 @@ async function downloadExecutive() {
     }
 }
 
+async function downloadExecutiveOdt() {
+    loadingExecOdt.value = true;
+    try {
+        await reportsService.downloadExecutiveOdtReport(projectId.value, period.value);
+        showSnack('Reporte ejecutivo ODT descargado correctamente.', 'success');
+    } catch (err: unknown) {
+        showSnack(errorMsg(err), 'error');
+    } finally {
+        loadingExecOdt.value = false;
+    }
+}
+
 async function downloadDashboard() {
     loadingDash.value = true;
     try {
@@ -42,6 +57,30 @@ async function downloadDashboard() {
         showSnack(errorMsg(err), 'error');
     } finally {
         loadingDash.value = false;
+    }
+}
+
+async function downloadDocumentation() {
+    loadingDoc.value = true;
+    try {
+        await reportsService.downloadDocumentationReport(projectId.value);
+        showSnack('Documentación del proyecto descargada correctamente.', 'success');
+    } catch (err: unknown) {
+        showSnack(errorMsg(err), 'error');
+    } finally {
+        loadingDoc.value = false;
+    }
+}
+
+async function downloadDocumentationOdt() {
+    loadingDocOdt.value = true;
+    try {
+        await reportsService.downloadDocumentationOdtReport(projectId.value);
+        showSnack('Documentación ODT descargada correctamente.', 'success');
+    } catch (err: unknown) {
+        showSnack(errorMsg(err), 'error');
+    } finally {
+        loadingDocOdt.value = false;
     }
 }
 
@@ -78,6 +117,57 @@ function errorMsg(err: unknown): string {
 
         <!-- Report cards -->
         <v-row class="mt-4">
+            <!-- Documentation DOCX -->
+            <v-col cols="12" sm="6" md="5">
+                <v-card variant="outlined" rounded="lg">
+                    <v-card-item>
+                        <template #prepend>
+                            <v-icon color="teal" size="36" class="mr-2">ri-article-line</v-icon>
+                        </template>
+                        <v-card-title>Documentación del Proyecto</v-card-title>
+                        <v-card-subtitle>Formato DOCX — Microsoft Word</v-card-subtitle>
+                    </v-card-item>
+
+                    <v-card-text class="text-body-2 text-medium-emphasis">
+                        Documento completo con portada, descripción, objetivos, plan (alcance, requerimientos,
+                        notas técnicas), fases con tareas/entregables/hitos, riesgos, bloqueadores,
+                        tickets, miembros del equipo y KPIs. Ideal para compartir el contexto del proyecto.
+                    </v-card-text>
+
+                    <v-card-actions class="pa-4 pt-0">
+                        <v-btn color="teal" variant="flat" prepend-icon="ri-download-line" :loading="loadingDoc"
+                            :disabled="loadingDocOdt" @click="downloadDocumentation">
+                            Descargar Documentación
+                        </v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-col>
+
+            <!-- Documentation ODT -->
+            <v-col cols="12" sm="6" md="5">
+                <v-card variant="outlined" rounded="lg">
+                    <v-card-item>
+                        <template #prepend>
+                            <v-icon color="cyan" size="36" class="mr-2">ri-article-line</v-icon>
+                        </template>
+                        <v-card-title>Documentación del Proyecto</v-card-title>
+                        <v-card-subtitle>Formato ODT — LibreOffice Writer</v-card-subtitle>
+                    </v-card-item>
+
+                    <v-card-text class="text-body-2 text-medium-emphasis">
+                        El mismo documento completo de documentación en formato OpenDocument (ODT),
+                        compatible con LibreOffice, OpenOffice y Google Docs.
+                    </v-card-text>
+
+                    <v-card-actions class="pa-4 pt-0">
+                        <v-btn color="cyan" variant="flat" prepend-icon="ri-download-line" :loading="loadingDocOdt"
+                            :disabled="loadingDoc" @click="downloadDocumentationOdt">
+                            Descargar ODT (LibreOffice)
+                        </v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-col>
+
             <!-- Executive DOCX -->
             <v-col cols="12" sm="6" md="5">
                 <v-card variant="outlined" rounded="lg">
@@ -96,8 +186,34 @@ function errorMsg(err: unknown): string {
 
                     <v-card-actions class="pa-4 pt-0">
                         <v-btn color="primary" variant="flat" prepend-icon="ri-download-line" :loading="loadingExec"
-                            :disabled="loadingDash" @click="downloadExecutive">
+                            :disabled="loadingDash || loadingExecOdt" @click="downloadExecutive">
                             Descargar Reporte Ejecutivo
+                        </v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-col>
+
+            <!-- Executive ODT -->
+            <v-col cols="12" sm="6" md="5">
+                <v-card variant="outlined" rounded="lg">
+                    <v-card-item>
+                        <template #prepend>
+                            <v-icon color="info" size="36" class="mr-2">ri-file-text-line</v-icon>
+                        </template>
+                        <v-card-title>Reporte Ejecutivo</v-card-title>
+                        <v-card-subtitle>Formato ODT — LibreOffice Writer</v-card-subtitle>
+                    </v-card-item>
+
+                    <v-card-text class="text-body-2 text-medium-emphasis">
+                        Documento OpenDocument Text (ODT) con resumen ejecutivo, KPIs, análisis del equipo,
+                        hitos, riesgos, bloqueadores, tickets y recomendaciones. Compatible con LibreOffice,
+                        OpenOffice y Google Docs.
+                    </v-card-text>
+
+                    <v-card-actions class="pa-4 pt-0">
+                        <v-btn color="info" variant="flat" prepend-icon="ri-download-line" :loading="loadingExecOdt"
+                            :disabled="loadingExec || loadingDash" @click="downloadExecutiveOdt">
+                            Descargar ODT (LibreOffice)
                         </v-btn>
                     </v-card-actions>
                 </v-card>
@@ -121,7 +237,7 @@ function errorMsg(err: unknown): string {
 
                     <v-card-actions class="pa-4 pt-0">
                         <v-btn color="success" variant="flat" prepend-icon="ri-download-line" :loading="loadingDash"
-                            :disabled="loadingExec" @click="downloadDashboard">
+                            :disabled="loadingExec || loadingExecOdt" @click="downloadDashboard">
                             Descargar Dashboard
                         </v-btn>
                     </v-card-actions>

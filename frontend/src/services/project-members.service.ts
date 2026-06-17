@@ -86,6 +86,36 @@ export const membersAsUsers = async (projectId: number) => {
   }
 };
 
+// ─── Suspend ──────────────────────────────────────────────────────────────────
+
+export const suspend = async (projectId: number, userId: number) => {
+  try {
+    const { data } = await apiWithToken.patch<MemberResponseI>(`/projects/${projectId}/members/${userId}/suspend`);
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    return { status: false, message: "Error en el servidor" };
+  }
+};
+
+// ─── Unsuspend ────────────────────────────────────────────────────────────────
+
+export const unsuspend = async (projectId: number, userId: number) => {
+  try {
+    const { data } = await apiWithToken.patch<MemberResponseI>(`/projects/${projectId}/members/${userId}/unsuspend`);
+    return {
+      status: true,
+      message: data.message,
+      items: data.items,
+    };
+  } catch (error) {
+    return { status: false, message: "Error en el servidor" };
+  }
+};
+
 // ─── Destroy ──────────────────────────────────────────────────────────────────
 
 export const destroy = async (projectId: number, userId: number) => {

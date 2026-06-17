@@ -6,7 +6,7 @@ import * as objectivesService from '@/services/project-objectives.service';
 import type { ObjectiveI, ObjectiveErroresFormI } from '@/interfaces/ObjectiveI';
 
 const emptyForm = (): ObjectiveI => ({
-    id: 0, project_id: 0, title: '', type: 'specific', completed: false, description: null,
+    id: 0, project_id: 0, phase_id: null, title: '', type: 'specific', completed: false, description: null,
 });
 const emptyErrors = (): ObjectiveErroresFormI => ({
     project_id: [], title: [], type: [], completed: [],

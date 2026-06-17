@@ -45,4 +45,14 @@ class ProjectException extends DomainException
     {
         return new static('No se puede cambiar el rol del owner del proyecto.', Response::HTTP_UNPROCESSABLE_ENTITY);
     }
+
+    public static function memberAlreadySuspended(): static
+    {
+        return new static('El miembro ya está suspendido.', Response::HTTP_CONFLICT);
+    }
+
+    public static function memberNotSuspended(): static
+    {
+        return new static('El miembro no está suspendido.', Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
 }

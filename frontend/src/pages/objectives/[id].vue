@@ -7,7 +7,7 @@ import * as objectivesService from '@/services/project-objectives.service';
 import { useObjectives } from '@/composables/useObjectives';
 import ObjectiveForm from '@/components/objectives/ObjectiveForm.vue';
 
-const route  = useRoute();
+const route = useRoute();
 const router = useRouter();
 const appStore = useAppStore();
 const { loader, snackbar } = storeToRefs(appStore);
@@ -15,31 +15,31 @@ const { loader, snackbar } = storeToRefs(appStore);
 const { errores, form, handleUpdate } = useObjectives();
 
 const confirmVisible = ref(false);
-const pendingAction   = ref<(() => Promise<void>) | null>(null);
+const pendingAction = ref<(() => Promise<void>) | null>(null);
 
 function requestSave(action: () => Promise<void>) {
-    pendingAction.value = action;
-    confirmVisible.value = true;
+  pendingAction.value = action;
+  confirmVisible.value = true;
 }
 
 async function confirmAction() {
-    confirmVisible.value = false;
-    if (pendingAction.value) await pendingAction.value();
-    pendingAction.value = null;
+  confirmVisible.value = false;
+  if (pendingAction.value) await pendingAction.value();
+  pendingAction.value = null;
 }
 
 onMounted(async () => {
-    loader.value = true;
-    const projectId = Number(route.params.projectId);
-    const id = Number(route.params.id);
-    const response = await objectivesService.show(projectId, id);
-    if (response.status && response.items) {
-        form.value = response.items;
-    } else {
-        snackbar.value = { show: true, text: 'Objetivo no encontrado', color: 'error' };
-        router.push({ name: 'objectives', params: { projectId } });
-    }
-    loader.value = false;
+  loader.value = true;
+  const projectId = Number(route.params.projectId);
+  const id = Number(route.params.id);
+  const response = await objectivesService.show(projectId, id);
+  if (response.status && response.items) {
+    form.value = response.items;
+  } else {
+    snackbar.value = { show: true, text: 'Objetivo no encontrado', color: 'error' };
+    router.push({ name: 'objectives', params: { projectId } });
+  }
+  loader.value = false;
 });
 </script>
 
@@ -58,7 +58,7 @@ onMounted(async () => {
     </VCol>
     <VCol cols="12">
       <VForm @submit.prevent="requestSave(handleUpdate)">
-        <ObjectiveForm :form="form" :errores="errores" />
+        <ObjectiveForm :form="form" :errores="errores" :project-id="Number(route.params.projectId)" />
       </VForm>
     </VCol>
 
