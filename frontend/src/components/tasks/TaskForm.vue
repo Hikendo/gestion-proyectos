@@ -6,6 +6,7 @@ import { membersAsUsers } from '@/services/project-members.service';
 import * as phasesService from '@/services/project-phases.service';
 import { useFieldLock } from '@/composables/useFieldLock';
 import RichTextEditor from '@/components/common/RichTextEditor.vue';
+import { ProjectPhaseI } from '@/interfaces';
 
 const props = defineProps<{
   form: TaskI;
@@ -40,7 +41,7 @@ onMounted(async () => {
     users.value = usersRes.items;
   }
   if (phasesRes.status && phasesRes.items) {
-    phases.value = phasesRes.items.map(p => ({ id: p.id, name: p.name }));
+    phases.value = phasesRes.items.map((p: ProjectPhaseI) => ({ id: p.id, name: p.name }));
   }
 });
 
