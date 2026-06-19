@@ -6,10 +6,10 @@ import ValidationErrors from '../../../components/ValidationErrors.vue';
 import { useProjectPhasesService } from '../../../composables';
 
 const props = defineProps({
-    projectId: {
-        type: Number,
-        required: true,
-    },
+  projectId: {
+    type: Number,
+    required: true,
+  },
 });
 
 const phasesQuery = useProjectPhasesService();
@@ -21,7 +21,6 @@ const form = reactive({
   name: '',
   start_date: '',
   end_date: '',
-  progress: 0,
 });
 
 const isEditing = computed(() => editingId.value !== null);
@@ -29,9 +28,9 @@ const isEditing = computed(() => editingId.value !== null);
 async function loadPhases() {
   const response = await phasesQuery.call('list', props.projectId);
 
-    if (response) {
-        phases.value = response.data;
-    }
+  if (response) {
+    phases.value = response.data;
+  }
 }
 
 function resetForm() {
@@ -39,7 +38,6 @@ function resetForm() {
   form.name = '';
   form.start_date = '';
   form.end_date = '';
-  form.progress = 0;
 }
 
 function startEdit(phase) {
@@ -47,7 +45,6 @@ function startEdit(phase) {
   form.name = phase.name || '';
   form.start_date = phase.start_date || '';
   form.end_date = phase.end_date || '';
-  form.progress = phase.progress ?? 0;
 }
 
 async function handleSubmit() {
@@ -57,7 +54,6 @@ async function handleSubmit() {
     name: form.name,
     start_date: form.start_date || null,
     end_date: form.end_date || null,
-    ...(isEditing.value ? { progress: Number(form.progress) } : {}),
   };
 
   const response = isEditing.value
@@ -87,10 +83,10 @@ async function handleRemove(phase) {
 onMounted(loadPhases);
 
 watch(
-    () => props.projectId,
-    () => {
-        loadPhases();
-    },
+  () => props.projectId,
+  () => {
+    loadPhases();
+  },
 );
 </script>
 
@@ -109,12 +105,6 @@ watch(
         </label>
 
         <label>
-          <span>Progreso</span>
-          <input v-model.number="form.progress" max="100" min="0" type="number">
-          <ValidationErrors :errors="phasesMutation.validationErrors.progress || []" />
-        </label>
-
-        <label>
           <span>Inicio</span>
           <input v-model="form.start_date" type="date">
           <ValidationErrors :errors="phasesMutation.validationErrors.start_date || []" />
@@ -128,7 +118,9 @@ watch(
       </div>
 
       <div class="form-actions">
-        <button class="button primary" :disabled="phasesMutation.loading" type="submit">{{ isEditing ? 'Actualizar fase' : 'Crear fase' }}</button>
+        <button class="button primary" :disabled="phasesMutation.loading" type="submit">{{ isEditing ? 'Actualizar fase'
+          :
+          'Crear fase' }}</button>
         <button class="button secondary" type="button" @click="resetForm">Cancelar</button>
       </div>
     </form>
@@ -141,13 +133,15 @@ watch(
         </div>
         <div class="item-actions">
           <button class="button secondary" type="button" @click="startEdit(phase)">Editar</button>
-          <button class="button danger" :disabled="phasesMutation.loading" type="button" @click="handleRemove(phase)">Eliminar</button>
+          <button class="button danger" :disabled="phasesMutation.loading" type="button"
+            @click="handleRemove(phase)">Eliminar</button>
         </div>
       </li>
     </ul>
 
     <p v-else-if="!phasesQuery.loading" class="feature-copy">No hay fases registradas para este proyecto.</p>
 
-    <RequestState :loading="phasesQuery.loading || phasesMutation.loading" :error-message="phasesMutation.errorMessage || phasesQuery.errorMessage" :success-message="successMessage" />
+    <RequestState :loading="phasesQuery.loading || phasesMutation.loading"
+      :error-message="phasesMutation.errorMessage || phasesQuery.errorMessage" :success-message="successMessage" />
   </FeaturePanel>
 </template>

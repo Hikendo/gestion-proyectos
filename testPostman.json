@@ -1168,6 +1168,119 @@
           }
         }
       ]
+    },
+    {
+      "name": "Chat",
+      "item": [
+        {
+          "name": "Get Group Messages",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/chat/messages",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", "chat", "messages"]
+            }
+          }
+        },
+        {
+          "name": "Send Group Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Hola equipo, ¿cómo va el proyecto?\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/chat/messages",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", "chat", "messages"]
+            }
+          }
+        },
+        {
+          "name": "Get Conversations",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/conversations",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", "conversations"]
+            }
+          }
+        },
+        {
+          "name": "Start Conversation",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": {{user_id}}\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/projects/{{project_id}}/conversations",
+              "host": ["{{base_url}}"],
+              "path": ["projects", "{{project_id}}", "conversations"]
+            }
+          }
+        },
+        {
+          "name": "Get Direct Messages",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/conversations/1/messages",
+              "host": ["{{base_url}}"],
+              "path": ["conversations", "1", "messages"]
+            }
+          }
+        },
+        {
+          "name": "Send Direct Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Hola, ¿cómo estás?\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/conversations/1/messages",
+              "host": ["{{base_url}}"],
+              "path": ["conversations", "1", "messages"]
+            }
+          }
+        },
+        {
+          "name": "Mark Conversation Read",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/conversations/1/read",
+              "host": ["{{base_url}}"],
+              "path": ["conversations", "1", "read"]
+            }
+          }
+        }
+      ]
     }
   ]
 }

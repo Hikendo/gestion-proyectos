@@ -81,9 +81,6 @@ services:
     environment: *laravel-env # 👈 Requerido para ejecutar tareas programadas en la BD
 
   # ─────────────────────────────────────────────────────────────
-  # NGINX (Tu Proxy / Servidor Web de la API)
-  # ─────────────────────────────────────────────────────────────
-  # ─────────────────────────────────────────────────────────────
   # NGINX (Tu Proxy / Servidor Web)
   # ─────────────────────────────────────────────────────────────
   nginx:
@@ -100,6 +97,7 @@ services:
       - backend
     networks:
       - gestion_network
+
   # ─────────────────────────────────────────────────────────────
   # FRONTEND VITE (Vue 3)
   # ─────────────────────────────────────────────────────────────
@@ -121,6 +119,26 @@ services:
       - nginx
     networks:
       - gestion_network
+
+  # ─────────────────────────────────────────────────────────────
+  # LARAVEL REVERB (WebSocket Server)
+  # ─────────────────────────────────────────────────────────────
+  reverb:
+    image: gestion_proyectos_backend_app
+    container_name: gestion_proyectos_reverb
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - ./backend:/var/www
+    command: [ "php", "artisan", "reverb:start", "--host=0.0.0.0", "--port=8080" ]
+    ports:
+      - "8080:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - gestion_network
+    environment: *laravel-env
 
   # ─────────────────────────────────────────────────────────────
   # REDIS

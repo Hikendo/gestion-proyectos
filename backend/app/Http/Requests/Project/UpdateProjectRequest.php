@@ -30,7 +30,6 @@ class UpdateProjectRequest extends FormRequest
             'start_date'  => ['nullable', 'date'],
             'end_date'    => ['nullable', 'date', 'after_or_equal:start_date'],
             'budget'      => ['nullable', 'numeric', 'min:0'],
-            'progress'    => ['nullable', 'integer', 'min:0', 'max:100'],
         ];
     }
 }

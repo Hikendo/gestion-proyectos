@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Notifications;
 
+use App\Jobs\SendEmailNotificationJob;
 use App\Jobs\SendPushNotificationJob;
 use App\Models\Notification;
 use App\Models\User;
@@ -109,8 +110,12 @@ abstract class AbstractNotificationService
                     image: $image,
                 );
 
+                SendEmailNotificationJob::dispatch(
+                    notification: $notification,
+                );
+
                 Log::channel('notifications')->debug(
-                    "[{$this->notificationType()}] Job despachado para user_id {$user->id}, notification_id {$notification->id}."
+                    "[{$this->notificationType()}] Jobs (push + email) despachados para user_id {$user->id}, notification_id {$notification->id}."
                 );
             }
         }

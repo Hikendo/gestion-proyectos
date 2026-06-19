@@ -22,4 +22,6 @@ Route::prefix('v1')->group(function () {
     require __DIR__ . '/api/reports.php';
     require __DIR__ . '/api/notifications.php';
     require __DIR__ . '/api/attachments.php';
+    require __DIR__ . '/api/broadcasting.php';
+    require __DIR__ . '/api/chat.php';
 });

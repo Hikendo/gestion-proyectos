@@ -106,4 +106,20 @@ class Project extends Model
     {
         return $this->hasOne(ProjectMetric::class);
     }
+
+    /**
+     * ----------------------------------------------------------------
+     * CHAT RELATIONS
+     * ----------------------------------------------------------------
+     */
+
+    public function groupMessages()
+    {
+        return $this->hasMany(ProjectMessage::class)->orderBy('created_at');
+    }
+
+    public function conversations()
+    {
+        return $this->hasMany(Conversation::class);
+    }
 }

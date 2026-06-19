@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import type { ProjectPhaseI } from '@/interfaces/ProjectPhaseI';
 
-type PhaseFormFields = Pick<ProjectPhaseI, 'name' | 'start_date' | 'end_date' | 'progress'>;
+type PhaseFormFields = Pick<ProjectPhaseI, 'name' | 'start_date' | 'end_date'>;
 
 const props = withDefaults(defineProps<{
     initial?: PhaseFormFields;
+    progress?: number;
     submitLabel?: string;
     errors?: Record<string, string[]>;
     loading?: boolean;
 }>(), {
-    initial: () => ({ name: '', progress: 0, start_date: null, end_date: null }),
+    initial: () => ({ name: '', start_date: null, end_date: null }),
+    progress: 0,
     submitLabel: 'Guardar',
     errors: () => ({}),
     loading: false,
@@ -21,6 +23,8 @@ const emit = defineEmits<{
 }>();
 
 const form = ref<PhaseFormFields>({ ...props.initial });
+
+const displayProgress = computed(() => props.progress ?? 0);
 
 const confirmVisible = ref(false);
 
@@ -61,10 +65,12 @@ function cancel() {
 
                         <div class="mb-4">
                             <label class="text-body-2 d-block mb-1">
-                                Progreso ({{ form.progress }}%)
+                                Progreso ({{ displayProgress }}%)
                             </label>
-                            <VSlider v-model="form.progress" min="0" max="100" step="5" thumb-label color="primary"
-                                :error-messages="errors.progress" />
+                            <VProgressLinear :model-value="displayProgress" color="primary" height="10" rounded
+                                class="mt-1" />
+                            <div class="text-caption text-disabled mt-1">Calculado automáticamente por el progreso de
+                                las tareas</div>
                         </div>
 
                         <VBtn type="submit" color="primary" block :loading="loading">

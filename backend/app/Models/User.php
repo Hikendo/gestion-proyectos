@@ -293,4 +293,42 @@ class User extends Authenticatable
     {
         return $this->hasMany(Notification::class);
     }
+
+    /**
+     * ----------------------------------------------------------------
+     * CHAT RELATIONS
+     * ----------------------------------------------------------------
+     */
+
+    /**
+     * Group messages sent by this user.
+     */
+    public function projectMessages(): HasMany
+    {
+        return $this->hasMany(ProjectMessage::class);
+    }
+
+    /**
+     * Direct messages sent by this user.
+     */
+    public function directMessages(): HasMany
+    {
+        return $this->hasMany(DirectMessage::class);
+    }
+
+    /**
+     * Conversations where the user is participant (as user_one).
+     */
+    public function conversationsAsOne(): HasMany
+    {
+        return $this->hasMany(Conversation::class, 'user_one_id');
+    }
+
+    /**
+     * Conversations where the user is participant (as user_two).
+     */
+    public function conversationsAsTwo(): HasMany
+    {
+        return $this->hasMany(Conversation::class, 'user_two_id');
+    }
 }

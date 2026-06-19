@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Events\AcceptanceCriterionCompleted;
 use App\Events\BlockerCreated;
+use App\Events\DirectMessageSent;
+use App\Events\MessageSent;
 use App\Events\BlockerResolved;
 use App\Events\CommentCreated;
 use App\Events\DeliverableApproved;
@@ -26,6 +28,8 @@ use App\Events\TicketCreated;
 use App\Listeners\CheckPhaseCompletion;
 use App\Listeners\HandleBlockerCreated;
 use App\Listeners\HandleBlockerResolved;
+use App\Listeners\HandleGroupMessageSent;
+use App\Listeners\HandlePrivateMessageSent;
 use App\Listeners\HandleCommentCreated;
 use App\Listeners\HandleDeliverableApproved;
 use App\Listeners\HandleMilestoneCompleted;
@@ -101,6 +105,10 @@ class EventServiceProvider extends ServiceProvider
 
         // ── Comentarios ───────────────────────────────────────────────────────
         CommentCreated::class      => [HandleCommentCreated::class],
+
+        // ── Chat ─────────────────────────────────────────────────────────────
+        MessageSent::class         => [HandleGroupMessageSent::class],
+        DirectMessageSent::class   => [HandlePrivateMessageSent::class],
 
         // ── Roles ─────────────────────────────────────────────────────────────
         RoleChanged::class         => [InvalidateUserSession::class],

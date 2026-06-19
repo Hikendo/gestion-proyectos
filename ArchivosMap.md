@@ -13,8 +13,10 @@
 | `AttachmentController.php` | Descarga, subida temporal (`upload-temp`), claim, eliminación y reemplazo de adjuntos |
 | `AuthController.php` | Login, logout, registro, perfil (`me`), refresh de permisos vía FCM |
 | `BlockerController.php` | CRUD de bloqueadores (impedimentos de tareas) |
+| `ChatController.php` | Chat grupal del proyecto: envía y lista mensajes. Broadcasting via `MessageSent`. |
 | `DashboardController.php` | Dashboard resumen por usuario autenticado |
 | `DeliverableController.php` | CRUD y aprobación de entregables de proyecto |
+| `DirectChatController.php` | Chats privados: conversaciones, mensajes, marcar leídos. Broadcasting via `DirectMessageSent`. |
 | `FcmTokenController.php` | Registro y eliminación de tokens FCM para notificaciones push |
 | `MilestoneController.php` | CRUD de hitos (milestones) |
 | `NotificationController.php` | CRUD de notificaciones internas, marcar como leídas, contador no leídas |
@@ -29,8 +31,8 @@
 | `RoleController.php` | Listado de roles y permisos disponibles |
 | `TaskCommentController.php` | CRUD de comentarios en tareas |
 | `TaskController.php` | CRUD de tareas, cambio de status, asignación, logs de tiempo, adjuntos, `field_permissions` |
-| `TaskTimeLogController.php` | Registro y listado de horas trabajadas en tareas |
-| `TicketController.php` | CRUD de tickets, asignación, adjuntos |
+| `TaskTimeLogController.php` | Registro y listado de horas trabajadas en tareas. Rechaza registro si la tarea está `Done`. |
+| `TicketController.php` | CRUD de tickets, asignación, adjuntos. `index()` filtra tickets por `created_by` para clientes. `show()` incluye `field_permissions`. |
 | `UserController.php` | CRUD de usuarios, métricas, asignación de roles/permisos, invalidación FCM |
 
 ### Requests (FormRequest) (`backend/app/Http/Requests/`)
@@ -41,8 +43,8 @@ Validación de entrada para cada recurso. Organizados por subdirectorio: `Auth/`
 
 | Archivo | Tabla | Relaciones clave |
 |---------|-------|-----------------|
-| `User.php` | `users` | Spatie HasRoles, `projectMemberships`, `ownedProjects`, `assignedTasks`, `fcmTokens` |
-| `Project.php` | `projects` | `owner`, `members`, `phases`, `tasks`, `tickets`, `risks`, `blockers`, `deliverables`, `milestones`, `metrics` |
+| `User.php` | `users` | Spatie HasRoles, `projectMemberships`, `ownedProjects`, `assignedTasks`, `fcmTokens`, `projectMessages`, `directMessages`, `conversationsAsOne`, `conversationsAsTwo` |
+| `Project.php` | `projects` | `owner`, `members`, `phases`, `tasks`, `tickets`, `risks`, `blockers`, `deliverables`, `milestones`, `metrics`, `groupMessages`, `conversations` |
 | `ProjectMember.php` | `project_members` | `user_id`, `project_id`, `role` |
 | `Task.php` | `tasks` | `project`, `assignee`, `creator`, `phase`, `comments`, `timeLogs`, `attachments` |
 | `Ticket.php` | `tickets` | `project`, `creator`, `assignee`, `attachments` |
@@ -62,6 +64,9 @@ Validación de entrada para cada recurso. Organizados por subdirectorio: `Auth/`
 | `Notification.php` | `notifications` | `user`, datos JSON, `read_at` |
 | `FcmToken.php` | `fcm_tokens` | `user`, `token`, `platform`, `browser` |
 | `UserMetric.php` | `user_metrics` | `user` |
+| `ProjectMessage.php` | `project_messages` | `project`, `user` (chat grupal) |
+| `Conversation.php` | `conversations` | `project`, `userOne`, `userTwo`, `messages` (DirectMessage). Helpers: `otherUser()`, `hasParticipant()`, `unreadCountFor()` |
+| `DirectMessage.php` | `direct_messages` | `conversation`, `user`. Scope `unread`. Campo `read_at` para marcar leídos. |
 
 ### Policies (`backend/app/Policies/`)
 
@@ -86,15 +91,18 @@ Todas las policies usan `$user->canForProject($project, 'permiso')` y `$user->ha
 | `AttachmentService.php` | Subida, subida temporal (`uploadTemporary`), claim (mueve archivos de `drafts/` a `projects/{uuid}/` con `DB::transaction`) |
 | `FieldPermissionsService.php` | Computa `field_permissions` para cada recurso llamando a las policies reales via `Gate::forUser()` |
 | `FirebaseNotificationService.php` | Envío de notificaciones push FCM v1 (token único, masivo, por usuario), Google OAuth2 JWT |
+| `ResendEmailService.php` | Envío de emails transaccionales via API de Resend usando el facade `Resend`. HTML template responsive. |
 | `ProjectService.php` | Lógica de negocio de proyectos (crear, agregar/quitar miembros) |
 | `TaskService.php` | Lógica de negocio de tareas (crear, cambio de status con transiciones válidas) |
 | `TicketService.php` | Lógica de negocio de tickets (crear, cambio de estado) |
 | `ProjectDashboardReportService.php` | Generación de reportes XLSX de proyecto |
 | `ProjectExecutiveReportService.php` | Generación de reportes DOCX ejecutivos |
-| `Notifications/AbstractNotificationService.php` | Clase base: resuelve destinatarios, filtra por policy, persiste en BD y despacha `SendPushNotificationJob` en chunks de 50 |
+| `Notifications/AbstractNotificationService.php` | Clase base: resuelve destinatarios, filtra por policy, persiste en BD y despacha `SendPushNotificationJob` + `SendEmailNotificationJob` en chunks de 50 |
 | `Notifications/NotificationRecipientResolver.php` | Resuelve destinatarios por rol, permiso, membresía de proyecto o asignado de tarea/ticket |
 | `Notifications/PolicyAwareRecipientFilter.php` | Filtra usuarios por policy (`Gate::forUser()->check()`) dejando solo autorizados |
 | `Notifications/Domain/TaskAssignedNotificationService.php` | Notificación de tarea asignada: destinatario = asignado, filtro `task.view` |
+| `Notifications/Domain/GroupMessageSentNotificationService.php` | Notificación de nuevo mensaje en chat grupal a todos los miembros excepto el remitente |
+| `Notifications/Domain/PrivateMessageSentNotificationService.php` | Notificación de nuevo mensaje privado al otro participante de la conversación |
 
 ### Traits (`backend/app/Traits/`)
 
@@ -108,11 +116,30 @@ Todas las policies usan `$user->canForProject($project, 'permiso')` y `$user->ha
 
 ### Jobs (`backend/app/Jobs/`)
 
-Tareas asíncronas (Horizon/Redis): `GenerateProjectMetricsJob`, `GenerateProjectReportJob`, `LogActivityJob`, `ProcessRiskAnalysisJob`, `RecalculateProjectMetricsJob`, `RecalculateUserMetricsJob`, `SendPushNotificationJob`, `SendTaskAssignedNotificationJob`.
+Tareas asíncronas (Horizon/Redis): `GenerateProjectMetricsJob`, `GenerateProjectReportJob`, `LogActivityJob`, `ProcessRiskAnalysisJob`, `RecalculateProjectMetricsJob`, `RecalculateUserMetricsJob`, `SendEmailNotificationJob` (envía email vía Resend, queue `notifications`), `SendPushNotificationJob` (envía push vía FCM), `SendTaskAssignedNotificationJob`.
 
 ### Events & Listeners (`backend/app/Events/`, `backend/app/Listeners/`)
 
-Sistema de eventos para notificaciones: cada evento de dominio (TaskCreated, TicketAssigned, BlockerResolved, etc.) tiene su listener que dispara notificaciones internas y push.
+| Evento | Listener | Propósito |
+|--------|----------|-----------|
+| `MessageSent.php` | `HandleGroupMessageSent.php` | Broadcasting de mensaje grupal → notificación FCM + email a miembros |
+| `DirectMessageSent.php` | `HandlePrivateMessageSent.php` | Broadcasting de mensaje privado → notificación FCM + email al otro participante |
+
+Además: `TaskCreated`, `TicketAssigned`, `BlockerResolved`, etc., cada uno con su listener que dispara notificaciones internas y push.
+
+### Routes — Broadcasting (`backend/routes/`)
+
+| Archivo | Propósito |
+|---------|-----------|
+| `channels.php` | Autorización de canales: `project.{id}` (miembros), `conversation.{id}` (participantes) |
+| `api/chat.php` | Endpoints REST para chat grupal y privado |
+| `api/broadcasting.php` | Ruta de autenticación para Laravel Echo (`broadcasting/auth`) |
+
+### Config (`backend/config/`)
+
+| Archivo | Cambio |
+|---------|--------|
+| `broadcasting.php` | Configuración de Reverb como broadcaster por defecto. Definición de apps y servidores. |
 
 ### Observers (`backend/app/Observers/`)
 
@@ -150,6 +177,7 @@ Capa de acceso a datos con interfaces (`Contracts/`). Implementaciones: `Project
 |---------|-----|
 | `useFieldLock.ts` | `useFieldLock(fieldPermissions)` — Proxy reactivo que devuelve `computed<boolean>` por campo. Reemplaza v-can-action. |
 | `useAttachments.ts` | Subida, descarga, eliminación, reemplazo de archivos |
+| `useChat.ts` | `useGroupChat(projectId)` y `usePrivateChat(projectId)`: estado reactivo, carga de mensajes, envío, scroll infinito |
 | `createServiceComposable.ts` | Factory para crear composables de servicio CRUD genéricos |
 | `useServiceRequest.ts` | Wrapper para peticiones HTTP con manejo de errores |
 | `useEnsureCurrentProject.ts` | Asegura que `currentProject` esté cargado en el store |
@@ -164,6 +192,7 @@ Capa de acceso a datos con interfaces (`Contracts/`). Implementaciones: `Project
 |---------|-----------|
 | `http.ts` | Axios instance (`apiWithToken`), interceptors, helpers de token (localStorage) |
 | `firebase.ts` | Inicialización de Firebase, `getToken`, `onMessage`, registro de token FCM |
+| `chat.service.ts` | Chat grupal y privado: `getGroupMessages`, `sendGroupMessage`, `getConversations`, `startConversation`, `getDirectMessages`, `sendDirectMessage`, `markRead` |
 | `auth.service.ts` | `login`, `logout`, `me`, `register` |
 | `dashboard.service.ts` | Dashboard del usuario autenticado |
 | `projects.service.ts` | CRUD de proyectos |
@@ -184,6 +213,12 @@ Capa de acceso a datos con interfaces (`Contracts/`). Implementaciones: `Project
 | `users.service.ts` | CRUD de usuarios (admin) |
 | `notifications.service.ts` | Notificaciones internas |
 
+### Plugins (`frontend/src/plugins/`)
+
+| Archivo | Uso |
+|---------|-----|
+| `echo.ts` | Inicialización de Laravel Echo (Reverb), `subscribeToGroupChat()`, `subscribeToConversation()`, `disconnectEcho()` |
+
 ### Helpers (`frontend/src/helpers/`)
 
 | Archivo | Propósito |
@@ -202,8 +237,10 @@ Rutas lazy-loading con guard `beforeEach`: restaura sesión desde token, carga `
 
 | Archivo | Responsabilidad |
 |---------|----------------|
+| `chat/GroupChat.vue` | Sala de chat grupal del proyecto con scroll infinito, envío de mensajes, WebSocket en tiempo real |
+| `chat/PrivateChat.vue` | Panel de chats privados: lista de conversaciones, área de mensajes, diálogo para iniciar nueva conversación |
 | `tasks/TaskForm.vue` | Formulario de creación/edición de tareas. En **creación** (`id===0`) inyecta `field_permissions` sintéticos (todo `true`) porque el backend solo retorna `field_permissions` en `show()`. En **edición** usa `useFieldLock` con `field_permissions` reales del backend para bloquear campos según el rol. |
-| `tickets/TicketForm.vue` | Formulario de creación/edición de tickets. Sin bloqueo de campos por permisos. |
+| `tickets/TicketForm.vue` | Formulario de creación/edición de tickets. Usa `useFieldLock` con `field_permissions` (backend envía en `show()`). Campos `status`, `priority`, `assigned_to` se deshabilitan según rol. |
 | `blockers/BlockerForm.vue` | Formulario de creación/edición de bloqueadores. |
 | `deliverables/DeliverableForm.vue` | Formulario de creación/edición de entregables. |
 | `milestones/MilestoneForm.vue` | Formulario de creación/edición de hitos. |
@@ -219,7 +256,12 @@ Rutas lazy-loading con guard `beforeEach`: restaura sesión desde token, carga `
 
 ### Pages (`frontend/src/pages/`)
 
-Vistas organizadas por módulo: `projects/`, `tasks/`, `tickets/`, `blockers/`, `risks/`, `milestones/`, `deliverables/`, `objectives/`, `phases/`, `plans/`, `members/`, `metrics/`, `admin/`, `profile/`.
+| Archivo | Responsabilidad |
+|---------|----------------|
+| `chat/GroupChatPage.vue` | Página contenedora del chat grupal con header, breadcrumb y carga de proyecto |
+| `chat/PrivateChatPage.vue` | Página contenedora de chats privados con header, breadcrumb, carga de proyecto y miembros |
+
+Vistas organizadas por módulo: `projects/`, `tasks/`, `tickets/`, `blockers/`, `risks/`, `milestones/`, `deliverables/`, `objectives/`, `phases/`, `plans/`, `members/`, `metrics/`, `chat/`, `admin/`, `profile/`.
 
 ---
 
@@ -230,6 +272,9 @@ Vistas organizadas por módulo: `projects/`, `tasks/`, `tickets/`, `blockers/`, 
 | `..._create_attachments_table.php` | `attachments` (polimórfica: `attachable_type` + `attachable_id` nullable, `uuid`, `disk_path`) |
 | `..._add_status_to_attachments_table.php` | Agrega `status` (`temp`/`claimed`) a `attachments` |
 | `..._make_attachable_columns_nullable.php` | Hace nullable `attachable_type`/`attachable_id` para attachments temporales |
+| `2026_06_19_000001_create_project_messages_table.php` | `project_messages`: `project_id`, `user_id`, `content`. Índice `[project_id, created_at]` |
+| `2026_06_19_000002_create_conversations_table.php` | `conversations`: `project_id`, `user_one_id`, `user_two_id`. Unique `[project_id, user_one_id, user_two_id]` |
+| `2026_06_19_000003_create_direct_messages_table.php` | `direct_messages`: `conversation_id`, `user_id`, `content`, `read_at`. Índice `[conversation_id, created_at]` |
 
 ---
 
@@ -251,11 +296,13 @@ Vistas organizadas por módulo: `projects/`, `tasks/`, `tickets/`, `blockers/`, 
 
 | Archivo | Propósito |
 |---------|-----------|
-| `docker-compose.yml` | Servicios: backend (PHP-FPM), nginx, frontend (Vite), horizon, scheduler, redis, mysql |
+| `docker-compose.yml` | Servicios: backend (PHP-FPM), nginx, frontend (Vite), horizon, scheduler, reverb (WebSocket :8080), redis, mysql |
 | `nginx.conf` | Proxy reverso: API en puerto 8000, Horizon en 8001 |
 | `refactorizar.md` | Especificación original de la refactorización (5 puntos) |
 | `Changes.md` | Registro completo de cambios de esta sesión |
+| `FeatureChat.md` | Especificación funcional del sistema de chat grupal y privado |
 | `ARCHITECTURAL_AUDIT.md` | Auditoría arquitectónica previa |
 | `ARCHITECTURE_V2.md` | Documento de arquitectura V2 |
 | `checklist.md` | Checklist de tareas pendientes |
+| `FlutterAppRequirements.md` | Especificación de endpoints, payloads y módulos para app móvil Flutter (cliente + soporte) |
 | `backend/bootstrap/providers.php` | Registro de Service Providers (Laravel 11+) — incluye `EventServiceProvider` que mapea eventos→listeners |

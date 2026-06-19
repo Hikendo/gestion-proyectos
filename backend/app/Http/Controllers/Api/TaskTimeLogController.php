@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\TaskStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TaskTimeLog\StoreTaskTimeLogRequest;
 use App\Models\Task;
@@ -33,6 +34,15 @@ class TaskTimeLogController extends Controller
     public function store(StoreTaskTimeLogRequest $request, Task $task): JsonResponse
     {
         $this->authorize('logTime', $task);
+
+        // No se pueden registrar horas en tareas completadas
+        if ($task->status === TaskStatus::Done) {
+            return response()->json([
+                'status'  => false,
+                'items'   => null,
+                'message' => 'No se pueden registrar horas en una tarea completada.',
+            ], 422);
+        }
 
         try {
             $item = $task->timeLogs()->create([

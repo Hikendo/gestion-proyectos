@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, toRef, computed } from 'vue';
 import type { TicketI, TicketErroresFormI } from '@/interfaces/TicketI';
 import type { TicketStatus, TicketPriority } from '@/interfaces/enums';
 import { membersAsUsers } from '@/services/project-members.service';
+import { useFieldLock } from '@/composables/useFieldLock';
 import RichTextEditor from '@/components/common/RichTextEditor.vue';
 
 const props = defineProps<{
@@ -21,6 +22,19 @@ function onFilesChanged(event: Event): void {
     emit('update:attachments', Array.from(input.files));
   }
 }
+
+// Cuando se crea un nuevo ticket (id === 0), no hay field_permissions del backend
+const isNewTicket = computed(() => !props.form.id || props.form.id === 0);
+const fieldPermissions = toRef(() => {
+  if (isNewTicket.value) {
+    return {
+      title: true, description: true, status: true, priority: true,
+      assigned_to: true,
+    };
+  }
+  return (props.form as any).field_permissions ?? {};
+});
+const fl = useFieldLock(fieldPermissions);
 
 const users = ref<{ id: number; name: string; email: string }[]>([]);
 
@@ -69,18 +83,20 @@ const priorities: { title: string; value: TicketPriority }[] = [
 
         <VCol cols="12" md="4">
           <VSelect v-model="form.status" :error-messages="errores.status" name="status" :items="statuses"
-            item-title="title" item-value="value" label="Estado" variant="outlined" density="comfortable" eager />
+            item-title="title" item-value="value" label="Estado" variant="outlined" density="comfortable" eager
+            :disabled="!fl.status.value" />
         </VCol>
 
         <VCol cols="12" md="4">
           <VSelect v-model="form.priority" :error-messages="errores.priority" name="priority" :items="priorities"
-            item-title="title" item-value="value" label="Prioridad" variant="outlined" density="comfortable" eager />
+            item-title="title" item-value="value" label="Prioridad" variant="outlined" density="comfortable" eager
+            :disabled="!fl.priority.value" />
         </VCol>
 
         <VCol cols="12" md="4">
           <VSelect v-model="form.assigned_to" :error-messages="errores.assigned_to" :items="users" item-title="name"
             item-value="id" name="assigned_to" label="Asignado a" placeholder="Selecciona un usuario" variant="outlined"
-            density="comfortable" clearable eager>
+            density="comfortable" clearable eager :disabled="!fl.assigned_to.value">
             <template #item="{ item, props: ip }">
               <VListItem v-bind="ip">
                 <template #prepend>

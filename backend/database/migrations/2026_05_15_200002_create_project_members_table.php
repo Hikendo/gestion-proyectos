@@ -28,7 +28,7 @@ return new class extends Migration
         'developer',
         'qa',
         'client',
-        'analyst'
+        'support',
     ]);
 
     $table->timestamps();

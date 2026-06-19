@@ -13,7 +13,7 @@ const projectId = () => Number(route.params.projectId);
 
 const form = ref({ user_id: 0, role: 'developer' });
 const errors = ref<any>({});
-const roles = ['manager', 'developer', 'qa', 'analyst', 'client'];
+const roles = ['manager', 'developer', 'qa', 'support', 'client'];
 const userName = ref('');
 
 onMounted(async () => {

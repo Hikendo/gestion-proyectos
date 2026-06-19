@@ -21,7 +21,6 @@ class StoreProjectRequest extends FormRequest
             'start_date'    => ['nullable', 'date'],
             'end_date'      => ['nullable', 'date', 'after_or_equal:start_date'],
             'budget'        => ['nullable', 'numeric', 'min:0'],
-            'progress'      => ['nullable', 'integer', 'min:0', 'max:100'],
             'attachments'   => ['nullable', 'array'],
             'attachments.*' => ['file', 'mimes:pdf,jpeg,png,zip,docx,xlsx', 'max:10240'],
         ];

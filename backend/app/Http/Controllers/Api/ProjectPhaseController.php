@@ -96,6 +96,23 @@ class ProjectPhaseController extends Controller
         $this->authorize('update', $project);
         abort_if($phase->project_id !== $project->id, 404);
 
+        // Verificar que la fase no tenga recursos asociados
+        $tasksCount        = $phase->tasks()->count();
+        $deliverablesCount = $phase->deliverables()->count();
+        $objectivesCount   = $phase->objectives()->count();
+        $risksCount        = $phase->risks()->count();
+        $criteriaCount     = $phase->acceptanceCriteria()->count();
+
+        if ($tasksCount > 0 || $deliverablesCount > 0 || $objectivesCount > 0 || $risksCount > 0 || $criteriaCount > 0) {
+            return response()->json([
+                'status'  => false,
+                'items'   => null,
+                'message' => 'No se puede eliminar la fase porque tiene recursos asociados: '
+                    . "{$tasksCount} tareas, {$deliverablesCount} entregables, "
+                    . "{$objectivesCount} objetivos, {$risksCount} riesgos, {$criteriaCount} criterios.",
+            ], 422);
+        }
+
         try {
             $phase->delete();
 

@@ -7,7 +7,7 @@ enum ProjectMemberRole: string
     case Manager   = 'manager';
     case Developer = 'developer';
     case Qa        = 'qa';
-    case Analyst   = 'analyst';
+    case Support   = 'support';
     case Client    = 'client';
 
     public function label(): string
@@ -16,7 +16,7 @@ enum ProjectMemberRole: string
             self::Manager   => 'Project Manager',
             self::Developer => 'Developer',
             self::Qa        => 'QA',
-            self::Analyst   => 'Analyst',
+            self::Support   => 'Support',
             self::Client    => 'Cliente',
         };
     }
@@ -108,7 +108,7 @@ enum ProjectMemberRole: string
                 'objective.view',
                 'metrics.view',
             ],
-            self::Analyst => [
+            self::Support => [
                 'dashboard.view',
                 'project.view',
                 'ticket.view',

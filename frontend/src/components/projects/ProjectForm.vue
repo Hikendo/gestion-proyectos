@@ -42,13 +42,13 @@ const statuses: { title: string; value: ProjectStatus }[] = [
     <VCardText class="px-8 pb-8">
       <VRow>
         <VCol cols="12" md="8">
-          <VTextField v-model="form.name" :error-messages="errores.name" name="name" label="Nombre" variant="outlined" density="comfortable"
-            placeholder="Nombre del proyecto" />
+          <VTextField v-model="form.name" :error-messages="errores.name" name="name" label="Nombre" variant="outlined"
+            density="comfortable" placeholder="Nombre del proyecto" />
         </VCol>
 
         <VCol cols="12" md="4">
-          <VTextField v-model="form.code" :error-messages="errores.code" name="code" label="Código" variant="outlined" density="comfortable"
-            placeholder="PRY-001" />
+          <VTextField v-model="form.code" :error-messages="errores.code" name="code" label="Código" variant="outlined"
+            density="comfortable" placeholder="PRY-001" />
         </VCol>
 
         <VCol cols="12">
@@ -77,14 +77,19 @@ const statuses: { title: string; value: ProjectStatus }[] = [
         </VCol>
 
         <VCol cols="12" md="6">
-          <VTextField v-model="form.progress" :error-messages="errores.progress" name="progress" type="number"
-            label="Progreso (%)" placeholder="0" />
+          <div class="text-caption text-medium-emphasis mb-1">Progreso (%)</div>
+          <div class="d-flex align-center gap-2">
+            <VProgressLinear :model-value="form.progress ?? 0" color="primary" height="10" rounded
+              class="flex-grow-1" />
+            <span class="text-body-2 font-weight-medium">{{ form.progress ?? 0 }}%</span>
+          </div>
+          <div class="text-caption text-disabled mt-1">Calculado automáticamente por el progreso de las fases</div>
         </VCol>
 
         <VCol cols="12">
-          <VFileInput label="Archivos adjuntos (PDF, imágenes, ZIP, DOCX)" variant="outlined" density="comfortable" multiple
-            accept=".pdf,.jpeg,.jpg,.png,.zip,.docx,.xlsx" :max-file-size="10240" prepend-icon="ri-attachment-2"
-            @change="onFilesChanged" />
+          <VFileInput label="Archivos adjuntos (PDF, imágenes, ZIP, DOCX)" variant="outlined" density="comfortable"
+            multiple accept=".pdf,.jpeg,.jpg,.png,.zip,.docx,.xlsx" :max-file-size="10240"
+            prepend-icon="ri-attachment-2" @change="onFilesChanged" />
           <div v-if="selectedFiles.length" class="mt-2">
             <p class="text-caption text-grey-darken-1 mb-2">
               Archivos seleccionados (previsualización local):

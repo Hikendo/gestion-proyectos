@@ -4,7 +4,7 @@ import { useProjectPhasesService } from '@/composables';
 import PhaseForm from '@/components/project-phases/PhaseForm.vue';
 import type { ProjectPhaseI } from '@/interfaces/ProjectPhaseI';
 
-type PhaseFormFields = Pick<ProjectPhaseI, 'name' | 'start_date' | 'end_date' | 'progress'>;
+type PhaseFormFields = Pick<ProjectPhaseI, 'name' | 'start_date' | 'end_date'>;
 
 const route = useRoute();
 const router = useRouter();

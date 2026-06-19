@@ -33,9 +33,13 @@ class DeliverablePolicy
             return false;
         }
 
+        // Owner siempre puede editar entregables de su proyecto
+        if ($deliverable->project->owner_id === $user->id) {
+            return true;
+        }
+
         return $user->canForProject($deliverable->project, 'deliverable.edit')
-            && ($deliverable->project->owner_id === $user->id
-                || $user->hasProjectRole($deliverable->project, 'manager'));
+            && $user->hasProjectRole($deliverable->project, 'manager');
     }
 
     /**
@@ -49,6 +53,11 @@ class DeliverablePolicy
             return false;
         }
 
+        // Owner siempre puede aprobar entregables de su proyecto
+        if ($deliverable->project->owner_id === $user->id) {
+            return true;
+        }
+
         // Validar dependencia: no aprobar si el padre no está aprobado
         if ($deliverable->parent_id) {
             $parent = Deliverable::find($deliverable->parent_id);
@@ -58,7 +67,6 @@ class DeliverablePolicy
         }
 
         return $user->canForProject($deliverable->project, 'deliverable.approve')
-            && ($deliverable->project->owner_id === $user->id
-                || $user->hasProjectRole($deliverable->project, 'manager'));
+            && $user->hasProjectRole($deliverable->project, 'manager');
     }
 }

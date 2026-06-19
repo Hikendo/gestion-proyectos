@@ -9,6 +9,7 @@ use App\Http\Requests\Ticket\UpdateTicketRequest;
 use App\Models\Project;
 use App\Models\Ticket;
 use App\Services\AttachmentService;
+use App\Services\FieldPermissionsService;
 use App\Services\ProjectService;
 use App\Services\TicketService;
 use App\Traits\BelongsToProject;
@@ -23,6 +24,7 @@ class TicketController extends Controller
         private TicketService $service,
         private ProjectService $projectService,
         private AttachmentService $attachmentService,
+        private FieldPermissionsService $fieldPermissionsService,
     ) {}
 
     /**
@@ -32,6 +34,9 @@ class TicketController extends Controller
     {
         $this->authorize('view', $project);
 
+        $user  = $request->user();
+        $isClient = $user->hasProjectRole($project, 'client');
+
         try {
             $query = $request->string('query', '')->trim()->toString();
 
@@ -40,6 +45,7 @@ class TicketController extends Controller
             if ($query === '') {
                 $items = Ticket::where('project_id', $project->id)
                     ->with(['creator:id,name,email', 'assignee:id,name,email'])
+                    ->when($isClient, fn($q) => $q->where('created_by', $user->id))
                     ->when($request->status,   fn($q, $s) => $q->where('status', $s))
                     ->when($request->priority, fn($q, $p) => $q->where('priority', $p))
                     ->latest()
@@ -50,6 +56,7 @@ class TicketController extends Controller
                         fn($q) => $q
                             ->where('project_id', $project->id)
                             ->with(['creator:id,name,email', 'assignee:id,name,email'])
+                            ->when($isClient, fn($q) => $q->where('created_by', $user->id))
                             ->when($request->status,   fn($q, $s) => $q->where('status', $s))
                             ->when($request->priority, fn($q, $p) => $q->where('priority', $p))
                             ->latest()
@@ -110,6 +117,9 @@ class TicketController extends Controller
                 'assignee:id,name,email',
                 'attachments',
             ]);
+
+            // Attach field-level permissions
+            $ticket->field_permissions = $this->fieldPermissionsService->compute($request->user(), $ticket);
 
             return response()->json([
                 'status'  => true,

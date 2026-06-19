@@ -122,6 +122,10 @@ const routes = [
             // Reports
             { path: '/projects/:projectId/reports', name: 'project-reports', component: () => import('../pages/project-detail/ProjectReportsTab.vue') },
 
+            // Chat
+            { path: '/projects/:projectId/chat', name: 'project-chat', component: () => import('../pages/chat/GroupChatPage.vue') },
+            { path: '/projects/:projectId/private-chat', name: 'project-private-chat', component: () => import('../pages/chat/PrivateChatPage.vue') },
+
             // Admin (superadmin)
             { path: '/admin', name: 'admin', component: AdminPage, meta: { requiresSuperAdmin: true } },
             { path: '/admin/users', name: 'admin-users', component: AdminUsersIndex, meta: { requiresSuperAdmin: true } },

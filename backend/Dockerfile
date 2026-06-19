@@ -4,6 +4,7 @@ FROM php:8.4-fpm
 RUN apt-get update && apt-get install -y \
     git \
     curl \
+    libcurl4-openssl-dev \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
@@ -22,6 +23,7 @@ RUN docker-php-ext-install \
     exif \
     pcntl \
     bcmath \
+    curl \
     gd \
     zip \
     intl

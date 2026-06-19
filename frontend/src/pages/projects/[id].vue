@@ -6,6 +6,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useEnsureCurrentProject } from '@/composables/useEnsureCurrentProject';
 import { canAction } from '@/helpers/canAction';
+import { usePermissionStore } from '@/store/usePermissionStore';
 import * as projectsService from '@/services/projects.service';
 import type { ProjectI } from '@/interfaces/ProjectI';
 import { formatDate } from '@/utils/util';
@@ -15,26 +16,34 @@ const route = useRoute();
 const router = useRouter();
 const appStore = useAppStore();
 const authStore = useAuthStore();
+const permissionStore = usePermissionStore();
 const { loader, snackbar } = storeToRefs(appStore);
 
 const project = ref<ProjectI | null>(null);
 
 const projectId = Number(route.params.projectId);
 
-const featureTabs = [
-  { key: 'objectives', label: 'Objetivos', icon: 'ri-flag-line', route: 'objectives' },
-  { key: 'phases', label: 'Fases', icon: 'ri-timeline-view', route: 'phases' },
-  { key: 'plans', label: 'Planes', icon: 'ri-calendar-schedule-line', route: 'plans' },
-  { key: 'tasks', label: 'Tareas', icon: 'ri-checkbox-circle-line', route: 'tasks' },
-  { key: 'tickets', label: 'Tickets', icon: 'ri-coupon-line', route: 'tickets' },
-  { key: 'risks', label: 'Riesgos', icon: 'ri-error-warning-line', route: 'risks' },
-  { key: 'blockers', label: 'Bloqueadores', icon: 'ri-forbid-line', route: 'blockers' },
-  { key: 'deliverables', label: 'Entregables', icon: 'ri-archive-line', route: 'deliverables' },
-  { key: 'milestones', label: 'Hitos', icon: 'ri-map-pin-line', route: 'milestones' },
-  { key: 'members', label: 'Miembros', icon: 'ri-group-line', route: 'members' },
-  { key: 'metrics', label: 'Métricas', icon: 'ri-bar-chart-line', route: 'metrics' },
-  { key: 'reports', label: 'Reportes', icon: 'ri-file-chart-line', route: 'project-reports' },
+const allFeatureTabs = [
+  { key: 'objectives', label: 'Objetivos', icon: 'ri-flag-line', route: 'objectives', permission: 'objective.view' },
+  { key: 'phases', label: 'Fases', icon: 'ri-timeline-view', route: 'phases', permission: 'phase.view' },
+  { key: 'plans', label: 'Planes', icon: 'ri-calendar-schedule-line', route: 'plans', permission: 'project.edit' },
+  { key: 'tasks', label: 'Tareas', icon: 'ri-checkbox-circle-line', route: 'tasks', permission: 'task.view' },
+  { key: 'tickets', label: 'Tickets', icon: 'ri-coupon-line', route: 'tickets', permission: 'ticket.view' },
+  { key: 'risks', label: 'Riesgos', icon: 'ri-error-warning-line', route: 'risks', permission: 'risk.view' },
+  { key: 'blockers', label: 'Bloqueadores', icon: 'ri-forbid-line', route: 'blockers', permission: 'blocker.view' },
+  { key: 'deliverables', label: 'Entregables', icon: 'ri-archive-line', route: 'deliverables', permission: 'deliverable.view' },
+  { key: 'milestones', label: 'Hitos', icon: 'ri-map-pin-line', route: 'milestones', permission: 'milestone.view' },
+  { key: 'members', label: 'Miembros', icon: 'ri-group-line', route: 'members', permission: 'project.assign-members' },
+  { key: 'metrics', label: 'Métricas', icon: 'ri-bar-chart-line', route: 'metrics', permission: 'metrics.view' },
+  { key: 'reports', label: 'Reportes', icon: 'ri-file-chart-line', route: 'project-reports', permission: 'reports.view' },
+  { key: 'chat', label: 'Chat del equipo', icon: 'ri-chat-1-line', route: 'project-chat', permission: 'project.view' },
+  { key: 'private-chat', label: 'Chats privados', icon: 'ri-message-2-line', route: 'project-private-chat', permission: 'project.view' },
 ];
+
+import { computed } from 'vue';
+const featureTabs = computed(() =>
+  allFeatureTabs.filter(tab => permissionStore.hasPermission(tab.permission))
+);
 
 const statusColor: Record<string, string> = {
   planning: 'blue-grey', active: 'success',

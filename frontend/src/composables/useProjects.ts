@@ -14,6 +14,19 @@ const emptyErrors = (): ProjectErroresFormI => ({
     name: [], status: [], owner_id: [],
 });
 
+function buildFormData(data: Record<string, any>, files: File[]): FormData {
+    const formData = new FormData();
+    for (const [key, value] of Object.entries(data)) {
+        if (value !== null && value !== undefined && key !== 'progress') {
+            formData.append(key, String(value));
+        }
+    }
+    for (const file of files) {
+        formData.append('attachments[]', file);
+    }
+    return formData;
+}
+
 export function useProjects() {
     const router = useRouter();
     const appStore = useAppStore();
@@ -23,9 +36,10 @@ export function useProjects() {
     const errores = ref<ProjectErroresFormI>(emptyErrors());
 
     async function handleStore(files?: File[]) {
+        const { progress, id, owner_id, ...formFields } = { ...form.value };
         const payload = files?.length
-            ? projectsService.buildFormData({ ...form.value }, files)
-            : { ...form.value };
+            ? buildFormData(formFields, files)
+            : formFields;
 
         const response = await projectsService.store(payload);
         if (response.status) {
@@ -38,9 +52,10 @@ export function useProjects() {
     }
 
     async function handleUpdate(files?: File[]) {
+        const { progress, id, owner_id, ...formFields } = { ...form.value };
         const payload = files?.length
-            ? projectsService.buildFormData({ ...form.value }, files)
-            : { ...form.value };
+            ? buildFormData(formFields, files)
+            : formFields;
 
         const response = await projectsService.update(form.value.id, payload);
         if (response.status) {

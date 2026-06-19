@@ -34,6 +34,16 @@ class TaskController extends Controller
     {
         $this->authorize('view', $project);
 
+        $user = $request->user();
+        $role = $user->projectMembershipRole($project);
+
+        // Developer y QA solo ven sus propias tareas asignadas.
+        // PM, owner, support, client y super-admin ven todas.
+        $onlyOwnTasks = ! $user->hasRole('super-admin')
+            && ! $user->hasProjectRole($project, 'manager')
+            && $project->owner_id !== $user->id
+            && in_array($role, ['developer', 'qa'], true);
+
         try {
             $query = $request->string('query', '')->trim()->toString();
 
@@ -42,6 +52,7 @@ class TaskController extends Controller
             if ($query === '') {
                 $items = Task::where('project_id', $project->id)
                     ->with(['assignee:id,name,email', 'phase:id,name'])
+                    ->when($onlyOwnTasks, fn($q) => $q->where('assigned_to', $user->id))
                     ->when($request->status,      fn($q, $s) => $q->where('status', $s))
                     ->when($request->assigned_to, fn($q, $u) => $q->where('assigned_to', $u))
                     ->when($request->priority,    fn($q, $p) => $q->where('priority', $p))
@@ -53,6 +64,7 @@ class TaskController extends Controller
                         fn($q) => $q
                             ->where('project_id', $project->id)
                             ->with(['assignee:id,name,email', 'phase:id,name'])
+                            ->when($onlyOwnTasks, fn($q) => $q->where('assigned_to', $user->id))
                             ->when($request->status,      fn($q, $s) => $q->where('status', $s))
                             ->when($request->assigned_to, fn($q, $u) => $q->where('assigned_to', $u))
                             ->when($request->priority,    fn($q, $p) => $q->where('priority', $p))
@@ -142,6 +154,9 @@ class TaskController extends Controller
 
         try {
             $data = $request->validated();
+
+            // Los campos derivados nunca se aceptan del cliente
+            unset($data['progress'], $data['worked_hours']);
 
             if (isset($data['status'])) {
                 $newStatus = TaskStatus::from($data['status']);

@@ -87,6 +87,8 @@ const projectMenu = computed(() => {
     { title: 'Hitos', icon: 'ri-map-pin-line', name: 'milestones', params: { projectId: pid } },
     { title: 'Miembros', icon: 'ri-group-line', name: 'members', params: { projectId: pid } },
     { title: 'Métricas', icon: 'ri-bar-chart-line', name: 'metrics', params: { projectId: pid } },
+    { title: 'Chat del equipo', icon: 'ri-chat-1-line', name: 'project-chat', params: { projectId: pid } },
+    { title: 'Chats privados', icon: 'ri-message-2-line', name: 'project-private-chat', params: { projectId: pid } },
   ];
 });
 

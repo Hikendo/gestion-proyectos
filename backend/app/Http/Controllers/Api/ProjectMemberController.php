@@ -80,7 +80,7 @@ class ProjectMemberController extends Controller
         $this->authorize('assignMembers', $project);
 
         $request->validate([
-            'role' => ['required', 'string', 'in:manager,developer,qa,analyst,client'],
+            'role' => ['required', 'string', 'in:manager,developer,qa,support,client'],
         ]);
 
         try {

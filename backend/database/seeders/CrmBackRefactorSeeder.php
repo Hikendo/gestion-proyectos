@@ -50,7 +50,7 @@ class CrmBackRefactorSeeder extends Seeder
             [$pm->id,      'manager'],
             [$dev->id,     'developer'],
             [$qa->id,      'qa'],
-            [$support->id, 'analyst'],
+            [$support->id, 'support'],
             [$client->id,  'client'],
         ]);
 

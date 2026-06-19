@@ -6,7 +6,7 @@ import PhaseForm from '@/components/project-phases/PhaseForm.vue';
 import { toDateInput } from '@/utils/util';
 import type { ProjectPhaseI } from '@/interfaces/ProjectPhaseI';
 
-type PhaseFormFields = Pick<ProjectPhaseI, 'name' | 'start_date' | 'end_date' | 'progress'>;
+type PhaseFormFields = Pick<ProjectPhaseI, 'name' | 'start_date' | 'end_date'>;
 
 const route = useRoute();
 const router = useRouter();
@@ -15,10 +15,10 @@ const { loading, validationErrors, call } = useProjectPhasesService();
 const projectId = () => Number(route.params.projectId);
 const initialData = ref<PhaseFormFields>({
   name: '',
-  progress: 0,
   start_date: null,
   end_date: null,
 });
+const phaseProgress = ref(0);
 const ready = ref(false);
 
 onMounted(async () => {
@@ -30,10 +30,10 @@ onMounted(async () => {
     if (phase) {
       initialData.value = {
         name: phase.name,
-        progress: phase.progress ?? 0,
         start_date: toDateInput(phase.start_date ?? null),
         end_date: toDateInput(phase.end_date ?? null),
       };
+      phaseProgress.value = phase.progress ?? 0;
     }
   }
   ready.value = true;
@@ -65,6 +65,6 @@ async function handleSubmit(form: PhaseFormFields) {
     </VCol>
   </VRow>
 
-  <PhaseForm v-if="ready" :initial="initialData" submit-label="Guardar cambios" :errors="validationErrors"
-    :loading="loading" @submit="handleSubmit" />
+  <PhaseForm v-if="ready" :initial="initialData" :progress="phaseProgress" submit-label="Guardar cambios"
+    :errors="validationErrors" :loading="loading" @submit="handleSubmit" />
 </template>

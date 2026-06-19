@@ -21,6 +21,12 @@ class TaskObserver
     {
         $actor = Auth::user() ?? $task->creator;
 
+        // Recalcular progreso al crear (si el factory/envío inicial incluye horas)
+        $this->recalculateProgress($task);
+        if ($task->isDirty('progress')) {
+            $task->saveQuietly();
+        }
+
         TaskCreated::dispatch($task, $actor);
 
         if ($task->assigned_to && $task->assignee) {
