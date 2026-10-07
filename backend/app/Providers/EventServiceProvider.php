@@ -24,6 +24,7 @@ use App\Events\TaskProgressUpdated;
 use App\Events\TaskStatusChanged;
 use App\Events\TicketAssigned;
 use App\Events\TicketClosed;
+use App\Events\TicketCommentCreated;
 use App\Events\TicketCreated;
 use App\Listeners\CheckPhaseCompletion;
 use App\Listeners\HandleBlockerCreated;
@@ -43,6 +44,7 @@ use App\Listeners\HandleTaskCreated;
 use App\Listeners\HandleTaskStatusChanged;
 use App\Listeners\HandleTicketAssigned;
 use App\Listeners\HandleTicketClosed;
+use App\Listeners\HandleTicketCommentCreated;
 use App\Listeners\HandleTicketCreated;
 use App\Listeners\InvalidateUserSession;
 use App\Listeners\RecalculatePhaseProgress;
@@ -95,6 +97,7 @@ class EventServiceProvider extends ServiceProvider
         TicketCreated::class       => [HandleTicketCreated::class],
         TicketAssigned::class      => [HandleTicketAssigned::class],
         TicketClosed::class        => [HandleTicketClosed::class],
+        TicketCommentCreated::class => [HandleTicketCommentCreated::class],
 
         // ── Blocker / Milestone / Deliverable / Risk ───────────────────────────
         BlockerCreated::class      => [HandleBlockerCreated::class],

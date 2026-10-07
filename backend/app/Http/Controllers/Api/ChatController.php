@@ -8,13 +8,14 @@ use App\Models\Project;
 use App\Models\ProjectMessage;
 use App\Traits\BelongsToProject;
 use App\Traits\HasProjectAccess;
+use App\Traits\PaginatesApiResponses;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class ChatController extends Controller
 {
-    use BelongsToProject, HasProjectAccess;
+    use BelongsToProject, HasProjectAccess, PaginatesApiResponses;
 
     /**
      * GET /api/v1/projects/{project}/chat/messages
@@ -29,7 +30,9 @@ class ChatController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(50);
 
-        return response()->json($messages);
+        return response()->json(
+            $this->paginatedResponse($messages, fn (ProjectMessage $m) => $this->transformGroupMessage($m))
+        );
     }
 
     /**

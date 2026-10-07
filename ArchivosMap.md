@@ -229,6 +229,8 @@ Capa de acceso a datos con interfaces (`Contracts/`). Implementaciones: `Project
 
 Rutas lazy-loading con guard `beforeEach`: restaura sesión desde token, carga `currentProject` al entrar a submódulos, protege rutas admin con `requiresSuperAdmin`.
 
+Las páginas de sub-recursos (members, objectives, phases, plans, tasks, tickets, risks, blockers, deliverables, milestones, metrics, notifications) se cargan con el helper `p(path)` construido sobre `import.meta.glob('../pages/{...}/**/*.vue')`. **Nunca** usar `import(`../pages/${path}`)` con plantilla: Vite/Rollup no lo analiza estáticamente, lo deja sin compilar en el bundle y en producción el navegador pide el `.vue` fuente; nginx responde `index.html` (`text/html`) -> error MIME. El glob se limita a esos directorios para no incluir páginas legacy fuera de uso.
+
 ### Layouts (`frontend/src/layouts/`)
 
 `MainLayout.vue`: AppBar + NavigationDrawer con menú dinámico (base, proyecto activo, admin), NotificationBell, ThemeSelector.
@@ -263,6 +265,8 @@ Rutas lazy-loading con guard `beforeEach`: restaura sesión desde token, carga `
 
 Vistas organizadas por módulo: `projects/`, `tasks/`, `tickets/`, `blockers/`, `risks/`, `milestones/`, `deliverables/`, `objectives/`, `phases/`, `plans/`, `members/`, `metrics/`, `chat/`, `admin/`, `profile/`.
 
+Algunas páginas son contenedores delgados que delegan en componentes de `src/features/` (p. ej. `pages/project-detail/*Tab.vue` -> `features/projects/*`, `pages/AdminPage.vue` -> `features/admin/*`).
+
 ---
 
 ## Base de datos — Migraciones
@@ -289,6 +293,28 @@ Vistas organizadas por módulo: `projects/`, `tasks/`, `tickets/`, `blockers/`, 
 ### Documentación de testing
 
 `docs/testing-documentation.md` — Diagramas Mermaid (flujo cross-role, autorización, attachments), matriz de cobertura, instrucciones de ejecución, CI/CD.
+
+---
+
+## Deploy (carpeta `deploy/`)
+
+Scripts bash que se ejecutan **localmente** y despliegan al VPS por SSH/rsync (IP, usuario, dominio y credenciales en `config.sh`).
+
+| Archivo | Propósito |
+|---------|-----------|
+| `config.sh` | Configuración central: `SSH_HOST/USER/PORT`, `REMOTE_ROOT`, `DOMAIN`, `WWW_DOMAIN`, `LETSENCRYPT_EMAIL`, `DB_*` |
+| `deploy.sh` | Orquestador: `all` (deps->backend->frontend->ssl), `deps`, `backend`, `frontend`, `ssl`, `update` (por defecto: backend+frontend) |
+| `01-install-deps.sh` | Instala en el servidor: Docker + Compose, nginx, rsync, git, unzip y certbot |
+| `02-deploy-backend.sh` | Sincroniza el repo, genera/adapta el `.env` de producción, levanta `docker-compose.prod.yml`, migra, siembra usuarios base y cachea config/rutas/vistas |
+| `03-deploy-frontend.sh` | Compila el frontend localmente (`npx vite build` a un dir temporal), sube `dist/` por rsync e instala el vhost del host (http o https según certificado) |
+| `04-configure-ssl.sh` | Emite/renueva el certificado Let's Encrypt (webroot) y activa el vhost HTTPS (80->443) |
+| `docker-compose.prod.yml` | Stack de producción independiente (backend, horizon, scheduler, nginx, reverb, redis, mysql sin puerto público) |
+| `nginx-site-http.conf` | Vhost HTTP del host (temporal / para certbot). SPA fallback `try_files $uri $uri/ /index.html` |
+| `nginx-site-https.conf` | Vhost HTTPS definitivo: estáticos + `/api/` + `/horizon/` + `/app` (Reverb wss) |
+| `env.production.example` | Plantilla del `.env` del backend para producción |
+| `README.md` | Guía de despliegue (arquitectura, configuración previa, actualizaciones) |
+
+> AVISO: El `try_files ... /index.html` del vhost es correcto para una SPA, pero si el bundle pide rutas inexistentes (p. ej. un `import()` dinámico mal compilado) devolverá `index.html` con MIME `text/html`. Ver el fix del router (2026-07-10) en `Changes.md`.
 
 ---
 

@@ -77,6 +77,21 @@ class Project extends Model
         return $this->hasMany(Ticket::class);
     }
 
+    /**
+     * Usuario que actúa como Project Manager del proyecto: el primer miembro
+     * con rol 'manager'. Si no existe, se retorna el owner del proyecto.
+     */
+    public function manager(): ?User
+    {
+        $managed = $this->members()
+            ->where('role', 'manager')
+            ->with('user')
+            ->first()
+            ?->user;
+
+        return $managed ?? $this->owner;
+    }
+
     public function risks()
     {
         return $this->hasMany(Risk::class);

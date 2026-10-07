@@ -67,10 +67,17 @@ export const update = async (projectId: number, userId: number, role: string) =>
   }
 };
 
-// ─── Users (miembros como usuarios planos [{id, name, email}]) ────────────────
+// ─── Users (miembros como usuarios planos [{id, name, email, role}]) ──────────
+
+interface MemberUserI {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+}
 
 interface MembersUsersResponseI extends ResponseBaseI {
-  items: { id: number; name: string; email: string }[];
+  items: MemberUserI[];
 }
 
 export const membersAsUsers = async (projectId: number) => {
@@ -82,7 +89,7 @@ export const membersAsUsers = async (projectId: number) => {
       items: data.items,
     };
   } catch (error) {
-    return { status: false, message: "Error en el servidor", items: [] as { id: number; name: string; email: string }[] };
+    return { status: false, message: "Error en el servidor", items: [] as MemberUserI[] };
   }
 };
 

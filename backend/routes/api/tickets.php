@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\TicketCommentController;
 use App\Http\Controllers\Api\TicketController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,4 +23,14 @@ Route::middleware('auth:sanctum')->prefix('projects/{project}')->group(function 
 
     Route::post('tickets/{ticket}/attachments', [TicketController::class, 'uploadAttachments'])
         ->name('projects.tickets.attachments.upload');
+
+    // Seguimiento / comentarios del ticket
+    Route::get('tickets/{ticket}/comments', [TicketCommentController::class, 'index'])
+        ->name('projects.tickets.comments.index');
+
+    Route::post('tickets/{ticket}/comments', [TicketCommentController::class, 'store'])
+        ->name('projects.tickets.comments.store');
+
+    Route::delete('tickets/{ticket}/comments/{comment}', [TicketCommentController::class, 'destroy'])
+        ->name('projects.tickets.comments.destroy');
 });

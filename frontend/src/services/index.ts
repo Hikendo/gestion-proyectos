@@ -16,5 +16,6 @@ export * as projectRisksService from './project-risks.service';
 export * as projectBlockersService from './project-blockers.service';
 export * as projectTasksService from './project-tasks.service';
 export * as ticketsService from './tickets.service';
+export * as ticketCommentsService from './ticket-comments.service';
 export * as taskCommentsService from './task-comments.service';
 export * as taskTimeLogsService from './task-time-logs.service';

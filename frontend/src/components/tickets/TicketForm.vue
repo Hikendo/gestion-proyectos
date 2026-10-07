@@ -4,6 +4,7 @@ import type { TicketI, TicketErroresFormI } from '@/interfaces/TicketI';
 import type { TicketStatus, TicketPriority } from '@/interfaces/enums';
 import { membersAsUsers } from '@/services/project-members.service';
 import { useFieldLock } from '@/composables/useFieldLock';
+import { canAction } from '@/helpers/canAction';
 import RichTextEditor from '@/components/common/RichTextEditor.vue';
 
 const props = defineProps<{
@@ -23,25 +24,29 @@ function onFilesChanged(event: Event): void {
   }
 }
 
-// Cuando se crea un nuevo ticket (id === 0), no hay field_permissions del backend
+// Permiso real para asignar: un cliente (u otro rol sin `ticket.assign`) no
+// puede elegir responsable. En tickets nuevos no hay field_permissions del
+// backend, por lo que derivamos `assigned_to` del permiso `ticket.assign`.
+const canAssign = computed(() => canAction('ticket.assign'));
 const isNewTicket = computed(() => !props.form.id || props.form.id === 0);
 const fieldPermissions = toRef(() => {
   if (isNewTicket.value) {
     return {
-      title: true, description: true, status: true, priority: true,
-      assigned_to: true,
+      subject: true, description: true, status: true, priority: true,
+      assigned_to: canAssign.value,
     };
   }
   return (props.form as any).field_permissions ?? {};
 });
 const fl = useFieldLock(fieldPermissions);
 
-const users = ref<{ id: number; name: string; email: string }[]>([]);
+const users = ref<{ id: number; name: string; email: string; role: string }[]>([]);
 
 onMounted(async () => {
   const response = await membersAsUsers(props.projectId);
   if (response.status && response.items) {
-    users.value = response.items;
+    // Los clientes no pueden ser responsables de un ticket: se excluyen.
+    users.value = response.items.filter((u) => u.role !== 'client');
   }
 });
 

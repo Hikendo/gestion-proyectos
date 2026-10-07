@@ -29,6 +29,7 @@ export type { TaskAttachmentI } from '@/interfaces/TaskAttachmentI';
 export type { TaskCommentI } from '@/interfaces/TaskCommentI';
 export type { TaskTimeLogI } from '@/interfaces/TaskTimeLogI';
 export type { TicketI } from '@/interfaces/TicketI';
+export type { TicketCommentI } from '@/interfaces/TicketCommentI';
 export type { UserI } from '@/interfaces/UserI';
 export type { NotificationI, NotificationsPaginatedResponse } from '@/interfaces/NotificationI';
 export type { UserMetricI } from '@/interfaces/UserMetricI';

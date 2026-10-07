@@ -14,6 +14,7 @@ import {
     rolesService,
     taskCommentsService,
     taskTimeLogsService,
+    ticketCommentsService,
     ticketsService,
     usersService,
 } from '../services';
@@ -64,6 +65,7 @@ export const useProjectBlockersService = createServiceComposable(projectBlockers
 export const useProjectTasksService = createServiceComposable(projectTasksService, taskFields);
 export const useTicketsService = createServiceComposable(ticketsService, ticketFields);
 export const useTaskCommentsService = createServiceComposable(taskCommentsService, commentFields);
+export const useTicketCommentsService = createServiceComposable(ticketCommentsService, commentFields);
 export const useTaskTimeLogsService = createServiceComposable(taskTimeLogsService, timeLogFields);
 
 export { useUsers } from './useUsers';

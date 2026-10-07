@@ -87,6 +87,13 @@ class TicketController extends Controller
 
             unset($data['attachments']);
 
+            // Solo quien puede asignar (PM/owner/support) puede fijar el
+            // responsable. El resto (p.ej. clientes) no puede establecerlo,
+            // por lo que se ignora y el servicio asigna al PM por defecto.
+            if (! $request->user()->canForProject($project, 'ticket.assign')) {
+                unset($data['assigned_to']);
+            }
+
             $item = $this->service->create($data, $project, $request->user());
 
             if (!empty($files)) {
@@ -144,13 +151,21 @@ class TicketController extends Controller
 
         $this->authorize('update', $ticket);
 
+        $data = $request->validated();
+
+        // Autorizar `assign` SOLO si el responsable realmente cambia. Así un
+        // cliente (o cualquier editor sin permiso de asignación) puede
+        // actualizar su ticket sin recibir un 403 por un assigned_to sin cambios.
+        // La autorización se evalúa FUERA del try para que el 403 no se
+        // convierta en un 500 al ser capturado por catch (\Throwable).
+        $changesAssignment = array_key_exists('assigned_to', $data)
+            && $data['assigned_to'] != $ticket->assigned_to;
+
+        if ($changesAssignment) {
+            $this->authorize('assign', $ticket);
+        }
+
         try {
-            $data = $request->validated();
-
-            if (isset($data['assigned_to'])) {
-                $this->authorize('assign', $ticket);
-            }
-
             $ticket->update($data);
 
             return response()->json([

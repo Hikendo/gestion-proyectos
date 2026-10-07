@@ -5,13 +5,13 @@ import FeaturePanel from '../../../components/FeaturePanel.vue';
 import RequestState from '../../../components/RequestState.vue';
 import UserForm from './UserForm.vue';
 import { useUserUpdate } from '../../../composables/useUserUpdate';
-import { useRolesList } from '../../../composables/useRolesList';
+import { useRoles } from '../../../composables/useRolesList';
 import { useConfirmAction } from '../../../composables/useConfirmAction';
 
 const route = useRoute();
 const { confirmAction } = useConfirmAction();
 const { form, errors, isLoading, successMessage, handleUpdate, loadUser, usersService } = useUserUpdate();
-const { roles, loadRoles } = useRolesList();
+const { roles, loadRoles } = useRoles();
 
 const userId = computed(() => {
     const id = route.query.id;

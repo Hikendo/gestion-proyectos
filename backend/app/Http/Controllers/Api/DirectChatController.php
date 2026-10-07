@@ -8,13 +8,14 @@ use App\Models\Conversation;
 use App\Models\DirectMessage;
 use App\Models\Project;
 use App\Traits\HasProjectAccess;
+use App\Traits\PaginatesApiResponses;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class DirectChatController extends Controller
 {
-    use HasProjectAccess;
+    use HasProjectAccess, PaginatesApiResponses;
 
     /**
      * GET /api/v1/projects/{project}/conversations
@@ -124,7 +125,9 @@ class DirectChatController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(50);
 
-        return response()->json($messages);
+        return response()->json(
+            $this->paginatedResponse($messages, fn (DirectMessage $m) => $this->transformDirectMessage($m))
+        );
     }
 
     /**

@@ -13,6 +13,7 @@ import type {
     TaskCommentI,
     TaskTimeLogI,
     TicketI,
+    TicketCommentI,
     UserI,
     UserMetricI,
     ProjectStatus,
@@ -172,6 +173,8 @@ export interface BlockerPayload extends Partial<BlockerI> {}
 export interface TaskCommentPayload {
     comment: string;
 }
+
+export interface TicketCommentPayload extends Pick<TicketCommentI, 'comment'> {}
 
 export interface TaskTimeLogPayload {
     minutes: number;

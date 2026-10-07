@@ -1,6 +1,272 @@
 # Changes.md — Contexto para sesiones futuras
 
- **Última actualización:** 2026-06-19
+ **Última actualización:** 2026-07-10
+
+---
+
+## [2026-07-10] Hotfix: 500 en login producción — `.env` ilegible por www-data
+
+### Contexto
+
+Tras el deploy a `project.business-and-growth.com`:
+
+- `POST /api/v1/auth/login` → **500**
+- `GET /api/v1/notifications` → 401 (normal, sin token)
+- Log: `No application encryption key has been specified.` y, antes,
+  `Database file at path [gestion_db] does not exist. (Connection: sqlite...)`.
+
+### Causa raíz
+
+`backend/.env` en el servidor quedaba en `600 root:root` (subido por `scp`
+desde un `mktemp` 600). PHP-FPM (contenedor) corre como **www-data**, que **no
+puede leer** ese `.env`. En runtime Laravel no cargaba ninguna variable y caía
+a los defaults: `DB_CONNECTION` ausente → `sqlite` (`config/database.php:20`)
+usando `DB_DATABASE=gestion_db` (del `environment:` de compose) como *path*; y
+`APP_KEY` vacío. El `optimize:clear` del entrypoint (que puede ejecutarse tras
+el `config:cache` del script → carrera) borraba la caché de config que venía
+enmascarando el problema.
+
+### Solución
+
+- `backend/docker-entrypoint.sh`: `fix_permissions()` ahora hace
+  `chmod 644 /var/www/.env` en cada arranque (auto-reparación; el `.env` va
+  montado desde el host).
+- `deploy/docker-compose.prod.yml`: `DB_CONNECTION: mysql` explícito en el
+  anchor `&laravel-env` (las vars de `environment:` son reales y ganan al `.env`).
+- `deploy/02-deploy-backend.sh`: `chmod 644 backend/.env` remoto tras subirlo.
+
+### Acción manual en el servidor (aplicada)
+
+`chmod 644 /opt/gestion-proyectos/backend/.env` + `optimize:clear` + `config:cache`.
+
+---
+
+## [2026-07-10] Fix: 403 en tickets/fases — autorización global en FormRequests (+ CORS)
+
+### Contexto
+
+En producción `project.business-and-growth.com`:
+
+- `POST /api/v1/projects/{project}/tickets` → **403** para miembros de proyecto
+  (usuarios sin rol global de Spatie, solo rol de membresía). El super-admin sí
+  recibía **201**.
+- `POST /api/v1/projects/{project}/conversations` → **404** (backend desplegado
+  desactualizado; ver «Despliegue pendiente»).
+
+### Causa
+
+`StoreTicketRequest::authorize()` usaba `$this->user()->can('ticket.create')`
+**global**. Un miembro de proyecto sin rol de Spatie no posee ese permiso global
+→ 403. El resto de FormRequests ya usaban `canForProject(...)`. Mismo patrón
+(incorrecto) en `UpdateTicketRequest`, `StoreProjectPhaseRequest`
+(`phase.create`) y `UpdateProjectPhaseRequest` (`phase.edit`).
+
+### Solución
+
+- `StoreTicketRequest` → `canForProject($project, 'ticket.create')` (resuelve el
+  `Project` desde la ruta).
+- `UpdateTicketRequest` → `return true`; la autorización fina (edit-any/edit-own,
+  estado `closed`) la aplica `TicketController::update()` vía
+  `TicketPolicy::update()` (ya project-scoped).
+- `StoreProjectPhaseRequest` → `canForProject($project, 'phase.create')`.
+- `UpdateProjectPhaseRequest` → `canForProject($project, 'phase.edit')`.
+- `config/cors.php` (nuevo): orígenes explícitos del dominio + `supports_credentials`
+  (el SPA es same-origin; habilita clientes cross-origin como Flutter).
+- `deploy/config.sh`: `DOMAIN` por defecto `project.business-and-growth.com`
+  (evita que `_require_domain` aborte el despliegue). `WWW_DOMAIN` se deja vacío
+  a propósito (decisión www-vs-apex pendiente).
+- Tests: nuevo caso de regresión en `TicketTest` (miembro **sin** rol global) y
+  nuevo `ProjectPhaseTest`.
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `backend/app/Http/Requests/Ticket/StoreTicketRequest.php` | `can()` → `canForProject($project, 'ticket.create')` |
+| `backend/app/Http/Requests/Ticket/UpdateTicketRequest.php` | Delegar autorización a `TicketPolicy` (`return true`) |
+| `backend/app/Http/Requests/ProjectPhase/StoreProjectPhaseRequest.php` | `can()` → `canForProject($project, 'phase.create')` |
+| `backend/app/Http/Requests/ProjectPhase/UpdateProjectPhaseRequest.php` | `can()` → `canForProject($project, 'phase.edit')` |
+| `backend/config/cors.php` | Nuevo: CORS con orígenes explícitos |
+| `deploy/config.sh` | `DOMAIN` por defecto fijado |
+| `backend/tests/Feature/Ticket/TicketTest.php` | Test de regresión (miembro sin rol global) |
+| `backend/tests/Feature/Project/ProjectPhaseTest.php` | Nuevo: fases (manager crea / developer 403) |
+
+### Despliegue pendiente
+
+El **404** de `conversations` se debe a que el backend desplegado está
+**desactualizado** (falta `routes/api/chat.php` / `DirectChatController`).
+Requiere un **redeploy** obligatorio:
+
+```bash
+./deploy/deploy.sh backend   # rsync + build + migrate + optimize:clear/config:cache/route:cache
+```
+
+Verificación posterior: `php artisan route:list --path=conversations` debe listar
+las rutas y los POST de tickets/conversations deben responder **201**.
+
+---
+
+## [2026-07-10] Fix: 500 al desplegar frontend — permisos del `dist/`
+
+### Contexto
+
+Tras aplicar el fix de `http2`, `nginx -t` ya pasaba y nginx servía HTTP/2, pero
+el sitio seguía devolviendo `500 Internal Server Error` (nginx/1.24.0) en rutas
+como `/projects/3`, y `403` en `/`:
+
+```
+[crit] stat() "/opt/gestion-proyectos/frontend/dist/index.html" failed
+       (13: Permission denied)
+[error] rewrite or internal redirection cycle while internally redirecting
+        to "/index.html"
+```
+
+### Causa
+
+`/opt/gestion-proyectos/frontend/dist` quedó en **`0700`** (dueño UID 1000). El
+worker de nginx corre como **`www-data`**, así que no podía atravesar/leer el
+directorio → `try_files` no podía abrir `index.html` → bucle de redirección
+interna → `500`.
+
+Origen: `03-deploy-frontend.sh` compila a un directorio `mktemp -d` (modo `0700`)
+y sube con `rsync -avz`; `-a` **preserva dueño y permisos**, propagando el `0700`
+y el UID local 1000 al `dist/` remoto.
+
+### Solución
+
+- `deploy/03-deploy-frontend.sh`:
+  - `chmod 755 "${BUILD_OUT}"` tras `mktemp -d`.
+  - `rsync ... --no-owner --no-group --chmod=D755,F644`.
+  - Tras el rsync, `chmod 755` + `chmod -R a+rX` del `dist/` remoto (el rsync en
+    modo "contenidos" no ajusta el modo del directorio raíz).
+- En el servidor (aplicado): `chmod 755 /opt/gestion-proyectos/frontend/dist`
+  y `chmod -R a+rX /opt/gestion-proyectos/frontend/dist`.
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `deploy/03-deploy-frontend.sh` | Normaliza dueño/permisos del `dist/` subido (evita el `0700`) |
+
+---
+
+## [2026-07-10] Fix: despliegue del frontend (nginx 1.24 + `DOMAIN` por defecto)
+
+### Contexto
+
+Al re-ejecutar el despliegue del frontend (`./deploy/deploy.sh frontend`) el
+build local y el `rsync` del `dist/` funcionaban, pero el paso 3 (config del
+nginx del host) fallaba:
+
+```
+[emerg] unknown directive "http2" in /etc/nginx/sites-enabled/gestion-proyectos.conf:30
+nginx: configuration file /etc/nginx/nginx.conf test failed
+```
+
+### Causa
+
+- `deploy/config.sh` tenía `DOMAIN="${DOMAIN:-}"` (vacío). Tanto `02` como `03`
+  llaman a `_require_domain` al inicio, así que sin `DOMAIN` el script abortaba
+  antes de compilar/subir.
+- `deploy/nginx-site-https.conf` usaba la directiva `http2 on;`, que **solo
+  existe en nginx >= 1.25.1**. El servidor corre **nginx 1.24.0 (Ubuntu)** →
+  `nginx -t` falla y el `systemctl reload nginx` del script no se ejecuta,
+  dejando la config inválida en disco (riesgo de caída del sitio en el siguiente
+  reload/reboot → de ahí el `500 Internal Server Error`).
+
+### Solución
+
+- `deploy/config.sh`: `DOMAIN="${DOMAIN:-project.business-and-growth.com}"`.
+- `deploy/nginx-site-https.conf`: `listen 443 ssl http2;` y
+  `listen [::]:443 ssl http2;` en lugar de `listen ... ssl;` + `http2 on;`
+  (compatible con nginx 1.24+; en 1.25.1+ solo emite un *warning* de deprecación).
+- `deploy/03-deploy-frontend.sh`: hace backup del vhost vigente antes de
+  sobreescribirlo y lo **restaura automáticamente si `nginx -t` falla**, para no
+  dejar nginx roto.
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `deploy/config.sh` | `DOMAIN` por defecto = dominio del front |
+| `deploy/nginx-site-https.conf` | Sintaxis HTTP/2 compatible con nginx 1.24 |
+| `deploy/03-deploy-frontend.sh` | Backup + rollback del vhost si `nginx -t` falla |
+
+### Acción pendiente
+
+Re-ejecutar `./deploy/deploy.sh frontend` para aplicar el vhost corregido y
+recargar nginx; después verificar `curl -sI https://project.business-and-growth.com/`
+(esperado `HTTP/2 200`).
+
+---
+
+## [2026-07-10] Fix: páginas lazy del router no cargaban en producción (MIME `text/html`)
+
+### Contexto
+
+Al desplegar el frontend compilado, al navegar a los módulos del proyecto
+(miembros, hitos, entregables, planes, tareas, tickets, riesgos, bloqueadores,
+fases, objetivos, métricas, notificaciones) la consola mostraba:
+
+```
+Failed to load module script: Expected a JavaScript-or-Wasm module script but the
+server responded with a MIME type of "text/html".
+TypeError: Failed to fetch dynamically imported module:
+https://project.business-and-growth.com/pages/members/index.vue
+```
+
+### Causa
+
+`frontend/src/router/index.js` definía el helper de páginas lazy como:
+
+```js
+const p = (path) => () => import(`../pages/${path}`);
+```
+
+El import dinámico con plantilla (`../pages/${path}`) no es analizable
+estáticamente por Vite/Rollup, así que el build lo dejaba sin compilar
+(confirmado en el bundle: `SA=e=>()=>cA(()=>import(`../pages/${e}`),[])`). En
+producción el navegador resolvía el import relativo al chunk (`/assets/index-*.js`)
+hacia `/pages/members/index.vue`; nginx (SPA fallback `try_files ... /index.html`)
+respondía `index.html` con `Content-Type: text/html`, produciendo el error de MIME.
+En `vite dev` funcionaba porque el dev server transforma los `.vue` al vuelo.
+
+### Solución
+
+Se reemplazó el helper por un mapa `import.meta.glob` (Vite sí compila cada
+página a su propio chunk):
+
+```js
+const pageModules = import.meta.glob(
+    '../pages/{members,objectives,phases,plans,tasks,tickets,risks,blockers,deliverables,milestones,metrics,notifications}/**/*.vue',
+);
+const p = (path) => pageModules[`../pages/${path}`];
+```
+
+El glob se limitó a los subdirectorios usados por `p()` para no incluir páginas
+legacy no referenciadas.
+
+### Archivos modificados
+
+| Archivo | Cambio |
+|---------|--------|
+| `frontend/src/router/index.js` | `p()` usa `import.meta.glob` en lugar de `import()` con plantilla |
+| `ArchivosMap.md` | Documentada la sección Router y añadida sección Deploy (`deploy/`) |
+| `frontend/src/features/admin/users/UserUpdateFeature.vue` | Corregido import roto `useRolesList` -> `useRoles` (habría provocado `MISSING_EXPORT` si la página entrara en el grafo) |
+
+### Verificación
+
+- `npx vite build` OK; se generan chunks por página (`members-*.js`, `milestones-*.js`, `deliverables-*.js`, `plans-*.js`, `tasks-*.js`, `tickets-*.js`, `objectives-*.js`, `risks-*.js`, `blockers-*.js`, `phases-*.js`, `metrics-*.js`, `notifications-*.js`).
+- El bundle ya no contiene un `import()` dinámico con plantilla apuntando a `../pages/`; solo queda el lookup del mapa.
+- Vitest: 132/135 (3 fallos pre-existentes en `useAttachments` y `useProjects`, sin relación con el router).
+
+### Incidencia adicional detectada y resuelta
+
+- `src/features/admin/users/UserUpdateFeature.vue` importaba `{ useRolesList }` desde
+  `src/composables/useRolesList.ts`, que solo exporta `useRoles`. Era código legacy sin uso
+  (bajo `src/pages/users/*`, no referenciado por el router), pero rompía el build con
+  `MISSING_EXPORT` en cuanto esa página entraba en el grafo (p. ej. un glob amplio sobre
+  todo `pages/`). Se corrigió el import a `useRoles` y el build vuelve a pasar.
 
 ---
 

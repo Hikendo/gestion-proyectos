@@ -35,13 +35,20 @@ export function useGroupChat(projectId: number) {
     if (sending.value || !content.trim()) return;
     sending.value = true;
     try {
-      await chatService.sendGroupMessage(projectId, content);
+      const response = await chatService.sendGroupMessage(projectId, content);
+      // El backend excluye al emisor del broadcast (toOthers), por lo que
+      // insertamos localmente el mensaje devuelto para verlo al instante.
+      if (response?.data) {
+        addMessage(response.data);
+      }
     } finally {
       sending.value = false;
     }
   }
 
   function addMessage(message: GroupMessage): void {
+    // Evita duplicados (eco del broadcast + respuesta del POST).
+    if (messages.value.some((m) => m.id === message.id)) return;
     messages.value.push(message);
   }
 
@@ -128,7 +135,11 @@ export function usePrivateChat(projectId: number) {
     if (sending.value || !content.trim() || !activeConversationId.value) return;
     sending.value = true;
     try {
-      await chatService.sendDirectMessage(activeConversationId.value, content);
+      const response = await chatService.sendDirectMessage(activeConversationId.value, content);
+      // El emisor no recibe su propio broadcast (toOthers): lo insertamos local.
+      if (response?.data) {
+        addMessage(response.data);
+      }
     } finally {
       sending.value = false;
     }
@@ -136,7 +147,10 @@ export function usePrivateChat(projectId: number) {
 
   function addMessage(message: DirectMessage): void {
     if (message.conversation_id === activeConversationId.value) {
-      messages.value.push(message);
+      // Evita duplicados (eco del broadcast + respuesta del POST).
+      if (!messages.value.some((m) => m.id === message.id)) {
+        messages.value.push(message);
+      }
       chatService.markRead(message.conversation_id);
     }
     loadConversations();

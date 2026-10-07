@@ -7,6 +7,8 @@ import type { ProjectMemberRole } from '@/interfaces/enums';
 // 🔔 Importamos las utilidades de Firebase de forma asíncrona
 import { requestNotificationPermission, listenForegroundNotifications, deleteFcmToken } from '@/services/firebase';
 import { usePermissionStore } from '@/store/usePermissionStore';
+// 📡 WebSockets (Laravel Echo / Reverb) para chat en tiempo real
+import { initEcho, disconnectEcho } from '@/plugins/echo';
 
 export const useAuthStore = defineStore('auth', () => {
     const authUser = ref<UserI | null>(null);
@@ -31,6 +33,14 @@ export const useAuthStore = defineStore('auth', () => {
     async function setSession(user: UserI, token: string) {
         setAuthToken(token);
         authUser.value = user;
+
+        // 📡 Conectar Laravel Echo (Reverb) con el token recién establecido.
+        // Debe ocurrir tras setAuthToken para que authEndpoint reciba el Bearer.
+        try {
+            initEcho(token);
+        } catch (error) {
+            console.error('Error al inicializar Laravel Echo:', error);
+        }
 
         // Prime the PermissionStore with user's permissions from login/me response
         const permissionStore = usePermissionStore();
@@ -65,6 +75,13 @@ export const useAuthStore = defineStore('auth', () => {
         // Si otro usuario inicia sesión en el mismo navegador, Firebase
         // generará un token nuevo para esa cuenta.
         await deleteFcmToken();
+
+        // 📡 Desconectar Laravel Echo para no dejar conexiones WS huérfanas.
+        try {
+            disconnectEcho();
+        } catch (error) {
+            console.error('Error al desconectar Laravel Echo:', error);
+        }
 
         clearAuthToken();
         authUser.value = null;

@@ -28,7 +28,14 @@ const AdminUsersNew = () => import('../pages/admin/users/new.vue');
 const AdminUsersEdit = () => import('../pages/admin/users/[id].vue');
 
 // ── Helper: lazy sub-resource pages ────────────────────────────────────────
-const p = (path) => () => import(`../pages/${path}`);
+// Vite no puede analizar import(`../pages/${path}`) (plantilla con variable),
+// por lo que dejaba el import sin compilar y el navegador pedía el .vue fuente
+// en producción (respuesta text/html -> MIME error). Con import.meta.glob Vite
+// compila cada página a su propio chunk en build.
+const pageModules = import.meta.glob(
+    '../pages/{members,objectives,phases,plans,tasks,tickets,risks,blockers,deliverables,milestones,metrics,notifications}/**/*.vue',
+);
+const p = (path) => pageModules[`../pages/${path}`];
 
 const routes = [
     { path: '/', redirect: '/login' },

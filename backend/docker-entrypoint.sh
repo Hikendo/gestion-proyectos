@@ -42,6 +42,13 @@ fix_permissions() {
         chmod -R 777 /var/www/storage /var/www/bootstrap/cache 2>/dev/null || true
         echo " ✓ Permisos amplios aplicados"
     fi
+
+    # El .env se monta desde el host y suele quedar en 600 root:root (p. ej.
+    # tras un `scp`), lo que impide que PHP-FPM (www-data) lo lea. Sin permisos
+    # de lectura, en runtime Laravel NO carga el .env y cae a los defaults
+    # (sqlite / sin APP_KEY) → 500 en login y en todo lo que use la BD.
+    # Lo dejamos legible para www-data en cada arranque (auto-reparación).
+    chmod 644 /var/www/.env 2>/dev/null || true
 }
 
 # Ejecutar la función de permisos ANTES de cualquier operación

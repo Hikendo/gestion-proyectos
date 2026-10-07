@@ -128,8 +128,9 @@ class ProjectMemberController extends Controller
     /**
      * GET /api/projects/{project}/members/users
      *
-     * Devuelve los miembros del proyecto como usuarios planos [{id, name, email}].
-     * Usado por los formularios de tareas y tickets para el selector "Asignado a".
+     * Devuelve los miembros del proyecto como usuarios planos
+     * [{id, name, email, role}]. Usado por los formularios de tareas y tickets
+     * para el selector "Asignado a" (los clientes se filtran en el frontend).
      */
     public function users(Request $request, Project $project): JsonResponse
     {
@@ -138,8 +139,13 @@ class ProjectMemberController extends Controller
         $users = $project->members()
             ->with('user:id,name,email')
             ->get()
-            ->map(fn($m) => $m->user)
-            ->filter()
+            ->map(fn($m) => [
+                'id'    => $m->user?->id,
+                'name'  => $m->user?->name,
+                'email' => $m->user?->email,
+                'role'  => $m->role,
+            ])
+            ->filter(fn($u) => $u['id'] !== null)
             ->values();
 
         return response()->json([

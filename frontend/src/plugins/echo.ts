@@ -1,11 +1,16 @@
 import Echo from 'laravel-echo';
+import Pusher from 'pusher-js';
 import type { GroupMessage, DirectMessage } from '@/services/chat.service';
 
-// Reverb uses the Pusher protocol underneath, so we use the pusher-js client
-// We'll import Pusher globally in index.html or setup it here
+// Reverb usa el protocolo de Pusher por debajo, por lo que laravel-echo
+// necesita el cliente `pusher-js` en `window.Pusher` para poder instanciarse.
+if (typeof window !== 'undefined') {
+  window.Pusher = Pusher;
+}
+
 declare global {
   interface Window {
-    Pusher: any;
+    Pusher: typeof Pusher;
     Echo: Echo<'reverb'>;
   }
 }
@@ -17,8 +22,17 @@ export function initEcho(token: string): Echo<'reverb'> {
     echoInstance.disconnect();
   }
 
+  // Conexión Reverb. En desarrollo (por defecto) usa ws://localhost:8080.
+  // En producción detrás de nginx con HTTPS usa wss://DOMINIO (puerto 443),
+  // controlado por las variables de build:
+  //   VITE_REVERB_HOST   (ej: dominio o IP)
+  //   VITE_REVERB_SCHEME (http | https)
+  //   VITE_REVERB_PORT   (opcional; por defecto 8080 en http, 443 en https)
+  //   VITE_REVERB_APP_KEY
   const reverbHost = import.meta.env.VITE_REVERB_HOST || 'localhost';
-  const reverbPort = import.meta.env.VITE_REVERB_PORT || '8080';
+  const reverbScheme = import.meta.env.VITE_REVERB_SCHEME || 'http';
+  const forceTLS = reverbScheme === 'https';
+  const reverbPort = import.meta.env.VITE_REVERB_PORT || (forceTLS ? '443' : '8080');
   const reverbKey = import.meta.env.VITE_REVERB_APP_KEY || 'gestion_proyectos_reverb_key';
 
   echoInstance = new Echo({
@@ -27,7 +41,7 @@ export function initEcho(token: string): Echo<'reverb'> {
     wsHost: reverbHost,
     wsPort: reverbPort,
     wssPort: reverbPort,
-    forceTLS: false,
+    forceTLS,
     enabledTransports: ['ws', 'wss'],
     authEndpoint: `${import.meta.env.VITE_API_BASE_URL || '/api/v1'}/broadcasting/auth`,
     auth: {

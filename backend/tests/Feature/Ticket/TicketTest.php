@@ -98,4 +98,77 @@ class TicketTest extends TestCase
             ->getJson("/api/v1/projects/{$this->project->id}/tickets/{$ticket->id}")
             ->assertNotFound();
     }
+
+    /**
+     * Regresión: un miembro de proyecto SIN rol global de Spatie (solo rol de
+     * membresía) debe poder crear tickets. Antes daba 403 porque
+     * StoreTicketRequest usaba can('ticket.create') GLOBAL en vez de
+     * canForProject($project, 'ticket.create').
+     */
+    public function test_member_without_global_role_can_create_ticket(): void
+    {
+        $member = User::factory()->create(); // sin assignRole() global
+        $this->project->members()->create([
+            'user_id' => $member->id,
+            'role'    => 'client',
+        ]);
+
+        $this->actingAs($member)
+            ->postJson("/api/v1/projects/{$this->project->id}/tickets", [
+                'subject' => 'Ticket sin rol global',
+            ])->assertCreated()
+            ->assertJsonPath('items.status', TicketStatus::Open->value);
+    }
+
+    /**
+     * Un ticket creado por un cliente sin responsable explícito se asigna por
+     * defecto al Project Manager del proyecto.
+     */
+    public function test_client_created_ticket_is_assigned_to_pm_by_default(): void
+    {
+        $response = $this->actingAs($this->client)
+            ->postJson("/api/v1/projects/{$this->project->id}/tickets", [
+                'subject' => 'Consulta de cliente',
+            ])->assertCreated();
+
+        $this->assertDatabaseHas('tickets', [
+            'id'          => $response->json('items.id'),
+            'assigned_to' => $this->pm->id,
+        ]);
+    }
+
+    /**
+     * Un cliente no puede reasignar el ticket: al cambiar assigned_to el
+     * backend responde 403 (no tiene permiso ticket.assign).
+     */
+    public function test_client_cannot_reassign_ticket(): void
+    {
+        $ticket = Ticket::factory()->create([
+            'project_id' => $this->project->id,
+            'created_by' => $this->client->id,
+            'status'     => TicketStatus::Open->value,
+        ]);
+
+        $this->actingAs($this->client)
+            ->putJson("/api/v1/projects/{$this->project->id}/tickets/{$ticket->id}", [
+                'assigned_to' => $this->developer->id,
+            ])->assertForbidden();
+    }
+
+    /**
+     * El responsable debe ser un miembro del proyecto que NO sea cliente.
+     */
+    public function test_assigned_to_must_be_a_non_client_member(): void
+    {
+        $ticket = Ticket::factory()->create([
+            'project_id' => $this->project->id,
+            'created_by' => $this->client->id,
+            'status'     => TicketStatus::Open->value,
+        ]);
+
+        $this->actingAs($this->pm)
+            ->putJson("/api/v1/projects/{$this->project->id}/tickets/{$ticket->id}", [
+                'assigned_to' => $this->client->id,
+            ])->assertUnprocessable();
+    }
 }
