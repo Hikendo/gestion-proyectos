@@ -133,9 +133,20 @@ enum ProjectMemberRole: string
         };
     }
 
-    public static function permissionsFor(string|self $role): array
+    /**
+     * Devuelve los permisos para un rol de membresía.
+     *
+     * Es tolerante a valores desconocidos o nulos (p. ej. datos heredados de
+     * renombrados de rol como 'analyst'): en ese caso devuelve un array vacío
+     * en lugar de lanzar \ValueError, evitando errores 500.
+     */
+    public static function permissionsFor(string|self|null $role): array
     {
-        return ($role instanceof self ? $role : self::from($role))->permissions();
+        $enum = $role instanceof self
+            ? $role
+            : ($role === null ? null : self::tryFrom($role));
+
+        return $enum?->permissions() ?? [];
     }
 
     public static function values(): array
