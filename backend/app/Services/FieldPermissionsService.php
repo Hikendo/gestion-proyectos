@@ -78,6 +78,7 @@ class FieldPermissionsService
         $canEdit = Gate::forUser($user)->allows('update', $ticket);
         $canAssign = Gate::forUser($user)->allows('assign', $ticket);
         $canManageAttachments = Gate::forUser($user)->allows('manageAttachments', $ticket);
+        $canAddAttachments = Gate::forUser($user)->allows('addAttachments', $ticket);
 
         return [
             'title'              => $canEdit,
@@ -87,6 +88,7 @@ class FieldPermissionsService
             'category'           => $canEdit,
             'assigned_to'        => $canAssign,
             'attachments'        => $canManageAttachments,
+            'add_attachments'    => $canAddAttachments,
         ];
     }
 

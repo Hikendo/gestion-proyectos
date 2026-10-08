@@ -47,15 +47,15 @@ onMounted(async () => {
                     <VRow>
                         <VCol cols="12">
                             <div class="text-caption text-medium-emphasis">Alcance</div>
-                            <div class="text-body-2 mt-1">{{ item.scope || '—' }}</div>
+                            <div class="text-body-2 mt-1 rich-view" v-html="item.scope || '—'"></div>
                         </VCol>
                         <VCol cols="12">
                             <div class="text-caption text-medium-emphasis">Requisitos</div>
-                            <div class="text-body-2 mt-1">{{ item.requirements || '—' }}</div>
+                            <div class="text-body-2 mt-1 rich-view" v-html="item.requirements || '—'"></div>
                         </VCol>
                         <VCol cols="12">
                             <div class="text-caption text-medium-emphasis">Notas técnicas</div>
-                            <div class="text-body-2 mt-1">{{ item.technical_notes || '—' }}</div>
+                            <div class="text-body-2 mt-1 rich-view" v-html="item.technical_notes || '—'"></div>
                         </VCol>
                     </VRow>
                 </VCardText>

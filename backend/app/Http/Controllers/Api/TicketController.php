@@ -196,15 +196,39 @@ class TicketController extends Controller
     }
 
     /**
-     * POST /api/v1/projects/{project}/tickets/{ticket}/attachments
+     * POST /api/v1/projects/{project}/tickets/{ticket}/attachments  (ruta heredada)
      *
-     * Solo PM/owner pueden gestionar adjuntos de tickets.
+     * Permite agregar adjuntos (evidencia) mientras el ticket no esté cerrado.
+     * PM/owner pueden agregar en cualquier ticket; el creador del ticket
+     * (p. ej. el cliente) también puede hacerlo aunque el ticket ya esté
+     * En Progreso o Resuelto. La eliminación sigue restringida a manageAttachments.
      */
     public function uploadAttachments(Request $request, Project $project, Ticket $ticket): JsonResponse
     {
         $this->assertBelongsToProject($ticket, $project->id);
-        $this->authorize('manageAttachments', $ticket);
+        $this->authorize('addAttachments', $ticket);
 
+        return $this->storeTicketAttachments($request, $ticket);
+    }
+
+    /**
+     * POST /api/v1/tickets/{ticket}/attachments
+     *
+     * Variante sin proyecto (misma URL relativa que tasks/blockers) usada por
+     * el frontend al subir adjuntos directamente a un ticket.
+     */
+    public function uploadTicketAttachments(Request $request, Ticket $ticket): JsonResponse
+    {
+        $this->authorize('addAttachments', $ticket);
+
+        return $this->storeTicketAttachments($request, $ticket);
+    }
+
+    /**
+     * Lógica compartida de almacenamiento de adjuntos de un ticket.
+     */
+    private function storeTicketAttachments(Request $request, Ticket $ticket): JsonResponse
+    {
         $request->validate([
             'attachments'   => ['required', 'array'],
             'attachments.*' => ['file', 'max:102400'],

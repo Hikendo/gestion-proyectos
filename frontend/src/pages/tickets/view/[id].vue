@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
@@ -23,6 +23,19 @@ const { loader } = storeToRefs(appStore);
 const ticket = ref<TicketI | null>(null);
 const projectId = Number(route.params.projectId);
 const id = Number(route.params.id);
+
+// Habilitar la subida de adjuntos: el backend es la fuente de verdad
+// (`field_permissions.add_attachments`). El cliente (creador) puede agregar
+// evidencia mientras el ticket no esté cerrado.
+const canUploadAttachments = computed(() => {
+    const t = ticket.value as any;
+    if (!t) return false;
+    const canAdd = t.field_permissions?.add_attachments;
+    if (typeof canAdd === 'boolean') return canAdd;
+    // Fallback si el API no expone el flag: creador del ticket mientras no esté cerrado.
+    if (t.status === 'closed') return false;
+    return canAction('ticket.manage-attachments') || canAction('ticket.edit-own', t.created_by ?? null);
+});
 
 const statusLabels: Record<string, string> = { open: 'Abierto', in_progress: 'En progreso', resolved: 'Resuelto', closed: 'Cerrado' };
 const statusColors: Record<string, string> = { open: 'error', in_progress: 'warning', resolved: 'success', closed: 'grey' };
@@ -136,7 +149,7 @@ onMounted(async () => {
                         </VCol>
                         <VCol cols="12" class="mt-3">
                             <div class="text-caption text-medium-emphasis">Descripción</div>
-                            <div class="text-body-2 mt-1">{{ ticket.description || 'Sin descripción' }}</div>
+                            <div class="text-body-2 mt-1 rich-view" v-html="ticket.description || 'Sin descripción'"></div>
                         </VCol>
                     </VRow>
                 </VCardText>
@@ -144,7 +157,8 @@ onMounted(async () => {
         </VCol>
         <VCol cols="12">
             <DocumentManager parent-type="tickets" :parent-id="ticket.id" :attachments="ticket.attachments ?? []"
-                :can-manage="canAction('ticket.manage-attachments')" @refresh="loadTicket" />
+                :can-manage="canAction('ticket.manage-attachments')" :can-upload="canUploadAttachments"
+                @refresh="loadTicket" />
         </VCol>
 
         <!-- Seguimiento (comentarios) -->

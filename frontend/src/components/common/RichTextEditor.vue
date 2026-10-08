@@ -4,7 +4,7 @@ import { useEditor, EditorContent } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
 
 const props = defineProps<{
-    modelValue: string;
+    modelValue?: string | null;
     disabled?: boolean;
 }>();
 
@@ -13,7 +13,7 @@ const emit = defineEmits<{
 }>();
 
 const editor = useEditor({
-    content: props.modelValue,
+    content: props.modelValue ?? '',
     extensions: [StarterKit],
     editable: !props.disabled,
     editorProps: {
@@ -24,6 +24,22 @@ const editor = useEditor({
     onUpdate: ({ editor }) => {
         emit('update:modelValue', editor.getHTML());
     },
+});
+
+// Sincroniza el contenido cuando `modelValue` cambia desde fuera, por ejemplo
+// al cargar un ticket/tarea de forma asíncrona (onMounted → form.value = ...).
+// Sin este watcher el editor se quedaba vacío y, al escribir, reemplazaba el
+// contenido ya guardado. Usamos `emitUpdate: false` para no re-emitir ni crear
+// bucles durante la edición normal.
+watch(() => props.modelValue, (value) => {
+    if (!editor.value) return;
+
+    const current = editor.value.getHTML();
+    const next = value ?? '';
+    // getHTML() devuelve '<p></p>' cuando el documento está vacío.
+    if (current === next || (next === '' && current === '<p></p>')) return;
+
+    editor.value.commands.setContent(next, { emitUpdate: false });
 });
 
 watch(() => props.disabled, (val) => {

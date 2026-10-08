@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { useAppStore } from '@/store/useAppStore';
@@ -15,6 +15,17 @@ const appStore = useAppStore();
 const { loader, snackbar } = storeToRefs(appStore);
 
 const { errores, form, handleUpdate } = useTickets();
+
+// Habilitar la subida de adjuntos según el backend (`field_permissions.add_attachments`).
+// El cliente (creador) puede agregar evidencia mientras el ticket no esté cerrado.
+const canUploadAttachments = computed(() => {
+  const t = form.value as any;
+  if (!t) return false;
+  const canAdd = t.field_permissions?.add_attachments;
+  if (typeof canAdd === 'boolean') return canAdd;
+  if (t.status === 'closed') return false;
+  return canAction('ticket.manage-attachments') || canAction('ticket.edit-own', t.created_by ?? null);
+});
 
 const confirmVisible = ref(false);
 const pendingAction = ref<(() => Promise<void>) | null>(null);
@@ -69,7 +80,7 @@ onMounted(async () => {
     </VCol>
     <VCol cols="12">
       <DocumentManager parent-type="tickets" :parent-id="form.id" :attachments="form.attachments ?? []"
-        :can-manage="canAction('ticket.manage-attachments')" @refresh="loadTicket" />
+        :can-manage="canAction('ticket.manage-attachments')" :can-upload="canUploadAttachments" @refresh="loadTicket" />
     </VCol>
 
     <VDialog v-model="confirmVisible" persistent max-width="400">

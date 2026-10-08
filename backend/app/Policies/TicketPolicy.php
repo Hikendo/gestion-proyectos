@@ -80,4 +80,32 @@ class TicketPolicy
             && ($ticket->project->owner_id === $user->id
                 || $user->hasProjectRole($ticket->project, 'manager'));
     }
+
+    /**
+     * Agregar adjuntos (evidencia) a un ticket.
+     *
+     * - PM / Owner: pueden agregar en cualquier ticket (sin restricción de estado,
+     *   preservando el comportamiento previo).
+     * - Creador del ticket (p. ej. el cliente): puede agregar evidencia mientras
+     *   el ticket NO esté cerrado, aunque ya esté En Progreso o Resuelto, para no
+     *   frenar la resolución del ticket.
+     *
+     * La eliminación / reemplazo sigue restringida a manageAttachments.
+     */
+    public function addAttachments(User $user, Ticket $ticket): bool
+    {
+        // PM / Owner: sin restricción de estado.
+        if ($ticket->project->owner_id === $user->id
+            || $user->hasProjectRole($ticket->project, 'manager')) {
+            return true;
+        }
+
+        // Creador del ticket: solo mientras el ticket no esté cerrado.
+        if ($ticket->status->isClosed()) {
+            return false;
+        }
+
+        return $user->canForProject($ticket->project, 'ticket.edit-own')
+            && $ticket->created_by === $user->id;
+    }
 }

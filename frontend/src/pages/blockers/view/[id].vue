@@ -92,7 +92,7 @@ onMounted(async () => {
                         </VCol>
                         <VCol cols="12" class="mt-3">
                             <div class="text-caption text-medium-emphasis">Descripción</div>
-                            <div class="text-body-2 mt-1">{{ blocker.description || 'Sin descripción' }}</div>
+                            <div class="text-body-2 mt-1 rich-view" v-html="blocker.description || 'Sin descripción'"></div>
                         </VCol>
                     </VRow>
                 </VCardText>

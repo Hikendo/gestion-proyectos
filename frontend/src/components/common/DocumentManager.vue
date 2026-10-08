@@ -8,7 +8,13 @@ const props = defineProps<{
     parentId: number;
     attachments: AttachmentI[];
     canManage?: boolean;
+    canUpload?: boolean;      // permite subir (aunque no gestionar/borrar); por defecto = canManage
 }>();
+
+// Habilitar subida: permitida si se puede gestionar (canManage) o si el padre
+// habilita explícitamente la subida (canUpload), p. ej. el cliente aportando
+// evidencia aunque no pueda eliminar/reemplazar archivos.
+const canUploadEnabled = computed(() => Boolean(props.canManage) || Boolean(props.canUpload));
 
 const emit = defineEmits<{
     (e: 'refresh'): void;
@@ -127,7 +133,7 @@ const sortedAttachments = computed(() =>
                         {{ sortedAttachments.length }} archivo(s)
                     </VChip>
                 </VCardTitle>
-                <VBtn v-if="canManage" variant="tonal" color="primary" prepend-icon="ri-upload-line" :loading="uploading"
+                <VBtn v-if="canUploadEnabled" variant="tonal" color="primary" prepend-icon="ri-upload-line" :loading="uploading"
                     @click="triggerFileInput">
                     Subir archivos
                 </VBtn>
@@ -136,13 +142,13 @@ const sortedAttachments = computed(() =>
 
         <VDivider />
 
-        <VCardText class="drop-zone pa-4" :class="{ 'drop-zone--active': dragOver && canManage }"
-            @dragover.prevent="canManage && (dragOver = true)" @dragleave="dragOver = false"
-            @drop.prevent="canManage && onDrop">
+        <VCardText class="drop-zone pa-4" :class="{ 'drop-zone--active': dragOver && canUploadEnabled }"
+            @dragover.prevent="canUploadEnabled && (dragOver = true)" @dragleave="dragOver = false"
+            @drop.prevent="canUploadEnabled && onDrop">
             <div v-if="sortedAttachments.length === 0 && !uploading" class="empty-state">
                 <VIcon icon="ri-cloud-upload-line" size="40" class="text-medium-emphasis mb-2" />
                 <p class="text-body-2 text-medium-emphasis">
-                    {{ canManage ? 'Arrastra archivos aquí o haz clic en "Subir archivos"' : 'No hay archivos adjuntos'
+                    {{ canUploadEnabled ? 'Arrastra archivos aquí o haz clic en "Subir archivos"' : 'No hay archivos adjuntos'
                     }}
                 </p>
             </div>

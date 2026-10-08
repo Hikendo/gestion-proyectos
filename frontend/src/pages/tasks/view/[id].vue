@@ -84,7 +84,7 @@ onMounted(async () => {
                         </VCol>
                         <VCol cols="12" class="mt-3">
                             <div class="text-caption text-medium-emphasis">Descripción</div>
-                            <div class="text-body-2 mt-1">{{ task.description || 'Sin descripción' }}</div>
+                            <div class="text-body-2 mt-1 rich-view" v-html="task.description || 'Sin descripción'"></div>
                         </VCol>
                         <VCol cols="12" md="4">
                             <div class="text-caption text-medium-emphasis">Horas estimadas</div>

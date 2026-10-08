@@ -6,6 +6,8 @@ use App\Models\Blocker;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class BlockerTest extends TestCase
@@ -88,5 +90,46 @@ class BlockerTest extends TestCase
             ->assertOk();
 
         $this->assertCount(2, $response->json('items'));
+    }
+
+    /**
+     * La ruta sin prefijo de proyecto /blockers/{id}/attachments (la que usa el
+     * frontend) debe funcionar; antes devolvía 404.
+     */
+    public function test_pm_can_upload_blocker_attachment_via_unprefixed_route(): void
+    {
+        Storage::fake('local');
+
+        $blocker = Blocker::factory()->create(['project_id' => $this->project->id]);
+        $file = UploadedFile::fake()->create('evidence.pdf', 50, 'application/pdf');
+
+        $this->actingAs($this->pm)
+            ->postJson("/api/v1/blockers/{$blocker->id}/attachments", [
+                'attachments' => [$file],
+            ])
+            ->assertCreated();
+
+        $this->assertDatabaseHas('attachments', [
+            'attachable_id'   => $blocker->id,
+            'attachable_type' => Blocker::class,
+        ]);
+    }
+
+    /**
+     * Un usuario ajeno al proyecto no puede subir adjuntos a un blocker.
+     */
+    public function test_non_member_cannot_upload_blocker_attachment(): void
+    {
+        Storage::fake('local');
+
+        $blocker = Blocker::factory()->create(['project_id' => $this->project->id]);
+        $outsider = User::factory()->create();
+        $file = UploadedFile::fake()->create('evidence.pdf', 50, 'application/pdf');
+
+        $this->actingAs($outsider)
+            ->postJson("/api/v1/blockers/{$blocker->id}/attachments", [
+                'attachments' => [$file],
+            ])
+            ->assertForbidden();
     }
 }

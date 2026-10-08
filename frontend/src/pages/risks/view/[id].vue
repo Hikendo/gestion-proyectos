@@ -65,11 +65,11 @@ onMounted(async () => {
                         </VCol>
                         <VCol cols="12" class="mt-3">
                             <div class="text-caption text-medium-emphasis">Descripción</div>
-                            <div class="text-body-2 mt-1">{{ item.description || 'Sin descripción' }}</div>
+                            <div class="text-body-2 mt-1 rich-view" v-html="item.description || 'Sin descripción'"></div>
                         </VCol>
                         <VCol cols="12" class="mt-3">
                             <div class="text-caption text-medium-emphasis">Plan de mitigación</div>
-                            <div class="text-body-2 mt-1">{{ item.mitigation_plan || 'No definido' }}</div>
+                            <div class="text-body-2 mt-1 rich-view" v-html="item.mitigation_plan || 'No definido'"></div>
                         </VCol>
                     </VRow>
                 </VCardText>

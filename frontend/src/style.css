@@ -797,3 +797,81 @@ button:disabled {
         width: 100%;
     }
 }
+
+/* ── Read-only rich text ───────────────────────────────────────────────────
+   Rendered from the rich-text editor (Tiptap) HTML via `v-html`.
+   Marker class used across all detail/view pages to normalize spacing.
+─────────────────────────────────────────────────────────────────────────── */
+.rich-view > :first-child {
+  margin-top: 0;
+}
+
+.rich-view > :last-child {
+  margin-bottom: 0;
+}
+
+.rich-view p {
+  margin: 0 0 0.5em;
+  line-height: 1.5;
+}
+
+.rich-view ul,
+.rich-view ol {
+  margin: 0 0 0.5em;
+  padding-left: 1.4em;
+}
+
+.rich-view li {
+  margin: 0.15em 0;
+}
+
+.rich-view h1,
+.rich-view h2,
+.rich-view h3 {
+  margin: 0.6em 0 0.35em;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.rich-view h1 {
+  font-size: 1.35em;
+}
+
+.rich-view h2 {
+  font-size: 1.2em;
+}
+
+.rich-view h3 {
+  font-size: 1.08em;
+}
+
+.rich-view blockquote {
+  margin: 0.5em 0;
+  padding-left: 0.9em;
+  border-left: 3px solid var(--app-border);
+  color: var(--app-muted);
+}
+
+.rich-view a {
+  color: var(--app-primary);
+  text-decoration: underline;
+}
+
+.rich-view pre {
+  margin: 0.5em 0;
+  padding: 0.6em 0.8em;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+  font-size: 0.85em;
+}
+
+.rich-view code {
+  font-family: monospace;
+}
+
+.rich-view img {
+  max-width: 100%;
+  height: auto;
+}
+

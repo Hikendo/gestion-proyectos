@@ -34,3 +34,11 @@ Route::middleware('auth:sanctum')->prefix('projects/{project}')->group(function 
     Route::delete('tickets/{ticket}/comments/{comment}', [TicketCommentController::class, 'destroy'])
         ->name('projects.tickets.comments.destroy');
 });
+
+// Sub-recurso sin prefijo de proyecto: permite subir adjuntos con la URL
+// que usa el frontend (/{parentType}/{parentId}/attachments), igual que tasks.
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::post('tickets/{ticket}/attachments', [TicketController::class, 'uploadTicketAttachments'])
+        ->name('tickets.attachments.upload');
+});

@@ -140,15 +140,34 @@ class BlockerController extends Controller
     }
 
     /**
-     * POST /api/v1/projects/{project}/blockers/{blocker}/attachments
-     *
-     * Solo PM/owner pueden gestionar adjuntos de blockers.
+     * POST /api/v1/projects/{project}/blockers/{blocker}/attachments  (ruta heredada)
      */
     public function uploadAttachments(Request $request, Project $project, Blocker $blocker): JsonResponse
     {
         $this->assertBelongsToProject($blocker, $project->id);
         $this->authorize('update', $project);
 
+        return $this->storeBlockerAttachments($request, $blocker);
+    }
+
+    /**
+     * POST /api/v1/blockers/{blocker}/attachments
+     *
+     * Variante sin proyecto (misma URL relativa que tasks/tickets) usada por
+     * el frontend al subir adjuntos directamente a un blocker.
+     */
+    public function uploadBlockerAttachments(Request $request, Blocker $blocker): JsonResponse
+    {
+        $this->authorize('update', $blocker->project);
+
+        return $this->storeBlockerAttachments($request, $blocker);
+    }
+
+    /**
+     * Lógica compartida de almacenamiento de adjuntos de un blocker.
+     */
+    private function storeBlockerAttachments(Request $request, Blocker $blocker): JsonResponse
+    {
         $request->validate([
             'attachments'   => ['required', 'array'],
             'attachments.*' => ['file', 'max:102400'],

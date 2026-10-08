@@ -22,3 +22,11 @@ Route::middleware('auth:sanctum')->prefix('projects/{project}')->group(function 
     Route::post('blockers/{blocker}/attachments', [BlockerController::class, 'uploadAttachments'])
         ->name('projects.blockers.attachments.upload');
 });
+
+// Sub-recurso sin prefijo de proyecto: misma URL relativa (/blockers/{id}/attachments)
+// que usa el frontend, igual que tasks/tickets.
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::post('blockers/{blocker}/attachments', [BlockerController::class, 'uploadBlockerAttachments'])
+        ->name('blockers.attachments.upload');
+});
